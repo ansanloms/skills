@@ -1,0 +1,14 @@
+name: skills
+version: 1.0.0
+description: APM project for skills
+author: ansanloms
+targets:
+  - claude
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+scripts: {}
+devDependencies:
+  apm:
+    - mizchi/skills/meta/empirical-prompt-tuning#89c1b340

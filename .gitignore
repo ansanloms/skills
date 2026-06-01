@@ -1,0 +1,12 @@
+
+# APM dependencies
+apm_modules/**
+
+# apm が配置する依存 skill (apm.yml + apm.lock.yaml から再生成可能)
+.claude/skills/**
+
+# textlint plugin のビルド生成物 (deno task build で再生成)
+textlint/plugins/yaml-keys/index.js
+
+# テストカバレッジ (deno task test で再生成)
+coverage/**
