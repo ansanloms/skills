@@ -1,0 +1,8 @@
+# APM dependencies
+apm_modules/**
+
+# apm が配置する依存 skill
+.claude/skills/empirical-prompt-tuning/**
+
+# テストカバレッジ
+coverage/**

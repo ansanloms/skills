@@ -3,6 +3,7 @@
   "fmt": {
     "proseWrap": "preserve"
   },
+  "exclude": [".claude/skills/empirical-prompt-tuning/**"],
   "imports": {
     "@proofdict/textlint-rule-proofdict": "npm:@proofdict/textlint-rule-proofdict@3.1.2",
     "@textlint-ja/textlint-rule-preset-ai-writing": "npm:@textlint-ja/textlint-rule-preset-ai-writing@1.7.0",
@@ -18,9 +19,9 @@
     },
     "lint": "deno task lint:textlint && deno task lint:deno",
     "lint:deno": "deno lint && deno fmt --check",
-    "lint:textlint": "deno task textlint . --ignore-path .gitignore",
+    "lint:textlint": "deno task textlint . --ignore-path .textlintignore",
     "fix": "deno task fix:textlint && deno task fix:deno; deno task lint",
     "fix:deno": "deno lint --fix && deno fmt",
-    "fix:textlint": "deno task textlint . --ignore-path .gitignore --fix"
+    "fix:textlint": "deno task textlint . --ignore-path .textlintignore --fix"
   }
 }
