@@ -4,24 +4,18 @@
     "proseWrap": "preserve"
   },
   "imports": {
-    "@std/assert": "jsr:@std/assert@1.0.19",
     "@proofdict/textlint-rule-proofdict": "npm:@proofdict/textlint-rule-proofdict@3.1.2",
     "@textlint-ja/textlint-rule-preset-ai-writing": "npm:@textlint-ja/textlint-rule-preset-ai-writing@1.7.0",
     "textlint": "npm:textlint@15.7.1",
     "textlint-rule-preset-ja-spacing": "npm:textlint-rule-preset-ja-spacing@3.0.0",
     "textlint-rule-preset-ja-technical-writing": "npm:textlint-rule-preset-ja-technical-writing@12.0.2",
-    "textlint-rule-preset-jtf-style": "npm:textlint-rule-preset-jtf-style@3.0.3",
-    "yaml": "npm:yaml@2.9.0"
+    "textlint-rule-preset-jtf-style": "npm:textlint-rule-preset-jtf-style@3.0.3"
   },
   "tasks": {
     "textlint": {
       "description": "Run textlint command",
       "command": "deno --quiet run --allow-env --allow-read --allow-sys --allow-write --allow-net textlint"
     },
-    "test": "deno test -A --parallel --coverage",
-    "check": "deno check",
-    "build": "deno task build:textlint-plugin",
-    "build:textlint-plugin": "deno bundle ./textlint/plugins/yaml-keys/index.ts -o ./textlint/plugins/yaml-keys/index.js",
     "lint": "deno task lint:textlint && deno task lint:deno",
     "lint:deno": "deno lint && deno fmt --check",
     "lint:textlint": "deno task textlint . --ignore-path .gitignore",

@@ -18,10 +18,7 @@
 
 ```sh
 apm install     # devDependency (empirical-prompt-tuning) を .claude/skills/ に復元
-deno task build # textlint plugin (index.js) を生成。lint の前提
 ```
-
-`index.js` は gitignore 済みのため、`deno task build` を先に走らせないと `deno task lint` (textlint) が plugin をロードできず失敗する。
 
 ## skill を追加・修正するフロー
 
