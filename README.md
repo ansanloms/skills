@@ -23,7 +23,7 @@ skill の取り込みには [apm](https://github.com/microsoft/apm) CLI を使�
 
 ```sh
 cd <project>
-apm install ansanloms/skills/library-docs ansanloms/skills/yamareco ansanloms/skills/jartic-traffic ansanloms/skills/bluesky-posts --target claude
+apm install ansanloms/skills/library-docs --target claude
 # → <project>/.claude/skills/ にコピー + apm.yml / apm.lock.yaml に記録
 ```
 
@@ -34,7 +34,3 @@ apm install ansanloms/skills/library-docs ansanloms/skills/yamareco ansanloms/sk
 ```sh
 cd <project> && apm update
 ```
-
-## 注意
-
-- skill は full agent permission で実行される。取り込む内容は自分で確認すること。
