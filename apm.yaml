@@ -7,8 +7,8 @@ targets:
 dependencies:
   apm: []
   mcp: []
-includes: auto
-scripts: {}
 devDependencies:
   apm:
     - mizchi/skills/meta/empirical-prompt-tuning#89c1b340
+includes: auto
+scripts: {}
