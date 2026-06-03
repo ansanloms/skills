@@ -6,15 +6,15 @@
 
 ## 収録 skill
 
-| skill                                                 | 概要                                                                                                                 |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [`library-docs`](./library-docs/SKILL.md)             | ライブラリ・フレームワーク・SDK 等の質問時に `ctx7` CLI で最新ドキュメントを取得する。                               |
-| [`yamareco`](./yamareco/SKILL.md)                     | ユーザの登山履歴・タイム・ペースをヤマレコから取得し、登山計画の所要時間予測に使う。                                 |
-| [`jartic-traffic`](./jartic-traffic/SKILL.md)         | 指定の道路・エリアの現在の交通量を JARTIC 交通量 API (国土交通省) から取得する。                                     |
-| [`bluesky`](./bluesky/SKILL.md)                       | 指定ユーザ (主に自分) の Bluesky の投稿・関心トピック・フォロー/フォロワーを公開 API から取得する。                  |
-| [`cloud-architecture`](./cloud-architecture/SKILL.md) | AWS のクラウドインフラ構成図 (アーキテクチャ図) を draw.io 形式で作成し、PNG / SVG にエクスポートする。              |
-| [`news-digest`](./news-digest/SKILL.md)               | 指定テーマの最新ニュースを優先ソースから集めて要約し、タイトル・要約・公開日・個別 URL で返す (整形は呼び出し側)。   |
-| [`e2e`](./e2e/SKILL.md)                               | E2E テストの試験項目書を作成し、playwright-cli でブラウザ操作して実行する。admin/frontend 横断シナリオの検証に使う。 |
+| skill                                                 | 概要                                                                                                               |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| [`library-docs`](./library-docs/SKILL.md)             | ライブラリ・フレームワーク・SDK 等の質問時に `ctx7` CLI で最新ドキュメントを取得する。                             |
+| [`yamareco`](./yamareco/SKILL.md)                     | ユーザの登山履歴・タイム・ペースをヤマレコから取得し、登山計画の所要時間予測に使う。                               |
+| [`jartic-traffic`](./jartic-traffic/SKILL.md)         | 指定の道路・エリアの現在の交通量を JARTIC 交通量 API (国土交通省) から取得する。                                   |
+| [`bluesky`](./bluesky/SKILL.md)                       | 指定ユーザ (主に自分) の Bluesky の投稿・関心トピック・フォロー/フォロワーを公開 API から取得する。                |
+| [`cloud-architecture`](./cloud-architecture/SKILL.md) | AWS のクラウドインフラ構成図 (アーキテクチャ図) を draw.io 形式で作成し、PNG / SVG にエクスポートする。            |
+| [`news-digest`](./news-digest/SKILL.md)               | 指定テーマの最新ニュースを優先ソースから集めて要約し、タイトル・要約・公開日・個別 URL で返す (整形は呼び出し側)。 |
+| [`e2e`](./e2e/SKILL.md)                               | E2E テストの試験項目書を作成し、playwright-cli でブラウザ操作して実行する。                                        |
 
 ## 前提: apm
 
