@@ -1,0 +1,19 @@
+{
+  "title": "購入テスト",
+  "description": "EC サイトの購入フロー。",
+  "case": {
+    "columns": ["lang"],
+    "rows": [{ "lang": "/ja" }]
+  },
+  "scenarios": [
+    {
+      "name": "カート追加",
+      "description": "商品追加の確認。",
+      "case": {
+        "columns": ["itemId"],
+        "rows": [{ "itemId": "A01" }]
+      },
+      "steps": ["トップを開く"]
+    }
+  ]
+}

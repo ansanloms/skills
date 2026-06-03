@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "spec.schema.json",
+  "title": "Spec",
+  "description": "E2E テスト試験項目書。",
+  "type": "object",
+  "required": ["title", "scenarios"],
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "テスト項目書のタイトル。",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "テスト概要。目的、対象機能、前提条件等。"
+    },
+    "devices": {
+      "type": "object",
+      "description": "デバイスプリセット定義。キーはデバイス名（例: pc, mobile）。step で <device> 列参照と合わせて使用する。",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "viewport": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["width", "height"],
+            "properties": {
+              "width": { "type": "number" },
+              "height": { "type": "number" }
+            }
+          },
+          "isMobile": { "type": "boolean" },
+          "hasTouch": { "type": "boolean" },
+          "userAgent": { "type": "string" }
+        }
+      }
+    },
+    "case": {
+      "$ref": "#/$defs/case"
+    },
+    "scenarios": {
+      "type": "array",
+      "description": "テストシナリオ一覧。",
+      "items": {
+        "$ref": "#/$defs/scenario"
+      }
+    }
+  },
+  "$defs": {
+    "case": {
+      "description": "テストケース。テストの条件パターンの総覧。",
+      "type": "object",
+      "required": ["columns", "rows"],
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "type": "array",
+          "description": "テーブルの列定義",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rows": {
+          "type": "array",
+          "description": "テストケースの各行。",
+          "items": {
+            "type": "object",
+            "description": "各列名をキーとした値のマップ。",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "description": "テストシナリオ。実際に確認する項目の一覧。",
+      "required": ["name", "steps"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "シナリオ名。",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "シナリオの概要や検証内容。"
+        },
+        "case": {
+          "$ref": "#/$defs/case"
+        },
+        "steps": {
+          "type": "array",
+          "description": "テストステップ一覧。",
+          "items": {
+            "type": "string",
+            "description": "テストステップの内容。${ENV_VAR} や <column_name> の置換記法を含む。",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

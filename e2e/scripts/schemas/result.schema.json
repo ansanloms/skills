@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "result.schema.json",
+  "title": "Result",
+  "description": "E2E テスト実行結果。scenarios コマンドの JSON 出力を基に、各項目にテスト結果を追記したもの。",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["no", "scenario"],
+    "additionalProperties": false,
+    "properties": {
+      "no": {
+        "type": "string",
+        "description": "項番（{scenario_index}.{case}.{step_index}）"
+      },
+      "scenario": {
+        "type": "string",
+        "description": "ステップテキスト（scenarios[*].steps[*] の値）"
+      },
+      "status": {
+        "type": "string",
+        "enum": ["OK", "NG", "SKIP"],
+        "description": "テスト結果ステータス。未実行の場合は省略する。OK: 成功、NG: 失敗、SKIP: 直前項目 NG による実行スキップ。"
+      },
+      "remark": {
+        "type": "string",
+        "description": "備考。失敗原因・スキップ理由等を記述する。"
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "macros.schema.json",
+  "title": "Macros",
+  "description": "E2E テスト共通マクロ定義。",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "required": ["script"],
+    "additionalProperties": false,
+    "properties": {
+      "description": {
+        "type": "string",
+        "description": "マクロの概要。"
+      },
+      "script": {
+        "type": "string",
+        "description": "ステップテキスト展開内容。${ENV_VAR} / <column> 置換記法を含んでよい。",
+        "minLength": 1
+      }
+    }
+  }
+}
