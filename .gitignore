@@ -3,3 +3,5 @@ apm_modules/**
 
 # テストカバレッジ
 coverage/**
+
+.env

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
+  "fmt": {
+    "proseWrap": "preserve"
+  },
+  "lint": {
+    "rules": { "tags": ["recommended"] },
+    "plugins": ["jsr:@aireone/deno-lint-curly"]
+  },
+  "exclude": ["coverage/"],
+  "imports": {
+    "@gunshi/gunshi": "jsr:@gunshi/gunshi@0.32.0",
+    "@std/assert": "jsr:@std/assert@1.0.19",
+    "@std/path": "jsr:@std/path@1.1.5",
+    "@std/yaml": "jsr:@std/yaml@1.1.1",
+    "ajv": "npm:ajv@8.20.0",
+    "json-schema-to-typescript": "npm:json-schema-to-typescript@15.0.4",
+    "remark-frontmatter": "npm:remark-frontmatter@5.0.0",
+    "remark-gfm": "npm:remark-gfm@4.0.1",
+    "remark-parse": "npm:remark-parse@11.0.0",
+    "remark-stringify": "npm:remark-stringify@11.0.0",
+    "unified": "npm:unified@11.0.5",
+    "exceljs": "npm:exceljs@4.4.0"
+  },
+  "tasks": {
+    "generate-types": "deno task generate-types:spec && deno task generate-types:result && deno task generate-types:macros",
+    "generate-types:spec": "deno run --allow-read --allow-write --allow-env --allow-sys json-schema-to-typescript -i schemas/spec.schema.json -o types/spec.ts",
+    "generate-types:result": "deno run --allow-read --allow-write --allow-env --allow-sys json-schema-to-typescript -i schemas/result.schema.json -o types/result.ts",
+    "generate-types:macros": "deno run --allow-read --allow-write --allow-env --allow-sys json-schema-to-typescript -i schemas/macros.schema.json -o types/macros.ts",
+    "json-to-md": "deno run --allow-read --allow-write cli/json-to-md.ts",
+    "replace-env": "deno run --allow-read --allow-write --allow-env cli/replace-env.ts",
+    "scenarios": "deno run --allow-read --allow-write cli/scenarios.ts",
+    "export:excel": "deno run --allow-read --allow-write --allow-env cli/export-excel.ts",
+    "lint": "deno lint && deno check && deno fmt --check",
+    "fix": "deno lint --fix && deno fmt",
+    "test": "deno test -A --parallel --shuffle --coverage"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  }
+}

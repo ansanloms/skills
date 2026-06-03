@@ -1,0 +1,9 @@
+{
+  "title": "テスト",
+  "scenarios": [
+    {
+      "name": "S1",
+      "steps": ["`${FRONTEND_URL}/` にアクセスする"]
+    }
+  ]
+}

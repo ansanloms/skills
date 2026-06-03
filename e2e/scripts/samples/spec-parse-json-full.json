@@ -1,0 +1,19 @@
+{
+  "title": "購入テスト",
+  "description": "購入フロー。",
+  "case": {
+    "columns": ["lang"],
+    "rows": [{ "lang": "/ja" }]
+  },
+  "scenarios": [
+    {
+      "name": "カート追加",
+      "description": "商品をカートへ。",
+      "case": {
+        "columns": ["itemId"],
+        "rows": [{ "itemId": "A1" }]
+      },
+      "steps": ["ページを開く"]
+    }
+  ]
+}

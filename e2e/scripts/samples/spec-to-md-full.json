@@ -1,0 +1,22 @@
+{
+  "title": "購入テスト",
+  "description": "EC サイトの購入フローを確認する。",
+  "case": {
+    "columns": ["lang", "currency"],
+    "rows": [
+      { "lang": "/ja", "currency": "JPY" },
+      { "lang": "/en", "currency": "USD" }
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "1. カート追加",
+      "description": "商品をカートに追加する。",
+      "case": {
+        "columns": ["itemId"],
+        "rows": [{ "itemId": "ABC" }]
+      },
+      "steps": ["トップページを開く", "商品をカートに追加する"]
+    }
+  ]
+}
