@@ -31,7 +31,7 @@ PNG / SVG エクスポートが必要な場合は draw.io CLI が必要。
 ## 推奨ワークフロー
 
 1. `.drawio` ファイルを XML 形式で作成 (これが編集用ソース = source of truth)
-2. PNG を一時ディレクトリ (例: `/tmp`) に出力して視覚的に確認する (確認用。成果物には残さない)
+2. PNG を `mktemp -d` で作った一時ディレクトリに出力して視覚的に確認する (確認用。成果物には残さない)
 3. 問題があれば `.drawio` の XML を修正して手順 2 に戻る
 4. 完成したら `-e` (`--embed-diagram`) 付きで SVG にエクスポート (成果物): `diagram.drawio.svg`
 5. 成果物は `diagram.drawio` (編集用ソース) と `diagram.drawio.svg` (配布用) の両方を残す
