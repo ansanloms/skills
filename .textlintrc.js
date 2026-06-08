@@ -92,6 +92,9 @@ module.exports = {
       "ai-tech-writing-guideline": {
         "severity": "info",
       },
+
+      // AI が読むことを前提とした文章であり、AI 的なリスト整形を許容する為、無効化する。
+      "no-ai-list-formatting": false,
     },
   },
 };
