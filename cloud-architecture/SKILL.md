@@ -1,10 +1,9 @@
 ---
 name: cloud-architecture
 description: >-
-  AWS のクラウドインフラ構成図 (アーキテクチャ図) を draw.io 形式で作成・編集するツール。EC2 / RDS / S3 / VPC
-  などの AWS サービスアイコンを用いた構成図を XML で生成し、PNG (確認用) と SVG (成果物) にエクスポートする。AWS
-  のシステム構成やインフラ設計を図にする場面、.drawio ファイルを操作する場面で使用する。フローチャート・シーケンス図・ER
-  図などベンダーアイコンを必要としない汎用ダイアグラムには使用しない (それらは mermaid 等のテキストベースのツールを使う)。
+  AWS のクラウドインフラ構成図 (アーキテクチャ図) を draw.io 形式で作成・編集するツール。
+  EC2 / RDS / S3 / VPC などの AWS サービスアイコンを用いた構成図を XML で生成し、PNG (確認用) と drawio XML を埋め込んだ編集可能 SVG (.drawio.svg, 成果物) にエクスポートする。
+  AWS のシステム構成やインフラ設計を図にする場面、.drawio ファイルを操作する場面で使用する。
 ---
 
 # Cloud Architecture (draw.io) Skills
@@ -31,11 +30,13 @@ PNG / SVG エクスポートが必要な場合は draw.io CLI が必要。
 
 ## 推奨ワークフロー
 
-1. `.drawio` ファイルを XML 形式で作成
+1. `.drawio` ファイルを XML 形式で作成 (これが編集用ソース = source of truth)
 2. PNG を出力して視覚的に確認する
-3. 問題があれば XML を修正して手順 2 に戻る
-4. 完成したら SVG にエクスポート (成果物): `diagram.svg`
-5. 成果物は `diagram.drawio` と `diagram.svg` の両方を残す
+3. 問題があれば `.drawio` の XML を修正して手順 2 に戻る
+4. 完成したら `-e` (`--embed-diagram`) 付きで SVG にエクスポート (成果物): `diagram.drawio.svg`
+5. 成果物は `diagram.drawio` (編集用ソース) と `diagram.drawio.svg` (配布用) の両方を残す
+
+図の修正は必ず `.drawio` 側で行い、再エクスポートして `diagram.drawio.svg` を更新する。`diagram.drawio.svg` を直接編集・Read しない。大半が描画データでトークンを浪費し、手編集しても再エクスポートで上書きされる。
 
 ## 使用例
 
