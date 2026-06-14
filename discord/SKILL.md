@@ -1,7 +1,7 @@
 ---
 name: discord
 description: >-
-  Discord の REST API を curl で叩いてサーバ (ギルド) を操作する手順。メッセージの送信・取得・検索、リアクション付与、スレッド作成、チャンネルやメンバーの一覧・検索が対象。「Discord にメッセージを送る」「チャンネルの発言を読む」「スレッドを立てる」「メンバーを検索する」などで使う。
+  Discord の REST API を curl で叩いてサーバ (ギルド) を操作する手順。メッセージの送信・取得・検索、リアクション付与、スレッドの作成・名前変更、チャンネルやメンバーの一覧・検索が対象。「Discord にメッセージを送る」「チャンネルの発言を読む」「スレッドを立てる」「スレッド名を変える」「メンバーを検索する」などで使う。
   bot トークンを Authorization の Bot ヘッダで渡し、 https://discord.com/api/v10 を叩く。トークンは環境変数 DISCORD_BOT_TOKEN から取る。メッセージ検索の API は bot に無いため、履歴を取得して jq でフィルタする。
   対象は bot トークンで操作できる範囲のサーバ機能。レート制限 (429) は自前で Retry-After を見て待つ。ユーザ DM や OAuth が要る操作、Gateway (リアルタイム受信) は扱わない。
 ---
@@ -102,6 +102,7 @@ curl -sS "https://discord.com/api/v10/channels/${CHANNEL_ID}/messages?limit=100"
 ```
 
 - 1 回で取れるのは直近 100 件まで。マッチが見つからない場合でも、それより古いメッセージにある可能性がある。`before` で遡って追加取得する。
+- `contains` は部分一致。検索語 `bot` は `Bottom` のような語にもマッチする。語単位で絞るなら正規表現で語境界を指定する (例: `select(.content | test("\\bbot\\b"; "i"))`。jq 文字列内なので語境界は `\\b` とエスケープして書く)。
 - 大量に遡るとレート制限に当たる。必要な範囲に絞る。
 
 ## 単一メッセージ取得
@@ -117,7 +118,7 @@ curl -sS "https://discord.com/api/v10/channels/${CHANNEL_ID}/messages/${MESSAGE_
 ```bash
 # Unicode 絵文字は URL エンコードして渡す
 EMOJI=$(printf '%s' '👍' | jq -sRr @uri)
-curl -sS -X PUT \
+curl -sS -X PUT -o /dev/null -w '%{http_code}\n' \
   "https://discord.com/api/v10/channels/${CHANNEL_ID}/messages/${MESSAGE_ID}/reactions/${EMOJI}/@me" \
   -H "Authorization: Bot ${DISCORD_BOT_TOKEN}"
 ```
@@ -125,7 +126,7 @@ curl -sS -X PUT \
 - 末尾の `@me` は bot 自身のリアクションを表す。
 - Unicode 絵文字はそのままだと URL に置けないので URL エンコードする。
 - カスタム絵文字は `name:id` 形式 (例: `partyparrot:123456789012345678`) を URL エンコードして渡す。
-- 成功時は `204 No Content` (body 無し)。
+- 成功時は `204 No Content` (body 無し)。body が無いので `jq` には流さず、上の例のように `-o /dev/null -w '%{http_code}'` で状態コードを確認する (`204` なら成功)。
 
 ## スレッド作成 (チャンネル直下)
 
@@ -159,14 +160,31 @@ curl -sS -X POST \
 ```
 
 - この形では `type` を指定しない (親メッセージのチャンネル種別から決まる)。
+- 返るスレッドの `id` は起点メッセージの `id` と同じになる (派生スレッドは起点メッセージの snowflake を引き継ぐ)。ID の取り違えではない。
 - 既にスレッドが付いているメッセージへ再度叩くとエラーになる。
+
+## スレッド名の変更
+
+スレッドはチャンネルの一種なので、`PATCH /channels/{thread_id}` で名前を変える。`thread_id` はスレッド作成時に返った `id`。
+
+```bash
+curl -sS -X PATCH "https://discord.com/api/v10/channels/${THREAD_ID}" \
+  -H "Authorization: Bot ${DISCORD_BOT_TOKEN}" \
+  -H 'Content-Type: application/json' \
+  --data '{"name": "新しいスレッド名"}' \
+| jq '{id, name, parent_id}'
+```
+
+- `name` は 1〜100 文字。
+- 同じ `PATCH /channels/{thread_id}` で `archived` (`true` でアーカイブ)、`locked`、`auto_archive_duration` も変更できる。
+- 名前変更には対象スレッドへの編集権限が要る。作成者は自分のスレッドを変更でき、他者のスレッドや `locked` の操作には Manage Threads 権限が要る。権限不足は `403` で返る。
 
 ## メンバー一覧
 
 ```bash
 curl -sS "https://discord.com/api/v10/guilds/${GUILD_ID}/members?limit=100" \
   -H "Authorization: Bot ${DISCORD_BOT_TOKEN}" \
-| jq -r '.[] | {id: .user.id, username: .user.username, nick, bot: .user.bot}'
+| jq -r '.[] | {id: .user.id, username: .user.username, global_name: .user.global_name, nick, bot: .user.bot}'
 ```
 
 - `limit` は 1〜1000 (既定 1)。多人数のサーバでは `after` に最後のユーザ ID を渡してページングする。
@@ -177,10 +195,11 @@ curl -sS "https://discord.com/api/v10/guilds/${GUILD_ID}/members?limit=100" \
 ```bash
 curl -sS "https://discord.com/api/v10/guilds/${GUILD_ID}/members/search?query=loms&limit=10" \
   -H "Authorization: Bot ${DISCORD_BOT_TOKEN}" \
-| jq -r '.[] | {id: .user.id, username: .user.username, nick}'
+| jq -r '.[] | {id: .user.id, username: .user.username, global_name: .user.global_name, nick}'
 ```
 
-- `query` はユーザ名・ニックネームの前方一致。`limit` は 1〜1000 (既定 1)。
+- `query` はユーザ名・ニックネーム・表示名 (`global_name`) のいずれかへの前方一致。ユーザ名が前方一致しなくても、ニックネームや表示名が前方一致すればヒットする。`limit` は 1〜1000 (既定 1)。
+- 出力の表示名は、ニックネーム (`nick`)、アカウント表示名 (`global_name`)、ユーザ名 (`username`) の順で解決する (先にあるものを優先)。
 - こちらは Server Members Intent 無しでも通る。
 
 ## レート制限
@@ -204,7 +223,5 @@ curl -sS -D - -o /dev/null "https://discord.com/api/v10/channels/${CHANNEL_ID}" 
 - snowflake ID は文字列として扱う。jq で数値化 (`tonumber`) すると桁落ちする。
 - メッセージ検索の API は bot に無い。履歴取得 + jq フィルタで代替し、直近 100 件を超える検索は `before` で遡る。
 - リアクションの絵文字は URL エンコードする。カスタム絵文字は `name:id` 形式で渡す。
-- スレッド作成はチャンネル直下版が `type` 必須、メッセージ派生版が `type` 不要と引数が異なる。
+- スレッド作成はチャンネル直下版が `type` 必須、メッセージ派生版が `type` 不要と引数が異なる。名前変更は `PATCH /channels/{thread_id}`。
 - 取得・操作した内容をユーザに示す際は対象のチャンネル・メッセージを明示する。値を捏造しない。
-  </content>
-  </invoke>
