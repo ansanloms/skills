@@ -9,6 +9,18 @@ description: メインの worktree (clone 直下) のブランチを切り替え
 
 worktree 操作は素の `git worktree` コマンドで行う。
 
+## worktree 配置先の受け取り
+
+worktree を置くベースディレクトリ (`<base>`) は呼び出し側から供給される前提で動く。各 worktree は `<base>/<name>` に作る。`<base>` がどう供給されるか (環境変数・呼び出し時の指示等) と、それが `git status` を汚さない場所であること (gitignore で除外済み、またはリポジトリ外) の保証は呼び出し側の責務であり、この skill は配置先を決めたり検証したりしない。
+
+次の手順では、供給された `<base>` を `$base` に入れて使う。相対パスで供給されたら絶対パスへ解決してから使う。
+
+```sh
+base="<呼び出し側から供給されたベースディレクトリの絶対パス>"
+```
+
+`<base>` が供給されていない場合、この skill は配置先を自前で決めない。`.claude/worktrees/` 等を勝手に補わず、配置先を供給するよう呼び出し側に求める。
+
 ## 原則
 
 - MUST: メインの worktree (clone 直下) が今いるブランチを切り替えない。別のブランチで作業する必要があるなら、そのブランチを worktree でチェックアウトして行う。これはファイル変更か読み取りかを問わない。
@@ -21,15 +33,14 @@ worktree 操作は素の `git worktree` コマンドで行う。
 
 ## 作成手順
 
-1. worktree を用意する。`<main>` はメインの worktree の絶対パス。
-   - 新しいブランチを切る場合: `git worktree add <main>/.claude/worktrees/<name> -b <branch>`。
-   - 既存ブランチ (例として既に main から切られたブランチ) を調べる、または続ける場合: `git worktree add <main>/.claude/worktrees/<name> <branch>` (`-b` を付けない。既存ブランチをそのままチェックアウトする)。
-   - path 規約: リポジトリ内の `.claude/worktrees/<name>` に置く。例としてメインが `~/dev/foo` なら worktree は `~/dev/foo/.claude/worktrees/<name>` になる。この path はグローバル gitignore (`~/.config/git/ignore` の `**/.claude/worktrees/*` 等) で除外されていることが多いが、前提にせず、これから作る worktree のパス自体 (`<main>/.claude/worktrees/<name>`) を配置前に `git check-ignore -q` で確認する。除外されていれば (終了コード 0) そのままリポジトリ内に置いてよい。メインの `git status` を汚さない。除外されていなければ (終了コード 1) リポジトリ内に置くと `git status` を汚すため、無視されるパスにするか worktree をリポジトリ外 (例として親ディレクトリ) に置く。
-   - `git worktree add` の path 引数は絶対パスで渡す。どの cwd から実行しても所定のディレクトリへ確実に置くため。
+1. worktree を用意する。配置先は受け取った `<base>` を使い、worktree は `<base>/<name>` に作る。
+   - 新しいブランチを切る場合: `git worktree add <base>/<name> -b <branch>`。
+   - 既存ブランチ (例として既に main から切られたブランチ) を調べる、または続ける場合: `git worktree add <base>/<name> <branch>` (`-b` を付けない。既存ブランチをそのままチェックアウトする)。
+   - `git worktree add` の path 引数は絶対パスで渡す。どの cwd から実行しても所定のディレクトリへ確実に置くため (`<base>` は受け取り時に絶対パスへ解決しておく)。
    - `<name>` / `<branch>` はタスク内容がわかる短い名前にする。
 2. ローカル設定を持ち込む (任意)。`git-worktree-include` コマンドが利用できる環境なら、`git worktree add` で作った path を渡して実行し、`.worktreeinclude` に記載されたローカル未追跡ファイル (`.env` 等) をメインから複製する。コマンドが無い環境では何もしない。
-   - MUST: メイン worktree の中をカレントディレクトリにして実行する。`git-worktree-include` はメイン worktree をカレントディレクトリから解決し (引数の path はコピー先にしか使わない)、cwd がメイン worktree の外だと別リポジトリを見て黙って no-op する。手順 1 の `git worktree add` は絶対 path で cwd 非依存だが、この手順は絶対 path を渡しても cwd 非依存にはならない。
-   - 例: `(cd <main> && command -v git-worktree-include >/dev/null && git-worktree-include <main>/.claude/worktrees/<name>)`。
+   - MUST: メイン worktree (`<main>`、clone 直下の絶対パス) の中をカレントディレクトリにして実行する。`git-worktree-include` はメイン worktree をカレントディレクトリから解決し (引数の path はコピー先にしか使わない)、cwd がメイン worktree の外だと別リポジトリを見て黙って no-op する。手順 1 の `git worktree add` は絶対 path で cwd 非依存だが、この手順は絶対 path を渡しても cwd 非依存にはならない。
+   - 例: `(cd <main> && command -v git-worktree-include >/dev/null && git-worktree-include <base>/<name>)`。
    - コマンドはあるが `.worktreeinclude` が無い場合、`git-worktree-include` 自体が何もせず正常終了する。そのため `command -v` のガードだけでよく、`.worktreeinclude` の有無を確認するガードを別途足す必要は無い。
 3. その branch に description を設定する (下記「branch description」)。
 
