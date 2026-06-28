@@ -15,16 +15,16 @@
 - 編集用ソースは `.drawio` (XML)。図の作成・修正はこのファイルに対して行う (source of truth)
 - 成果物 SVG は `.drawio.svg` という拡張子で出力する (drawio XML を埋め込んだ編集可能 SVG)
 - SVG は `.drawio` と同一ディレクトリに出力する
-- 確認用 PNG は中間生成物。`mktemp -d` で作った一時ディレクトリに出力し、成果物ディレクトリには残さない
+- 確認用 PNG は中間生成物。一時ディレクトリ (例: `/tmp`) に出力し、成果物ディレクトリには残さない
 - `.drawio` は任意の場所・任意のファイル名でよい
 - 既存ファイルは上書きする
 
 ファイル名の例を以下に示す。
 
 ```
-diagram.drawio                       # 編集用ソース (source of truth)
-diagram.drawio.svg                   # 成果物 (drawio XML 埋め込み、単体で再編集可能)
-$(mktemp -d)/diagram.png             # 確認用 (一時ディレクトリ。成果物に残さない)
+diagram.drawio           # 編集用ソース (source of truth)
+diagram.drawio.svg       # 成果物 (drawio XML 埋め込み、単体で再編集可能)
+/tmp/diagram.png         # 確認用 (一時ディレクトリ。成果物に残さない)
 ```
 
 成果物は `.drawio` (編集用ソース) と `.drawio.svg` (配布用) の両方を残す。
@@ -35,20 +35,14 @@ $(mktemp -d)/diagram.png             # 確認用 (一時ディレクトリ。成
 
 ## 確認用 PNG の出力
 
-開発中の視覚的確認には PNG を使用する。確認用 PNG は中間生成物なので、`mktemp -d` で作った一意な一時ディレクトリに出力し、成果物ディレクトリには残さない。`/tmp` 直下の固定名は複数図や並行実行で衝突するため使わない。
-
-出力先のパスは変数に受けて同一コマンド内で使い、最後に `echo` で表示してそのパスの PNG を確認する (シェル変数はコマンドをまたいで保持されないため、1 つのコマンドにまとめる)。
+開発中の視覚的確認には PNG を使用する。確認用 PNG は中間生成物なので、一時ディレクトリ (例: `/tmp`) に出力し、成果物ディレクトリには残さない。
 
 ```bash
 # 確認用 PNG（高解像度）
-png="$(mktemp -d)/diagram.png"
-drawio -x -f png --scale 2.5 --border 10 -o "$png" input.drawio --disable-gpu --no-sandbox
-echo "$png"
+drawio -x -f png --scale 2.5 --border 10 -o /tmp/diagram.png input.drawio --disable-gpu --no-sandbox
 
 # 透過背景を使用
-png="$(mktemp -d)/diagram.png"
-drawio -x -f png --scale 2.5 --transparent --border 10 -o "$png" input.drawio --disable-gpu --no-sandbox
-echo "$png"
+drawio -x -f png --scale 2.5 --transparent --border 10 -o /tmp/diagram.png input.drawio --disable-gpu --no-sandbox
 ```
 
 ## 成果物用 SVG の出力
