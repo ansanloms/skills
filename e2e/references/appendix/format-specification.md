@@ -80,8 +80,8 @@ devices:
 ```
 
 - キーはデバイス名（`pc`, `mobile` など）
-- `viewport.width` / `viewport.height`: viewport サイズ（数値）
-- `isMobile` / `hasTouch`: 真偽値（`true` または省略）
+- `viewport.width`/`viewport.height`: viewport サイズ（数値）
+- `isMobile`/`hasTouch`: 真偽値（`true` または省略）
 - `userAgent`: 文字列。`${ENV_VAR}` 置換記法を使用可
 
 ## パラメータ置換の記述
@@ -233,7 +233,7 @@ A!-IDを使用したログイン機能の動作確認。
 
 - テストケーステーブルを使用しない単一ケース
 - 各シナリオは 1 回ずつ実行される
-- case 項番は常に 1 になる(1.1.1 / 1.1.2 / 1.1.3 / 1.1.4 / 2.1.1 ...)
+- case 項番は常に 1 になる(1.1.1/1.1.2/1.1.3/1.1.4/2.1.1 ...)
 
 ## 記述時の注意点
 

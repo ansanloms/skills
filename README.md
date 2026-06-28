@@ -16,7 +16,7 @@ apm install ansanloms/skills/find-docs --target claude
 # → <project>/.claude/skills/ にコピー + apm.yml / apm.lock.yaml に記録
 ```
 
-`--target` は配置先ハーネス (claude / cursor / codex 等)。Claude Code なら `.claude/skills/` に入る。
+`--target` は配置先ハーネス (claude/cursor/codex 等)。Claude Code なら `.claude/skills/` に入る。
 
 ## 更新
 

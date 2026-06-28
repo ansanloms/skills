@@ -138,7 +138,7 @@ playwright-cli -s=admin close
 各シナリオ開始時に次の順で実行すること。
 
 1. ビューポートサイズを設定する
-2. ストレージを一括クリア（Cookie / localStorage / sessionStorage）
+2. ストレージを一括クリア（Cookie/localStorage/sessionStorage）
 3. ログアウト URL へ遷移してサーバー側のセッションを破棄する
 4. テスト対象ページへ遷移する
 

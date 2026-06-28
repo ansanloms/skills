@@ -135,7 +135,7 @@ deno task --cwd .claude/skills/e2e/scripts scenarios \
   --output $(pwd)/${WORKSPACE}/steps.json
 ```
 
-生成直後の steps.json は `status` / `remark` を持たない状態。
+生成直後の steps.json は `status`/`remark` を持たない状態。
 
 ```json
 [

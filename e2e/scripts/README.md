@@ -1,6 +1,6 @@
 # E2E テスト CLI ツール
 
-試験項目書（Markdown / JSON）を変換・加工するための CLI ツール群。
+試験項目書（Markdown/JSON）を変換・加工するための CLI ツール群。
 
 ## コマンド一覧
 
@@ -41,7 +41,7 @@ cat spec.json | deno task json-to-md
 
 spec.json 内のすべての文字列値に含まれる `${ENV_VAR}` パターンを、実際の環境変数の値に置き換える。
 
-対象フィールド: `title` / `description` / `case.columns` / `case.rows[*][*]` / `scenarios[*].name` / `scenarios[*].description` / `scenarios[*].steps[*]` / `scenarios[*].case.*`
+対象フィールド: `title`/`description`/`case.columns`/`case.rows[*][*]`/`scenarios[*].name`/`scenarios[*].description`/`scenarios[*].steps[*]`/`scenarios[*].case.*`
 
 未定義の環境変数は `${ENV_VAR}` のままプレースホルダーを保持する。
 
@@ -71,7 +71,7 @@ env $(cat .env | xargs) deno task replace-env --input spec.json
 
 ## scenarios
 
-spec.json の case / scenario / step をもとに、実行される全項目（step 単位）の一覧を出力する。
+spec.json の case/scenario/step をもとに、実行される全項目（step 単位）の一覧を出力する。
 
 no. の形式は `{scenario_index}.{case_index}.{step_index}` の 3 桁。桁順の正本は `references/appendix/target-specification.md`。
 

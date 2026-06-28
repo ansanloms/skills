@@ -59,7 +59,7 @@ nvim --server "$sock" --remote-tab "$tmp"
 
 コマンド実行結果や調査結果等、長文の出力は一時ファイルに書き出して `--remote-tab` で開く。
 
-- MUST: 拡張子は内容に合わせる (`.md` / `.log` / `.json` / `.txt` 等)。filetype 判定が効く。
+- MUST: 拡張子は内容に合わせる (`.md`/`.log`/`.json`/`.txt` 等)。filetype 判定が効く。
 - MUST NOT: 一時ファイルを削除しない。nvim 側で開いている間に消えると参照できなくなる。
 
 ```sh
@@ -72,6 +72,6 @@ nvim --server "$sock" --remote-tab "$tmp"
 ## 注意事項
 
 - MUST: ファイルを開く際は `--remote` ではなく `--remote-tab` を使用する。ユーザが編集中のバッファを上書きしない為、必ず新規タブに開く。
-- MUST: nvim に渡すファイルパスは絶対パスにする。`--remote-tab` / `diffsplit` のパス解決基準は受け取る nvim 側の cwd であり、エージェント側の cwd と一致する保証がない。相対パスで来たら `realpath <path>` 等で絶対パスへ解決してから渡す (`mktemp` が返すパスは元から絶対なのでそのままでよい)。
-- `--remote-send` で送るキーシーケンスは nvim 記法 (`<Esc>` / `<CR>` 等) を使用する。
+- MUST: nvim に渡すファイルパスは絶対パスにする。`--remote-tab`/`diffsplit` のパス解決基準は受け取る nvim 側の cwd であり、エージェント側の cwd と一致する保証がない。相対パスで来たら `realpath <path>` 等で絶対パスへ解決してから渡す (`mktemp` が返すパスは元から絶対なのでそのままでよい)。
+- `--remote-send` で送るキーシーケンスは nvim 記法 (`<Esc>`/`<CR>` 等) を使用する。
 - nvim が insert mode 等にいる可能性を考慮し、Ex コマンド送信前には `<Esc>` を前置する。
