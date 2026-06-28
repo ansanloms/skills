@@ -1,14 +1,19 @@
 {
   "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
   "fmt": {
-    "proseWrap": "preserve"
+    "proseWrap": "preserve",
+    "exclude": [
+      "apm.yml",
+      "apm.lock.yaml",
+      ".claude/skills/",
+      "cloud-architecture/scripts/testdata/"
+    ]
   },
-  "exclude": [".claude/skills/empirical-prompt-tuning/**"],
   "imports": {
     "@proofdict/textlint-rule-proofdict": "npm:@proofdict/textlint-rule-proofdict@3.1.2",
     "@textlint-ja/textlint-rule-preset-ai-writing": "npm:@textlint-ja/textlint-rule-preset-ai-writing@1.7.0",
     "textlint": "npm:textlint@15.7.1",
-    "textlint-rule-preset-ja-spacing": "npm:textlint-rule-preset-ja-spacing@3.0.0",
+    "textlint-rule-preset-ja-spacing": "npm:textlint-rule-preset-ja-spacing@3.0.2",
     "textlint-rule-preset-ja-technical-writing": "npm:textlint-rule-preset-ja-technical-writing@12.0.2",
     "textlint-rule-preset-jtf-style": "npm:textlint-rule-preset-jtf-style@3.0.3"
   },
