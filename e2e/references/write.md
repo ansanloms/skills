@@ -59,6 +59,7 @@ spec.json を作成する。スキーマは `../scripts/schemas/spec.schema.json
 - `steps` は最低 1 件必要
 - ステップ内のパラメータ置換記法: `${ENV_VAR}`（環境変数）、`<column-name>`（ケースの値）
 - 環境ごとに URL を変える必要がなければ `${ENV_VAR}` を使わず、`サインアップ画面にアクセスする` のように素の文や相対パスで書いてよい。`${ENV_VAR}` は環境差や秘匿値があるときだけ使う
+- ステップ内の URL やリテラル値はバッククォート（コードスパン）で括る。素の URL のままだと spec.md 生成後の deno fmt で `https\://` にエスケープされ可読性が落ちる
 - マクロ参照: `@macro-name` 形式でマクロを参照できる
   - マクロ名自体にも `<column-name>` を使用可能。ケースの値に応じてマクロを動的に切り替えられる
   - 例: `@login-frontend-<lang>` → `lang: ja` のとき `@login-frontend-ja` に展開されてからマクロ展開される
@@ -153,10 +154,11 @@ TEST_PRODUCT_ID_2=
 # spec.json / spec.md は常に生成されるので必ず fmt する
 deno fmt --no-config --prose-wrap preserve $(pwd)/path/to/{feature-name}/spec.json
 deno fmt --no-config --prose-wrap preserve $(pwd)/path/to/{feature-name}/spec.md
-# 以下は step 4 で生成した場合のみ実行する（未生成ならスキップ）
-deno fmt --no-config --prose-wrap preserve $(pwd)/path/to/{feature-name}/.env.example
+# README.md は step 4 で生成した場合のみ実行する（未生成ならスキップ）
 deno fmt --no-config --prose-wrap preserve $(pwd)/path/to/{feature-name}/README.md
 ```
+
+`.env.example` は deno fmt の対応形式ではない（単独で渡すと `No target files found` で exit 1 になる）ため fmt の対象にしない。
 
 ## テンプレート設計ガイド
 

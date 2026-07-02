@@ -3,7 +3,7 @@ name: cloud-architecture
 description: >-
   AWS のクラウドインフラ構成図 (アーキテクチャ図) を draw.io 形式で作成・編集するツール。
   EC2 / RDS / S3 / VPC などの AWS サービスアイコンを用いた構成図を XML で生成し、PNG (確認用) と drawio XML を埋め込んだ編集可能 SVG (.drawio.svg, 成果物) にエクスポートする。
-  AWS のシステム構成やインフラ設計を図にする場面、.drawio ファイルを操作する場面で使用する。
+  AWS のシステム構成やインフラ設計を図にする場面、AWS 構成図の .drawio ファイルを操作する場面で使用する。GCP/Azure 等の他クラウドは未対応。フローチャート・シーケンス図などベンダーアイコン不要の汎用図は対象外 (mermaid 等を使う)。
 ---
 
 # Cloud Architecture (draw.io) Skills

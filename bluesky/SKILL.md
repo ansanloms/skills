@@ -89,10 +89,14 @@ curl -sS -G 'https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed' \
 ```
 
 - `is_repost` が真なら本人による他者投稿のリポストである。`author` (= `post.author.handle`) が元投稿者なので「リポスト: @元投稿者」と区別して示す。`reason.by.handle` がリポストした本人 (= 取得対象アカウント)。
+- `time` は UTC の ISO 8601。提示前に JST へ直す (例: `TZ=Asia/Tokyo date -d "<time の値>" '+%Y-%m-%d %H:%M'`)。
 - embed は種別ごとに扱いを変える。
   - `app.bsky.embed.images#view` は画像。`images[]` の `fullsize`/`alt` を使う (後述「画像の取得と表示」へ)。
   - `app.bsky.embed.external#view` は外部リンク。`external.uri`/`external.title` を添える。
   - `app.bsky.embed.record#view` は引用投稿。`.post.embed.record` に引用元の本文がある。
+  - 上記に無い種別 (例: `app.bsky.embed.gallery#view` 等の新種別) が来たら、種別名をそのまま添えて本文のみ提示する。列挙外を理由に投稿を落とさない。
+- jq テンプレートは全フィールド版。依頼に不要なフィールド (画像不要なら `images` 等) は削ってよい。コアは `is_repost`/`time`/`author`/`text`/`rkey`。
+- 本文は原文のまま示すことを優先し、長文・多数件のときは要約してよい (要約した旨を添える)。
 - Web URL へ変換するには、`rkey` (投稿 URI `at://{did}/app.bsky.feed.post/{rkey}` の末尾) を使い `https://bsky.app/profile/{author}/post/{rkey}` を組み立てて各投稿に併記する。リポストは元投稿者の URL になる (元投稿が `author` の下にあるため正しい)。
 
 ## 画像の取得と表示
@@ -145,9 +149,9 @@ curl -sS -G 'https://public.api.bsky.app/xrpc/app.bsky.graph.getFollowers' \
 | jq -r '.cursor, (.followers[] | "\(.handle)\t\(.displayName // "")")'
 ```
 
-- `limit` は最大 100。続きは末尾の `cursor` を次回 `--data-urlencode "cursor=<値>"` に渡す。`cursor` が返らなくなったら終端である。
+- `limit` は最大 100。続きは末尾の `cursor` を次回 `--data-urlencode "cursor=<値>"` に渡す。`cursor` が返らなくなったら終端である。1 ページの返却数は `limit` より少ないことがある (削除・モデレーション落ち等) ため、終端判定は件数でなく `cursor` の有無のみで行う。
 - 各要素は `handle`/`displayName`/`description` (bio) を持つ。一覧は handle を主に、必要なら displayName・bio を添える。
-- `getProfile` の `followsCount`/`followersCount` が 100 以下なら 1 リクエスト (`limit=100`) で全件取得し全件提示してよい。100 を超えるときは既定で新しい順に上位 50 件程度へ留め、`cursor` で続きを取れる旨を明示する。全件ダンプは避け、打ち切ったら省略を明示する。
+- `getProfile` の `followsCount`/`followersCount` が 100 以下なら 1 リクエスト (`limit=100`) で全件取得し全件提示してよい。100 を超えるときは既定で新しい順に上位 50 件程度へ留め、`cursor` で続きを取れる旨を明示する。全件ダンプは避け、打ち切ったら省略を明示する。先頭ページだけを根拠に傾向を述べるときは、並び順由来の偏り (新しいフォロー順 = 直近の関心に偏る) を結論に添える。
 - `getProfile` の総数と、一覧で実際に列挙できる件数は一致しないことがある (削除・凍結・ブロック等のアカウントは総数に含まれても一覧から落ちる)。`cursor` が返らなければ列挙は終端であり、差は誤差としてその旨を添える。件数を補完・捏造しない。
 - 並び順は新しくフォローした順 (API 既定) である。
 

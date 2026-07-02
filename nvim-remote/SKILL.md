@@ -72,6 +72,7 @@ nvim --server "$sock" --remote-tab "$tmp"
 ## 注意事項
 
 - MUST: ファイルを開く際は `--remote` ではなく `--remote-tab` を使用する。ユーザが編集中のバッファを上書きしない為、必ず新規タブに開く。
+- MUST NOT: この skill で作った一時ファイル (diff・出力結果のいずれの手順でも) を削除しない。nvim 側で開いている間に消えると参照できなくなる。
 - MUST: nvim に渡すファイルパスは絶対パスにする。`--remote-tab`/`diffsplit` のパス解決基準は受け取る nvim 側の cwd であり、エージェント側の cwd と一致する保証がない。相対パスで来たら `realpath <path>` 等で絶対パスへ解決してから渡す (`mktemp` が返すパスは元から絶対なのでそのままでよい)。
 - `--remote-send` で送るキーシーケンスは nvim 記法 (`<Esc>`/`<CR>` 等) を使用する。
 - nvim が insert mode 等にいる可能性を考慮し、Ex コマンド送信前には `<Esc>` を前置する。

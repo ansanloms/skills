@@ -68,6 +68,12 @@ drawio -x -e -f svg -p 0 --border 10 -o diagram.drawio.svg input.drawio --disabl
 
 `-e` を付けないと描画のみの SVG になり、`.drawio.svg` としての再編集ができない。成果物には必ず `-e` を付ける。
 
+埋め込みの確認は、`.drawio.svg` を Read せずヘッダ部分だけを見る (Read 禁止と両立する検証手順)。
+
+```bash
+head -c 2000 diagram.drawio.svg | grep -q 'content="&lt;mxfile' && echo embedded
+```
+
 ## 主要なオプション
 
 - `-x`: XML モード（非対話的）
