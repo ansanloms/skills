@@ -6,7 +6,9 @@
       "apm.yml",
       "apm.lock.yaml",
       ".claude/skills/",
-      "cloud-architecture/scripts/testdata/"
+      "cloud-architecture/scripts/testdata/",
+      "apm.yml",
+      "apm.lock.yaml"
     ]
   },
   "imports": {
