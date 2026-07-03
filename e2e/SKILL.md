@@ -1,8 +1,9 @@
 ---
 name: e2e
 description: >-
-  E2E テストの試験項目書作成・実行を行う。
-  シナリオ、ユーザー操作フロー全体のテストに使う。
+  Web アプリの E2E テストの試験項目書 (spec.json) 作成・Excel 出力・playwright-cli によるテスト実行を行う。
+  「試験項目書を作りたい」「E2E テストを実行したい」「試験項目書を Excel にしたい」など、シナリオ・ユーザー操作フロー全体の試験を設計・実施する際に使う。
+  サブコマンドは write (項目書作成)・generate (ワークスペース生成)・export:excel (Excel 出力)・run (テスト実行)。単体テスト・API 単発の確認には使わない。
 argument-hint: "[write|generate|export:excel|run] [options]"
 ---
 
@@ -24,6 +25,10 @@ playwright-cli を活用したブラウザ自動化により、Web アプリケ�
 /e2e export:excel --workspace <path>     # Excel 試験項目書出力
 /e2e run --workspace <path> [options]    # テスト実行（playwright-cli）
 ```
+
+必須引数は generate が `--spec`、export:excel と run が `--workspace`。欠落している場合はサブエージェントへ委譲せず、その場でユーザに確認する（パスを推測して実行しない。既存ディレクトリを走査して候補を提示することも行わない）。確認時は前提の一言（export:excel と run は generate 済みワークスペースが対象）を添えてよく、そのために references の前提条件節を参照してよい（references 冒頭の「サブエージェントが読む」という読者宣言は、この引数確認のための参照を妨げない）。値を受領したら通常フロー（サブエージェントへの委譲）に合流する。
+
+手順書・references 中の `deno task --cwd .claude/skills/e2e/scripts` は配布先レイアウトの表記であり、skill 実体が別の場所にある場合は scripts ディレクトリの絶対パスに読み替える（`--input`/`--output` は常に絶対パスで渡す）。
 
 ### 実行フロー
 

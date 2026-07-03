@@ -9,6 +9,7 @@
 - アイコンが空表示になる (resIcon 名の誤り)
 - 日本語が豆腐になる (fontFamily 未指定)
 - テキストが途切れる
+- エッジがノードラベルやエッジラベルの文字を横切る (幾何チェックはラベル文字の矩形を見ないため、これは目視でしか検出できない)
 
 一方、見やすさを損なう次の 4 事象はすべて幾何的性質であり、目視では精度・再現性が出ない。
 
@@ -49,6 +50,13 @@ drawio -x -f svg -e -o diagram.drawio.svg diagram.drawio --disable-gpu --no-sand
 # 幾何チェック
 deno run --allow-read scripts/check-readability.ts \
   --drawio diagram.drawio --svg diagram.drawio.svg
+```
+
+スクリプトは skill 配下の絶対パス、対象ファイルは任意の絶対パスで渡せる。図が skill 外のディレクトリにある場合は両方とも絶対パスで指定する。
+
+```bash
+deno run --allow-read <skillの絶対パス>/scripts/check-readability.ts \
+  --drawio /path/to/diagram.drawio --svg /path/to/diagram.drawio.svg
 ```
 
 `scripts/` には `deno.json` があり、そのディレクトリからは task でも呼べる。

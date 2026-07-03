@@ -15,7 +15,7 @@
 - 編集用ソースは `.drawio` (XML)。図の作成・修正はこのファイルに対して行う (source of truth)
 - 成果物 SVG は `.drawio.svg` という拡張子で出力する (drawio XML を埋め込んだ編集可能 SVG)
 - SVG は `.drawio` と同一ディレクトリに出力する
-- 確認用 PNG は中間生成物。一時ディレクトリ (例: `/tmp`) に出力し、成果物ディレクトリには残さない
+- 確認用 PNG は中間生成物。一時ディレクトリ (例: `/tmp`) に出力し、成果物ディレクトリには残さない。ファイル名はタスク固有の接頭辞か `mktemp` で一意化する (並行タスクとの衝突を防ぐ)
 - `.drawio` は任意の場所・任意のファイル名でよい
 - 既存ファイルは上書きする
 
@@ -67,6 +67,12 @@ drawio -x -e -f svg -p 0 --border 10 -o diagram.drawio.svg input.drawio --disabl
 ```
 
 `-e` を付けないと描画のみの SVG になり、`.drawio.svg` としての再編集ができない。成果物には必ず `-e` を付ける。
+
+埋め込みの確認は、`.drawio.svg` を Read せずヘッダ部分だけを見る (Read 禁止と両立する検証手順)。
+
+```bash
+head -c 2000 diagram.drawio.svg | grep -q 'content="&lt;mxfile' && echo embedded
+```
 
 ## 主要なオプション
 
