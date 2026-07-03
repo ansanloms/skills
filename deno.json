@@ -6,7 +6,8 @@
       "apm.yml",
       "apm.lock.yaml",
       ".claude/skills/",
-      "cloud-architecture/scripts/testdata/"
+      "cloud-architecture/scripts/testdata/",
+      "mountain-weather/scripts/testdata/"
     ]
   },
   "imports": {
