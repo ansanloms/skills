@@ -13,7 +13,7 @@ argument-hint: "[write|generate|export:excel|run] [options]"
 
 E2E テストの試験項目書作成・実行を統合したスキル。
 
-playwright-cli を活用したブラウザ自動化により、Web アプリケーションの動作確認を行う。
+playwright-cli を活用したブラウザ自動化により、Web アプリケーションの動作確認を行う。playwright-cli そのものの操作リファレンス（コマンド仕様・ref の扱い・config・セッション分離）は `playwright-cli` skill に依存し、本 skill は spec 駆動のワークフロー（項目書作成・生成・Excel 出力・実行）に固有の規約のみを持つ。
 
 ## サブコマンド
 
@@ -26,7 +26,7 @@ playwright-cli を活用したブラウザ自動化により、Web アプリケ�
 /e2e run --workspace <path> [options]    # テスト実行（playwright-cli）
 ```
 
-必須引数は generate が `--spec`、export:excel と run が `--workspace`。欠落している場合はサブエージェントへ委譲せず、その場でユーザに確認する（パスを推測して実行しない。既存ディレクトリを走査して候補を提示することも行わない）。確認時は前提の一言（export:excel と run は generate 済みワークスペースが対象）を添えてよく、そのために references の前提条件節を参照してよい（references 冒頭の「サブエージェントが読む」という読者宣言は、この引数確認のための参照を妨げない）。値を受領したら通常フロー（サブエージェントへの委譲）に合流する。
+必須引数は generate が `--spec`、export:excel と run が `--workspace`。欠落している場合はサブエージェントへ委譲せず、その場でユーザに確認する（パスを推測して実行しない。既存ディレクトリを走査して候補を提示することも行わない）。確認時は前提の一言（export:excel と run は generate 済みワークスペースが対象）を添えてよく、そのために references の前提条件節を参照してよい（references 冒頭の「サブエージェントが読む」という読者宣言は、この引数確認のための参照を妨げない。本文の前提の一言で足りる場合は開かなくてよい）。確認の文言には欠落している必須引数名と受け付ける形式（絶対パス。`--input`/`--output` と同じ扱い）を最低限含める。任意オプション（`--screenshot` 等）はまとめて確認せず、未指定は既定値で進める。値を受領したら通常フロー（サブエージェントへの委譲）に合流する。
 
 手順書・references 中の `deno task --cwd .claude/skills/e2e/scripts` は配布先レイアウトの表記であり、skill 実体が別の場所にある場合は scripts ディレクトリの絶対パスに読み替える（`--input`/`--output` は常に絶対パスで渡す）。
 

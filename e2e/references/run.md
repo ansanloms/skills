@@ -2,6 +2,7 @@
 
 > **このファイルはサブエージェント（Task ツールで起動された `general-purpose` エージェント）が読む実行手順書。**
 > メインセッションからの委譲で実行される。作業宣言・承認確認は不要。即座にテストを実行すること。
+> （例外: メインセッションが引数確認のために「前提条件」節のみ参照することは妨げない。）
 
 ## 引数仕様
 
@@ -15,7 +16,8 @@
 ## 前提条件
 
 - `playwright-cli` がインストール済みであること
-  - playwright-cli コマンドの詳細仕様は [appendix/playwright-cli-usage.md](appendix/playwright-cli-usage.md) を参照
+  - playwright-cli の操作リファレンス（コマンド仕様・ref の扱い・config・セッション分離・生成コードの収集）は `playwright-cli` skill に依存する。[../../playwright-cli/SKILL.md](../../playwright-cli/SKILL.md) を Read して従うこと（skill 実体が別の場所にある場合は playwright-cli skill の SKILL.md の絶対パスに読み替える）
+  - 本手順書には e2e ワークフロー固有の規約（ステップ対応表・記録方法・初期化手順）のみを記す
 - `/e2e generate` で生成済みのワークスペースが必要。ワークスペースには次のファイルが存在する:
   - `spec.replaced.json` — 環境変数置換済み spec
   - `steps.json` — テスト項目一覧（status なし）
@@ -45,6 +47,9 @@ cd $(git rev-parse --show-toplevel)
 playwright-cli open --browser=chromium
 ```
 
+- `.playwright/cli.config.json` は playwright-cli skill の前提（sandbox 不可環境の `--no-sandbox`、信頼されない証明書の `ignoreHTTPSErrors` 等）を満たす内容である前提。存在しない場合は playwright-cli skill に従って config ファイルを作成し、`open --config=<path>` で渡すことで代替する。
+- `open` に URL を渡さないのは意図的（最初のページ遷移は steps 側の「`<url>` にアクセスする」ステップ = `goto` が担うため）。
+
 ### 3. テスト実行
 
 `spec.replaced.json` からデバイス定義を読み取る。steps.json の各項目を項番順に実行する。
@@ -56,6 +61,8 @@ echo "[${no}] ${scenario}"
 ```
 
 **MUST: 1 ステップ実行するたびに、即座に result.json を更新すること。**
+
+status は `OK`/`NG`/`SKIP` のいずれか。`SKIP` は先行ステップの NG により実行に到達できなかった場合など、実行しないまま残すステップに付け、remark に理由を記す。NG の影響は同一シナリオ内に限る（後続で実行不能なステップを SKIP で埋める）。次のシナリオは 3.1 の初期化後に通常どおり続行する。
 
 ```bash
 # status 更新
@@ -72,6 +79,8 @@ playwright-cli cookie-clear
 playwright-cli localstorage-clear
 playwright-cli sessionstorage-clear
 ```
+
+ストレージクリアだけではサーバー側のセッションは破棄されない。サーバー側セッションの破棄が必要な場合は、ログアウト URL への遷移ステップを spec 側のシナリオに含めること。
 
 #### 3.2. ステップテキスト → playwright-cli コマンド対応表
 
@@ -137,14 +146,14 @@ playwright-cli の出力コードをそのまま使うのではなく、次の�
 
 **マクロ（`@macro-name` 形式）**
 
-`macro.{N}.replaced.json` から該当マクロの `script` を取得し、その内容を展開して実行する。
-マクロの script は `/e2e --spec ... --target ...` 形式のため、その spec の該当ステップを順次実行する。
+`macro.{N}.replaced.json` は「マクロ名 → `{ description?, script }`」のオブジェクト（スキーマは `scripts/schemas/macros.schema.json`）。該当マクロの `script`（ステップテキストの展開内容。環境変数は generate 時に置換済み）を取得し、その内容を 3.2 の対応表に従って実行する（複数行の場合は各行を 1 ステップとして順次実行する）。
+展開後の各操作の合否はマクロステップ 1 件の status に集約する（result.json の行は steps.json の項目単位のため）。展開後の操作で得た Playwright コードは、そのマクロステップの no で playwright-code.json に追記する。
 
 #### 3.3. playwright_code の記録
 
 各ステップの Playwright コードを `${RUN_DIR}/playwright-code.json` に記録する。
 
-**操作系ステップ**（`playwright-cli fill`/`click`/`goto`/`resize`/`go-back`/`tab-new` 等）は playwright-cli の出力に `Ran Playwright code:` ブロックが含まれる。これを抽出して記録する。
+**操作系ステップ**（`playwright-cli fill`/`click`/`goto`/`resize`/`go-back`/`tab-new` 等）は playwright-cli の出力に `### Ran Playwright code` 見出しと ```js フェンスのコードブロックが含まれる。このフェンス内を抽出して記録する。最初の操作ステップで実出力と抽出結果が一致することを確認してから残りのステップへ進む。
 
 ````bash
 # playwright-cli コマンドの出力からコードを抽出する例
@@ -182,6 +191,8 @@ PW_CODE="await expect(page.getByRole('dialog')).toBeVisible();"
 | `all`      | 各 step の実行完了後                 |
 | `scenario` | 各 scenario の最終 step の実行完了後 |
 | `none`     | 取得しない                           |
+
+`scenario` モードの「最終 step」は、実行開始前に steps.json を走査してシナリオ番号ごとの最終項番を求めておき、それと照合して判定する（次ステップの先読みで代替してもよい）。
 
 ```bash
 playwright-cli screenshot --filename=${RUN_DIR}/screenshots/${no}.png
