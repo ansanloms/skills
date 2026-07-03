@@ -5,3 +5,7 @@ apm_modules/**
 coverage/**
 
 .env
+
+
+# APM dependencies
+apm_modules/
