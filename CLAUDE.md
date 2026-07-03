@@ -11,8 +11,9 @@
 
 - `<name>/SKILL.md` を 1 skill = 1 ディレクトリで配置する。これがこのリポジトリの提供する skill。
 - frontmatter は `name` と `description` が必須。`description` が skill の発動トリガになる。「何をするか + いつ発動するか」を具体的に書く。曖昧だと発動しない。
+- `<name>/README.md` は各 skill の人間向け説明で、SKILL.md の frontmatter を情報源にする。SKILL.md とは別に用意し、新設・更新時に追随させる (後述のフロー参照)。
 - `apm.yml` の `devDependencies` は skill を磨くための道具 (empirical-prompt-tuning)。配布対象ではない。
-- コミットするのは `apm.yml`/`apm.lock.yaml` と各 `<name>/SKILL.md`、lint・plugin 構成。`apm_modules/`/`.claude/skills/` (依存 skill)/`index.js` (plugin の bundle)/`coverage/` は gitignore 済みで、それぞれ `apm install`/`deno task build`/`deno task test` で再生成する。
+- コミットするのは `apm.yml`/`apm.lock.yaml` と各 `<name>/SKILL.md`・`<name>/README.md`、lint・plugin 構成。`apm_modules/`/`.claude/skills/` (依存 skill)/`index.js` (plugin の bundle)/`coverage/` は gitignore 済みで、それぞれ `apm install`/`deno task build`/`deno task test` で再生成する。
 
 ## クローン後のセットアップ
 
@@ -23,9 +24,10 @@ apm install     # devDependency (empirical-prompt-tuning) を .claude/skills/ �
 ## skill を追加・修正するフロー
 
 1. `<name>/SKILL.md` を作成・編集し、frontmatter (`name`/`description`) と本文を書く。
-2. empirical-prompt-tuning skill でブラッシュアップする (後述)。
-3. lint を通す (後述)。
-4. コミットする (Conventional Commits、日本語、絵文字なし)。
+2. `<name>/README.md` を同じ内容に合わせて作成・修正する。skill を新設したら必ず用意し、既存 skill の frontmatter や対象範囲を変えたら追随させる。
+3. empirical-prompt-tuning skill でブラッシュアップする (後述)。
+4. lint を通す (後述)。
+5. コミットする (Conventional Commits、日本語、絵文字なし)。
 
 ## ブラッシュアップ
 
