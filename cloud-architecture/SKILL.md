@@ -3,7 +3,7 @@ name: cloud-architecture
 description: >-
   AWS のクラウドインフラ構成図 (アーキテクチャ図) を draw.io 形式で作成・編集するツール。
   EC2 / RDS / S3 / VPC などの AWS サービスアイコンを用いた構成図を XML で生成し、PNG (確認用) と drawio XML を埋め込んだ編集可能 SVG (.drawio.svg, 成果物) にエクスポートする。
-  AWS のシステム構成やインフラ設計を図にする場面、AWS 構成図の .drawio ファイルを操作する場面で使用する。GCP/Azure 等の他クラウドは未対応。フローチャート・シーケンス図などベンダーアイコン不要の汎用図は対象外 (mermaid 等を使う)。
+  AWS のシステム構成やインフラ設計を図にする場面、AWS 構成図の .drawio ファイルを操作する場面で使用する。GCP/Azure 等の他クラウドは未対応で、依頼された場合は代替案と拡張パスを案内する (本文参照)。フローチャート・シーケンス図などベンダーアイコン不要の汎用図は対象外 (mermaid 等を使う)。
 ---
 
 # Cloud Architecture (draw.io) Skills
@@ -25,6 +25,8 @@ description: >-
 現時点の対象は AWS のみ。GCP/Azure 等の他クラウドは未対応 (将来 `references/<provider>-architecture.md` とテンプレートを追加して拡張する想定)。
 
 フローチャート・シーケンス図・ER 図など、ベンダーアイコンを必要としない汎用ダイアグラムはこのスキルの対象外。テキストで完結するこれらの図は mermaid 等を使う。
+
+スコープ外の依頼 (GCP/Azure 等の未対応クラウド) を受けたときは、AWS アイコンや汎用図形で代用して描き切らず、未対応である旨を伝えたうえで次の選択肢を案内する: (1) AWS 構成への読み替えなら本スキルで対応可能、(2) ベンダーアイコン不要の汎用図なら mermaid 等、(3) 恒久対応が必要なら `references/<provider>-architecture.md` とテンプレートを追加する拡張。
 
 PNG/SVG エクスポートが必要な場合は draw.io CLI が必要。
 

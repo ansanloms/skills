@@ -58,7 +58,7 @@ spec.json を作成する。スキーマは `../scripts/schemas/spec.schema.json
 - `scenarios` は最低 1 件必要
 - `steps` は最低 1 件必要
 - ステップ内のパラメータ置換記法: `${ENV_VAR}`（環境変数）、`<column-name>`（ケースの値）
-- 環境ごとに URL を変える必要がなければ `${ENV_VAR}` を使わず、`サインアップ画面にアクセスする` のように素の文や相対パスで書いてよい。`${ENV_VAR}` は環境差や秘匿値があるときだけ使う
+- 環境ごとに URL を変える必要がなければ `${ENV_VAR}` を使わず、`サインアップ画面にアクセスする` のように素の文や相対パスで書いてよい。`${ENV_VAR}` は環境差や秘匿値があるときだけ使う。認証情報・アカウント情報 (テスト用メールアドレス・パスワード等) は秘匿値として `${ENV_VAR}` を使う典型例
 - ステップ内の URL やリテラル値はバッククォート（コードスパン）で括る。素の URL のままだと spec.md 生成後の deno fmt で `https\://` にエスケープされ可読性が落ちる
 - マクロ参照: `@macro-name` 形式でマクロを参照できる
   - マクロ名自体にも `<column-name>` を使用可能。ケースの値に応じてマクロを動的に切り替えられる
@@ -89,7 +89,7 @@ spec.json を作成する。スキーマは `../scripts/schemas/spec.schema.json
 
 spec.json から spec.md を生成する。**json-to-md は内部で JSON スキーマバリデーションも実行する。**
 
-コマンド仕様は [scripts/README.md](../scripts/README.md#json-to-md) を参照。**MUST: git リポジトリのルートで実行すること。**
+コマンド仕様は [scripts/README.md](../scripts/README.md#json-to-md) を参照。**MUST: git リポジトリのルートで実行すること (相対パスで渡す場合。`--cwd` と `--input`/`--output` をすべて絶対パスで渡す運用なら実行 cwd は問わない)。**
 
 ```bash
 deno task --cwd .claude/skills/e2e/scripts json-to-md \

@@ -31,6 +31,8 @@ description: >-
 deno run --no-lock --allow-env --allow-sys=osRelease,homedir --allow-read --allow-net=context7.com,registry.npmjs.org npm:ctx7@latest library <name> "<user's question>"
 ```
 
+`<name>` が複数語の場合はクォートで囲む (例: `library "Spring Boot" "..."`)。
+
 `query` 引数は必須で、結果のランキングに直接影響する。ユーザの質問全文をクエリに使う。同名のライブラリが複数ある場合の曖昧性解消にも効く。
 
 #### 出力フィールド
@@ -43,7 +45,7 @@ deno run --no-lock --allow-env --allow-sys=osRelease,homedir --allow-read --allo
 - **Code Snippets** — 利用可能なコード例の数。
 - **Source Reputation** — ソースの信頼性 (High/Medium/Low/Unknown)。
 - **Benchmark Score** — 品質指標 (100 が最高)。
-- **Versions** — バージョン一覧 (存在する場合)。バージョン指定がある場合はここから選ぶ。形式は `/org/project/version`。
+- **Versions** — バージョン一覧 (存在する場合)。バージョン指定がある場合はここから選ぶ。形式は `/org/project/version`。このフィールドが無い候補の扱いは「バージョン指定」の節に従う。
 
 #### 選択基準
 
@@ -71,10 +73,14 @@ ID の種別 (公式リポジトリ系 `/org/project`、ドキュメントサイ
 deno run --no-lock --allow-env --allow-sys=osRelease,homedir --allow-read --allow-net=context7.com,registry.npmjs.org npm:ctx7@latest docs <libraryId> "<user's question>"
 ```
 
-取得結果には 2 種類の内容が含まれる。回答時はこの両方を見る。
+docs のクエリは library と同一文である必要はない。初回から対象の API 名・機能語 (例: `@@unique`) を加えて絞ってよい。
+
+取得結果には 2 種類の内容が含まれうる。両方あれば両方を見る。
 
 - **コードスニペット** — タイトル付きで、言語タグ付きのコードブロック。
 - **info スニペット** — パンくず文脈付きの散文による解説。
+
+クエリによっては片方 (コードスニペットのみ等) しか返らない。その場合はある方だけで判断してよい。
 
 取得したドキュメントに基づいて回答する。
 

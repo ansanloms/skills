@@ -22,7 +22,8 @@ Discord の REST API を curl で叩き、サーバ (ギルド) のチャンネ�
 
 - bot トークンが要る。Discord Developer Portal の Bot ページで発行する (`Bot <token>` の `<token>` 部分)。
 - トークンは環境変数 `DISCORD_BOT_TOKEN` から取り、 `Authorization: Bot ${DISCORD_BOT_TOKEN}` ヘッダで渡す。クエリや body に直書きしない。プロセス一覧・シェル履歴・アクセスログに平文が残る。会話への貼り付けやコミットも避ける。
-- 変数が空のときは設定をユーザに依頼する。変数名は任意で、別名を使う場合は読み替える。
+- 変数が空のときは設定をユーザに依頼する。依頼には次の 3 点を含める: 設定方法の例 (`export DISCORD_BOT_TOKEN='<token>'` 等)・トークンを会話に貼らない旨・設定後にこちらで処理を再開する旨。再開後に実行する手順の要約を添えてもよい。変数名は任意で、別名を使う場合は読み替える。
+- 主手段 (curl) がトークン未設定等の前提条件で止まった場合も、同等機能の別ツール (MCP 等) へフォールバックしない。別 bot・別権限で動いている可能性があり、対象サーバの前提が崩れる。設定を依頼して待つ。
 - bot が対象サーバに参加していること。操作には対応する権限 (例: メッセージ送信に Send Messages、スレッド作成に Create Public Threads) が要る。権限不足は `403 Missing Permissions` で返る。
 - メンバー一覧 (`GET /guilds/{guild_id}/members`) には Privileged Gateway Intent の**Server Members Intent**を Developer Portal で有効化する必要がある。検索 (`/members/search`) はこの intent 無しでも通る。
 - `guild_id`/`channel_id`/`message_id` は呼び出し側のコンテキスト (システムプロンプトのテンプレート変数、ユーザ提示の URL 等) から得る。Discord の URL `https://discord.com/channels/{guild_id}/{channel_id}/{message_id}` の各セグメントがそれにあたる。判別できない場合はユーザに確認する。推測で組み立てない。
@@ -166,7 +167,7 @@ curl -sS -X POST \
 
 ## スレッド名の変更
 
-スレッドはチャンネルの一種なので、`PATCH /channels/{thread_id}` で名前を変える。`thread_id` はスレッド作成時に返った `id`。
+スレッドはチャンネルの一種なので、`PATCH /channels/{thread_id}` で名前を変える。`thread_id` はスレッド作成時に返った `id`。メッセージ派生スレッドなら `thread_id` = 起点メッセージの `id` になる (作成応答の `id` で確認できる)。
 
 ```bash
 curl -sS -X PATCH "https://discord.com/api/v10/channels/${THREAD_ID}" \
@@ -224,5 +225,5 @@ curl -sS -D - -o /dev/null "https://discord.com/api/v10/channels/${CHANNEL_ID}" 
 - snowflake ID は文字列として扱う。jq で数値化 (`tonumber`) すると桁落ちする。
 - メッセージ検索の API は bot に無い。履歴取得 + jq フィルタで代替し、直近 100 件を超える検索は `before` で遡る。
 - リアクションの絵文字は URL エンコードする。カスタム絵文字は `name:id` 形式で渡す。
-- スレッド作成はチャンネル直下版が `type` 必須、メッセージ派生版が `type` 不要と引数が異なる。名前変更は `PATCH /channels/{thread_id}`。
+- スレッド作成はチャンネル直下版が `type` 必須、メッセージ派生版が `type` 不要と引数が異なる。名前変更は `PATCH /channels/{thread_id}`。スレッド名等の必須パラメータがユーザの依頼から決まらない場合は、どちらの作成手順でも推測で発明せずユーザに確認する。最終的な値だけが判明している場合 (例: 変更後の名前だけ指定された) は、その値で最初から作成して後続の変更を省く選択肢を併せて提示する。
 - 取得・操作した内容をユーザに示す際は対象のチャンネル・メッセージを明示する。値を捏造しない。

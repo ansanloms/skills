@@ -52,6 +52,13 @@ deno run --allow-read scripts/check-readability.ts \
   --drawio diagram.drawio --svg diagram.drawio.svg
 ```
 
+スクリプトは skill 配下の絶対パス、対象ファイルは任意の絶対パスで渡せる。図が skill 外のディレクトリにある場合は両方とも絶対パスで指定する。
+
+```bash
+deno run --allow-read <skillの絶対パス>/scripts/check-readability.ts \
+  --drawio /path/to/diagram.drawio --svg /path/to/diagram.drawio.svg
+```
+
 `scripts/` には `deno.json` があり、そのディレクトリからは task でも呼べる。
 
 ```bash
