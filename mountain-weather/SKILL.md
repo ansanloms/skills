@@ -108,7 +108,7 @@ deno task --cwd "$SKILL_DIR/scripts" fetch-index --code=01150271
 - `fetch-index` が exit 1 で停止したら値を捏造しない。停止理由 (登山指数 0 件 = `type` 誤りや HTML 構造変化、`code` 不一致 = CDN が別ページを返した、テーブル抽出 0 件) を報告し、必要なら scripts・skill を更新する。
 - スクリプトは `code=` と `alt="登山指数"` で取得物を照合し、cache-bust の 2〜3 回取得で CDN の別版・古い版 (日付ヘッダ・指数 gif・気圧面の fingerprint 不一致) を弾く。それでも `title`・近隣市町村名が対象の山と合うかは最終的に人が確認する。別の山・別県のデータを山頂判断に使うのは危険。
 - 指数と日付・時刻の対応がずれると別の日の指数を読む。`heading` と `columns` の並びが妥当か確認し、ずれを疑ったらユーザに提示して確認する。
-- 参考実装: <https://github.com/hidenorly/tenkura> (同じ `kad.html` を解析。 `mnt1/2/3.gif`→`A/B/C` の対応もここに準拠)。 HTML 構造が変わって抽出に失敗したら `scripts/cli/parse.ts` とこの skill を更新する。
+- HTML 構造が変わって抽出に失敗したら `scripts/cli/parse.ts` とこの skill を更新する。
 
 ## 2. 気象庁の麓の天気 (補完・クロスチェック)
 
