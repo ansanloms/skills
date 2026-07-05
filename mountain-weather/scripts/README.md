@@ -1,6 +1,10 @@
 # mountain-weather CLI ツール
 
-てんくらの登山指数 HTML と Open-Meteo の山頂数値予報を取得・解析する CLI ツール。
+てんくらの登山指数 HTML と Open-Meteo の山頂数値予報を取得・解析し、山コード・気象庁区域コードを検索する CLI ツール。
+
+出力を `jq` 等で機械処理するときは `deno task -q <task>` で実行する。`-q` が無いとタスクランナーのバナー行が stdout に混ざる。
+
+`find-mountain`・`find-area` は `../assets/` のキャッシュ (コミット済み) を検索する。キャッシュは各コマンドの `--update` で再生成する。
 
 ## fetch-index
 
@@ -58,6 +62,38 @@ deno task fetch-index --help                            # 使い方
 ## エラー時の挙動
 
 `--code`/`--file` 未指定、取得物の検証失敗 (`alt="登山指数"` 0 件・`code=` 不一致)、テーブル抽出 0 件のいずれも stderr にメッセージを出力し exit code 1 で終了する。抽出 0 件は HTML 構造変化の可能性があるため、値を捏造せず停止する。
+
+## find-mountain
+
+山名 (部分一致) から、てんくらの山コード (`kad.html?code=` の数値) を検索する。
+
+- 検索対象はキャッシュ `assets/tenkura-mountains.json`。全 9 地域 (`ba=hk`〜`ks`) の `kasel.html` (登山カテゴリ `type=15` 固定) を Shift_JIS デコードして生成したもの。
+- `--update` で全地域を取得し直してキャッシュを書き換える。取得時は各エントリのアンカーに echo される `ba` が要求地域と一致することを検証し、CDN キャッシュによる別地域ページの混入・HTML 構造変化 (エントリ 0 件) は exit 1 で停止する。
+- 出力の `pref` はコード先頭 2 桁から引いた都道府県名。同名の山の識別に使う。
+
+```sh
+deno task -q find-mountain --name=<山名>   # -n。キャッシュを検索
+deno task -q find-mountain --update        # -u。キャッシュを再生成
+```
+
+`--update` なしで 0 件のときは「キャッシュが古い可能性」を stderr に出して exit 1 で止まる (呼び出し側に `--update` での取り直しを促す)。`--update` 付きで 0 件なら確定的な空結果として exit 0 で空の `matches` を返す。
+
+## find-area
+
+登山口の市町村・地区名 (部分一致) から、気象庁の細分区 (class10) と気象台 (office) を検索する。
+
+- 検索対象はキャッシュ `assets/jma-area.json`。気象庁 `area.json` から `offices`/`class10s`/`class15s`/`class20s` の name・parent のみを抜き出して正規化したもの。`--update` で取得し直す (構造欠落は exit 1 で停止)。
+- `class20s` の名前一致から `class15s` → `class10s` → `offices` を parent で決定的に辿る。連鎖の切れたエントリは候補に入れない (捏造しない)。
+- 複数ヒットは全件返す。どれを使うかは呼び出し側の判断 (SKILL.md 参照)。
+
+```sh
+deno task -q find-area --municipality=<市町村・地区名>   # -m。キャッシュを検索
+deno task -q find-area --update                          # -u。キャッシュを再生成
+```
+
+0 件時の挙動は find-mountain と同じ (`--update` なしは exit 1、あわせて広い地名での引き直しを促す)。
+
+検索・解析の本体は `cli/kasel.ts`・`cli/area.ts` に分離してある (ネットワーク非依存でテスト可能)。
 
 ## fetch-openmeteo
 
