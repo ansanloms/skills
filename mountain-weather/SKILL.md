@@ -138,7 +138,9 @@ deno task -q --cwd "$SKILL_DIR/scripts" find-area --municipality=富士宮市
 ### 予報を取得する (forecast)
 
 ```sh
-curl -sS 'https://www.jma.go.jp/bosai/forecast/data/forecast/200000.json' -o /tmp/jma-forecast.json
+# mktemp -d で実行ごとに一意なディレクトリを作る (固定パスは並行タスクと衝突する。「注意」参照)
+tmpdir=$(mktemp -d)
+curl -sS 'https://www.jma.go.jp/bosai/forecast/data/forecast/200000.json' -o "$tmpdir/forecast.json"
 ```
 
 配列は 2 要素で `[0]` が 3 日予報、`[1]` が週間予報。`[0].timeSeries` は 3 本あり区分単位が異なる。
@@ -153,11 +155,11 @@ curl -sS 'https://www.jma.go.jp/bosai/forecast/data/forecast/200000.json' -o /tm
 
 ```sh
 # 天気・風 (細分区コードで絞る。例: 中部 200020)
-jq '.[0].timeSeries[0].areas[] | select(.area.code == "200020") | {area: .area.name, weathers, winds}' /tmp/jma-forecast.json
+jq '.[0].timeSeries[0].areas[] | select(.area.code == "200020") | {area: .area.name, weathers, winds}' "$tmpdir/forecast.json"
 # 降水確率
-jq '.[0].timeSeries[1].areas[] | select(.area.code == "200020") | {area: .area.name, pops}' /tmp/jma-forecast.json
+jq '.[0].timeSeries[1].areas[] | select(.area.code == "200020") | {area: .area.name, pops}' "$tmpdir/forecast.json"
 # 気温 (アメダス地点。登山口に最も近い地点を名前で選ぶ)
-jq '.[0].timeSeries[2].areas[] | {name: .area.name, temps}' /tmp/jma-forecast.json
+jq '.[0].timeSeries[2].areas[] | {name: .area.name, temps}' "$tmpdir/forecast.json"
 ```
 
 - 気温のアメダス地点は登山口に最も近いものを名前で選ぶ。判断できない場合は複数地点を併記して幅で伝える。憶測で 1 地点に決め打ちしない。最寄り地点が登山口から離れているとき (県に近傍地点が 1 つも無い場合 = 例: 東京は都心・離島のみ、最寄りは在るが水平距離が遠い場合 = 例: 富士宮口に対する三島、最寄りでも登山口と標高差が大きい場合 = 例: 旭岳の登山口 (約 1100m) に対する平地のアメダス旭川 (約 120m)) は、その 1 点を「遠隔地点の参考値」と明記して採り、山頂側の気温はてんくらの気圧面気温を主とする。近い・遠いの線引きに迷えば遠隔参考値として扱い断定を避ける。
