@@ -48,10 +48,29 @@ base="<呼び出し側から供給されたベースディレクトリの絶対�
 
 ## branch description
 
-- MUST: 作業対象の worktree は、常に 1 行の branch description を持つこと。これは作成時の一手順ではなく、worktree の steady state に対する不変条件として扱う。調査 (read) 用でも変更 (write) 用でも区別しない。
+- MUST: 作業対象の worktree は、常に branch description を持つこと。これは作成時の一手順ではなく、worktree の steady state に対する不変条件として扱う。調査 (read) 用でも変更 (write) 用でも区別しない。
   - worktree を新規に用意したとき (新ブランチ・既存ブランチを問わず): 着手前に設定する。既存ブランチに既に description があればそのまま使ってよい。
   - 既存の worktree で作業を続けるとき: description が未設定なら、その場で設定してから着手する (誰が作ったかに関係なく適用する)。
-- 設定方法: `git config branch.<branch>.description "<作業概要>"`。
-- 内容は、その worktree で何をするかが分かる作業概要を**1 行**で書く。文体はコミットメッセージの subject に準じ、日本語で書く。
-- 1 行に収める理由: worktree の一覧表示ツールによっては `branch.<branch>.description` の先頭 1 行しか読まない (2 行目以降を捨てる) ため。複数行にすると一覧でタスクを識別できなくなる。
+
+### 書式
+
+コミットメッセージと同じ「subject + 空行 + 本文」の構成で書く。
+
+- 先頭 1 行 (subject): その worktree で何をするかが分かる作業概要。文体はコミットメッセージの subject に準じ、日本語で書く。
+  - MUST: subject は単独で読めること。worktree の一覧表示ツールは先頭 1 行のみを表示するため、2 行目以降が無いと意味が取れない書き方をしない。
+- 本文 (任意): 空行を 1 行挟み、markdown で補足を書く。背景・関連 PR/issue へのリンク等。リンクは `[表示名](URL)` の markdown 形式で、URL は絶対 URL で書く (一覧ツールのプレビューが markdown をレンダリングし、リンクを辿れるようにする)。subject だけで足りるなら本文は書かない。
+- 設定方法:
+  - subject のみ: `git config branch.<branch>.description "<作業概要>"`。
+  - 本文あり: 改行を含む値をそのまま渡す。例:
+
+    ```sh
+    git config branch.<branch>.description "$(printf '%s\n\n%s' \
+      '<作業概要>' \
+      '<markdown 本文>')"
+    ```
+
+  - `git branch --edit-description` は対話エディタが開くため、プログラム的に実行する場合は使わない。
+
+### 確認
+
 - 確認・一覧は非対話のコマンドを使う。description は `git config --get branch.<branch>.description`、worktree の一覧は `git worktree list` で引く。対話的な worktree セレクタはプログラム的に実行すると入力待ちでハングするため使わない。
