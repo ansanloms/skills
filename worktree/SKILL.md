@@ -54,22 +54,24 @@ base="<呼び出し側から供給されたベースディレクトリの絶対�
 
 ### 書式
 
-コミットメッセージと同じ「subject + 空行 + 本文」の構成で書く。
+- MUST: description は全体を日本語の markdown で書く (status・todo の項目も含む)。構成は `assets/template.md` をテンプレートとして使う (一覧ツールのプレビューが markdown をレンダリングして表示する)。
 
-- 先頭 1 行 (subject): その worktree で何をするかが分かる作業概要。文体はコミットメッセージの subject に準じ、日本語で書く。
-  - MUST: subject は単独で読めること。worktree の一覧表示ツールは先頭 1 行のみを表示するため、2 行目以降が無いと意味が取れない書き方をしない。
-- 本文 (任意): 空行を 1 行挟み、markdown で補足を書く。背景・関連 PR/issue へのリンク等。リンクは `[表示名](URL)` の markdown 形式で、URL は絶対 URL で書く (一覧ツールのプレビューが markdown をレンダリングし、リンクを辿れるようにする)。subject だけで足りるなら本文は書かない。
-- 設定方法:
-  - subject のみ: `git config branch.<branch>.description "<作業概要>"`。
-  - 本文あり: 改行を含む値をそのまま渡す。例:
+- 先頭 1 行 (subject 行): `# [#<チケット番号>](<チケット URL>) <作業概要>`。
+  - H1 とし、行頭に関連する PJ 管理ツール (GitHub issue・Redmine・Backlog 等) のチケットへの markdown リンクを置く。URL は絶対 URL で書く。
+  - 関連チケットが無い作業では、リンクを省いて `# <作業概要>` とする。リンク先を捏造しない。
+  - 作業概要の文体はコミットメッセージの subject に準じる。
+  - MUST: subject 行は単独で読めること。worktree の一覧表示ツールは先頭 1 行のみを表示するため、2 行目以降が無いと意味が取れない書き方をしない。
+- 概要の補足 (任意): subject 行の直後に空行を挟んで書く。
+- `## status`: 現在の状況を短い散文で書く。
+- `## todo`: 作業項目のチェックリスト。完了は `- [x]`、未了は `- [ ]` で書く。
+- MUST: status と todo は作業の進行に合わせて更新する。タスクの完了・方針変更・中断といった節目で見直す。一覧ツールのプレビューは description をそのまま表示するため、放置すると一覧が実態と乖離する。
+- 設定方法: テンプレートを埋めた内容を、改行を含む値としてそのまま設定する。例:
 
-    ```sh
-    git config branch.<branch>.description "$(printf '%s\n\n%s' \
-      '<作業概要>' \
-      '<markdown 本文>')"
-    ```
+  ```sh
+  git config branch.<branch>.description "$(cat <テンプレートを埋めたファイル>)"
+  ```
 
-  - `git branch --edit-description` は対話エディタが開くため、プログラム的に実行する場合は使わない。
+  `git branch --edit-description` は対話エディタが開くため、プログラム的に実行する場合は使わない。
 
 ### 確認
 
