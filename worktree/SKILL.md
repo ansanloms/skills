@@ -1,6 +1,6 @@
 ---
 name: worktree
-description: メインの worktree (clone 直下) のブランチを切り替えず、別ブランチの作業を隔離 worktree で行うライフサイクルの手順。worktree の作成と branch description の設定、作業の節目 (タスク完了・方針転換・中断・PR 作成) での status と todo の更新、マージ報告を受けた後の片付け (sweep) までを扱う。ファイルを変更する作業で専用ブランチを切るとき、main から切られた別ブランチを調べるとき、作業の節目で description を更新するとき、マージ済み worktree を片付けるときに使う。現在のブランチに対する読み取りだけの調査には使わない。
+description: メインの worktree (clone 直下) のブランチを切り替えず、別ブランチの作業を隔離 worktree で行うライフサイクルの手順。worktree の作成と branch description の設定、作業の節目 (タスク完了・方針転換・中断・PR 作成) での status と todo の更新、マージ報告を受けた後の片付けまでを扱う。ファイルを変更する作業で専用ブランチを切るとき、main から切られた別ブランチを調べるとき、作業の節目で description を更新するとき、マージ済み worktree を片付けるときに使う。現在のブランチに対する読み取りだけの調査には使わない。
 ---
 
 # Worktree
@@ -96,7 +96,8 @@ description は書いた時点の記録ではなく、worktree の現在地を�
 
 worktree のブランチがデフォルトブランチへマージされたら、worktree とローカルブランチを片付ける。発動条件は、PR やブランチのマージ報告を受けたとき、またはマージ済み worktree の残骸に気づいたとき。
 
-- MUST: `git-worktree-sweep` コマンドが利用できる環境では、削除を sweep に任せる。個別の `git worktree remove` と `git branch -D` を手組みしない。sweep はマージ判定を git のみで行い (squash merge も検知)、マージ済みかつクリーンな worktree だけを削除してローカルブランチも消す。dirty・未マージの worktree には触れず報告だけ行う。`--dry-run` で判定結果だけ確認できる。
-- コマンドが無い環境では、マージ済みであることを非対話コマンド (`git log --oneline <default>..<branch>` が空になる等) で確認できた worktree に限り、`git worktree remove <path>` と `git branch -d <branch>` で個別に片付ける。確認できないものは削除しない。
-- MUST: merge 操作のローカル後処理 (デフォルトブランチへの checkout・ローカルブランチ削除) を merge コマンドに任せない。デフォルトブランチはメインの worktree にチェックアウト済みのため必ず失敗する (例: GitHub の `gh pr merge --delete-branch` は `fatal: 'main' is already used by worktree` になる)。マージだけ行い、ローカルの後片付けは sweep に任せる。
-- リモートブランチの削除は sweep の対象外。sweep が出力する案内に従い、自分が作ったマージ済みブランチに限り削除してよい (forge 側の自動削除が有効なら不要)。
+- 呼び出し側の環境に片付け専用のツールや手順が供給されている場合は、そちらを優先して従う。その供給は base と同様に呼び出し側の責務であり、この skill は汎用手順のみを定める。
+- MUST: マージ済みであることを非対話コマンド (`git log --oneline <デフォルトブランチ>..<branch>` が空になる等) で確認できた worktree に限り、`git worktree remove <path>` と `git branch -d <branch>` で片付ける。確認できないもの・working tree が dirty なものは削除せず、状態を報告するに留める。
+  - squash merge されたブランチはローカルコミットが常に「未マージ」に見えるため、この確認では検出できない。マージ済みと外部情報 (forge の表示等) で分かっていても機械的な確認が取れない場合は、削除せず呼び出し側へ判断を仰ぐ。
+- MUST: merge 操作のローカル後処理 (デフォルトブランチへの checkout・ローカルブランチ削除) を merge コマンドに任せない。デフォルトブランチはメインの worktree にチェックアウト済みのため必ず失敗する (例: GitHub の `gh pr merge --delete-branch` は `fatal: 'main' is already used by worktree` になる)。マージだけ行い、ローカルの後片付けは本節の手順で別途行う。
+- リモートブランチの削除は本手順の対象外。自分が作ったマージ済みブランチに限り削除してよい (forge 側の自動削除が有効なら不要)。

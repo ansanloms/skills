@@ -8,7 +8,7 @@
 - main から切られた別ブランチの状態を、メインのブランチを切り替えずに調べる
 - ローカル設定の持ち込みと branch description の設定 (subject + status + todo のテンプレート構成)
 - 作業の節目 (タスク完了・方針転換・中断・PR 作成) での status と todo の更新
-- マージ報告を受けた後の worktree とローカルブランチの片付け (`git-worktree-sweep` があれば委譲)
+- マージ報告を受けた後の worktree とローカルブランチの片付け (マージ確認できたものに限る汎用手順。専用ツールの供給は呼び出し側)
 
 worktree の配置先 (base) の供給・`git status` 非汚染の保証は呼び出し側の責務。この skill は渡された base を使った worktree 操作の手順を担う。
 
