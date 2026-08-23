@@ -6,7 +6,7 @@
       "apm.yml",
       "apm.lock.yaml",
       ".claude/skills/",
-      "cloud-architecture/scripts/testdata/",
+      "infra-architecture/scripts/testdata/",
       "mountain-weather/scripts/testdata/"
     ]
   },
