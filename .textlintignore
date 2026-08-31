@@ -12,3 +12,6 @@ e2e/scripts/samples/**
 
 # 隔離 worktree (他タスクの checkout。lint 対象外)
 .claude/worktrees/**
+
+# textlint rule preset のキャッシュ (proofdict 等)
+**/.cache/**
