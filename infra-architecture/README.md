@@ -26,4 +26,4 @@ apm install ansanloms/skills/infra-architecture --target claude
 
 ## 謝辞・ライセンス
 
-`references/` の一部 (drawio-cli・xml-format・troubleshooting・layout-best-practices) は [jgraph/drawio-mcp](https://github.com/jgraph/drawio-mcp) の drawio skill を Apache License 2.0 で翻訳・改変して取り込んでいる。
+`references/` の一部 (drawio-cli・xml-format・troubleshooting・layout-best-practices) は [jgraph/drawio-mcp](https://github.com/jgraph/drawio-mcp) の drawio skill (Apache License 2.0) を翻訳・改変して取り込んでいる。
