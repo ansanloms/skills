@@ -44,7 +44,7 @@ for d in "$PWD/.claude/skills/ja-tech-proofread" "$HOME/.claude/skills/ja-tech-p
 done
 ```
 
-候補の順は、配布先 (`apm install` 後)、ユーザ共通、このリポジトリ内。最初に見つかった 1 件を使う。0 件なら推測せず、機械層を「実行不可 (scripts 未検出)」として手順 1 へ進む。内部動作は `scripts/README.md` を参照。
+候補の順は、配布先、ユーザ共通、このリポジトリ内。最初に見つかった 1 件を使う。0 件なら推測せず、機械層を「実行不可 (scripts 未検出)」として手順 1 へ進む。内部動作は `scripts/README.md` を参照。
 
 ## 手順
 
