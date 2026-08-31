@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "deno"
+    directories:
+      - "/"
+      - "/e2e/scripts"
+      - "/infra-architecture/scripts"
+      - "/mountain-weather/scripts"
+    schedule:
+      interval: "weekly"
