@@ -12,7 +12,7 @@
     "@gunshi/gunshi": "jsr:@gunshi/gunshi@0.37.1",
     "@std/assert": "jsr:@std/assert@1.0.19",
     "@std/path": "jsr:@std/path@1.1.6",
-    "@std/yaml": "jsr:@std/yaml@1.1.1",
+    "@std/yaml": "jsr:@std/yaml@1.2.0",
     "ajv": "npm:ajv@8.20.0",
     "json-schema-to-typescript": "npm:json-schema-to-typescript@16.0.0",
     "remark-frontmatter": "npm:remark-frontmatter@5.0.0",
