@@ -26,7 +26,7 @@ playwright-cli を活用したブラウザ自動化により、Web アプリケ�
 /e2e run --workspace <path> [options]    # テスト実行（playwright-cli）
 ```
 
-必須引数は generate が `--spec`、export:excel と run が `--workspace`。欠落している場合はサブエージェントへ委譲せず、その場でユーザに確認する（パスを推測して実行しない。既存ディレクトリを走査して候補を提示することも行わない）。確認時は前提の一言（export:excel と run は generate 済みワークスペースが対象）を添えてよく、そのために references の前提条件節を参照してよい（references 冒頭の「サブエージェントが読む」という読者宣言は、この引数確認のための参照を妨げない。本文の前提の一言で足りる場合は開かなくてよい）。確認の文言には欠落している必須引数名と受け付ける形式（絶対パス。`--input`/`--output` と同じ扱い）を最低限含める。任意オプション（`--screenshot` 等）はまとめて確認せず、未指定は既定値で進める。値を受領したら通常フロー（サブエージェントへの委譲）に合流する。
+必須引数は generate が `--spec`、export:excel と run が `--workspace`。欠落している場合はサブエージェントへ委譲せず、その場でユーザに確認する（パスを推測して実行しない。既存ディレクトリを走査して候補を提示することも行わない）。確認時は前提の一言（export:excel と run は generate 済みワークスペースが対象）を添えてよく、そのために references の前提条件節を参照してよい。references 冒頭の「サブエージェントが読む」という読者宣言は、この引数確認のための参照を妨げない。本文の前提の一言で足りる場合は開かなくてよい。確認の文言には欠落している必須引数名と受け付ける形式（絶対パス。`--input`/`--output` と同じ扱い）を最低限含める。任意オプション（`--screenshot` 等）はまとめて確認せず、未指定は既定値で進める。値を受領したら通常フロー（サブエージェントへの委譲）に合流する。
 
 手順書・references 中の `deno task --cwd .claude/skills/e2e/scripts` は配布先レイアウトの表記であり、skill 実体が別の場所にある場合は scripts ディレクトリの絶対パスに読み替える（`--input`/`--output` は常に絶対パスで渡す）。
 
@@ -45,17 +45,21 @@ flowchart LR
 
 詳細は [references/write.md](references/write.md) を参照。
 
+## generate・export:excel・run の共通手順
+
+いずれも `Task` ツール（`subagent_type: general-purpose`, `run_in_background: false`）でサブエージェントを起動し、対応する references の手順に従って実行させる。引数（`$ARGS`）をプロンプトに含める。作業ディレクトリ（`pwd`）も同様に含める。
+
 ## generate: ワークスペース生成
 
-`Task` ツール（`subagent_type: general-purpose`, `run_in_background: false`）でサブエージェントを起動し、[references/generate.md](references/generate.md) の手順に従って実行させる。引数（`$ARGS`）と作業ディレクトリ（`pwd`）をプロンプトに含める。完了後、生成物一覧をユーザーに報告する。
+[references/generate.md](references/generate.md) の手順に従って実行させる。完了後、生成物一覧をユーザーに報告する。
 
 ## export:excel: Excel 試験項目書出力
 
-`Task` ツール（`subagent_type: general-purpose`, `run_in_background: false`）でサブエージェントを起動し、[references/export-excel.md](references/export-excel.md) の手順に従って実行させる。引数（`$ARGS`）と作業ディレクトリ（`pwd`）をプロンプトに含める。完了後、出力ファイルパスをユーザーに報告する。
+[references/export-excel.md](references/export-excel.md) の手順に従って実行させる。完了後、出力ファイルパスをユーザーに報告する。
 
 ## run: テスト実行（playwright-cli）
 
-`Task` ツール（`subagent_type: general-purpose`, `run_in_background: false`）でサブエージェントを起動し、[references/run.md](references/run.md) の手順に従って実行させる。引数（`$ARGS`）と作業ディレクトリ（`pwd`）をプロンプトに含める。完了後、`result.md` を Read してユーザーにサマリを報告する。
+[references/run.md](references/run.md) の手順に従って実行させる。完了後、`result.md` を Read してユーザーにサマリを報告する。
 
 ## E2E テスト規約
 
