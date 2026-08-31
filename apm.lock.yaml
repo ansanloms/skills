@@ -1,11 +1,11 @@
 lockfile_version: '1'
-generated_at: '2026-08-31T17:17:42.488330+00:00'
+generated_at: '2026-08-31T17:37:57.843442+00:00'
 apm_version: 0.29.0
 dependencies:
 - repo_url: ansanloms/skills
   name: ja-tech-proofread
   host: github.com
-  resolved_commit: 8691bf94e16f4fb4b05647fd93598dd5c371aa87
+  resolved_commit: 8d02b61ca8f65c0298ed974dabe764719fadfd8e
   version: unknown
   virtual_path: ja-tech-proofread
   is_virtual: true
@@ -23,20 +23,20 @@ dependencies:
   - .claude/skills/ja-tech-proofread/scripts/textlint/textlint-rule-preset-ansanloms/index.js
   deployed_file_hashes:
     .claude/skills/ja-tech-proofread/README.md: sha256:f0f2e6944a2343d702d2c4a3a2ddc382b64b1a161231b966ee1b4f5d9e854b22
-    .claude/skills/ja-tech-proofread/SKILL.md: sha256:e63ebda41dafc61654a25bcf48f49c8feb4d1bff26f5347d59eeb8ae49502a47
+    .claude/skills/ja-tech-proofread/SKILL.md: sha256:51dd65ac446fbcfd6f0c2c379af402ae7d1354b6a30bae6058126376a0611d6e
     .claude/skills/ja-tech-proofread/references/sources.md: sha256:7164f81c3686409e936a538ab32e58d7ac207b57c26039476fbaf6dd3c930176
     .claude/skills/ja-tech-proofread/scripts/.gitignore: sha256:70a213afeabe5ac38ae4c88b2c7002ce5068b91a3e57a032245ab809dc6fa460
     .claude/skills/ja-tech-proofread/scripts/.textlintrc.js: sha256:c219edd78f407353a6e1b06baa702bd5568110f102bf8de2c96f07a293ae3588
     .claude/skills/ja-tech-proofread/scripts/README.md: sha256:547b56d2f6819df12df79f4632752e06cb9d30b35b4d02c2180ab4a089410383
-    .claude/skills/ja-tech-proofread/scripts/deno.json: sha256:2fa88d7523e8246d368841dcd1a82dcd6d315f662d17c846391991c7a8e2e950
+    .claude/skills/ja-tech-proofread/scripts/deno.json: sha256:b67398789ea0ec1f4e36cfc7a2be317af8fea0cd18525a886595442157c9264c
     .claude/skills/ja-tech-proofread/scripts/deno.lock: sha256:41d31d6b0af3befefbba62c20b6023f61ee8b085db77dab87bc5c00e0f48fdac
     .claude/skills/ja-tech-proofread/scripts/textlint/textlint-rule-preset-ansanloms/index.js: sha256:cfcee3fcf441f25dc4f77ee13d7f2f3da755079d00c886779c38b97d887c512e
-  content_hash: sha256:eeb6a569a565774c3b481637787da8031ce271a58c7ca29ed490a52ab73daa3a
+  content_hash: sha256:218802cf3b8d04145adca9ed69d308e90616d432958bda1c6e3ae810bedd36e5
   is_dev: true
 - repo_url: mizchi/skills
   name: empirical-prompt-tuning
   host: github.com
-  resolved_commit: d7999453cdb4e0e09df1c7f82fd23752539c546c
+  resolved_commit: 7a0d72866a0bb3e9ac3e2768c328b09ba2bc40c4
   version: unknown
   virtual_path: meta/empirical-prompt-tuning
   is_virtual: true
@@ -115,7 +115,7 @@ deployments:
   owners:
   - ansanloms/skills/ja-tech-proofread
   active_owner: ansanloms/skills/ja-tech-proofread
-  content_hash: sha256:e63ebda41dafc61654a25bcf48f49c8feb4d1bff26f5347d59eeb8ae49502a47
+  content_hash: sha256:51dd65ac446fbcfd6f0c2c379af402ae7d1354b6a30bae6058126376a0611d6e
 - kind: project-relative
   target: claude
   value: .claude/skills/ja-tech-proofread/references/sources.md
@@ -160,7 +160,7 @@ deployments:
   owners:
   - ansanloms/skills/ja-tech-proofread
   active_owner: ansanloms/skills/ja-tech-proofread
-  content_hash: sha256:2fa88d7523e8246d368841dcd1a82dcd6d315f662d17c846391991c7a8e2e950
+  content_hash: sha256:b67398789ea0ec1f4e36cfc7a2be317af8fea0cd18525a886595442157c9264c
 - kind: project-relative
   target: claude
   value: .claude/skills/ja-tech-proofread/scripts/deno.lock
