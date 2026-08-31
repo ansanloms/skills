@@ -53,7 +53,7 @@ skill/プロンプトを新規作成・大幅改訂したら、empirical-prompt-
 
 日本語の markdown は skill `ja-tech-proofread` で推敲する。機械層 (textlint-rule-preset-ansanloms + deno fmt) を含み、既定の fix モードは修正を skill 内で完結させる (著者の判断が要る箇所はその場で確認される)。変更したファイルを列挙して渡す。一括で見たい場合も対象ファイルを列挙する (ディレクトリ走査はしない)。
 
-実行する時期: md を変更したら、コミット前にその md へ fix を当てる。skill の `scripts/` (TS・設定) を変更したら、そのディレクトリで `deno task lint` を通す。`.claude/skills/` の実体は apm が remote の main から解決したスナップショットで、ローカルの編集は反映されない。skill への変更は main に入った後に `apm install` で複製へ反映される。skill として実行される定義も複製側のため、探索順を含む定義の変更は main 反映後に効く。開発中に変更を検証するときは、リポジトリ内の `ja-tech-proofread/SKILL.md` をパス指定で実行者に読ませる。
+実行する時期: md を変更したら、コミット前にその md へ fix を当てる。skill の `scripts/` (TS・設定) を変更したら、そのディレクトリで `deno task lint` を通す。`.claude/skills/` の実体は apm が remote の main から解決したスナップショットで、ローカルの編集は反映されない。skill への変更は main に入った後に `apm update` で複製へ反映される (`apm install` は lock の resolved_commit に固定されたままで、複製を更新しない)。skill として実行される定義も複製側のため、探索順を含む定義の変更は main 反映後に効く。開発中に変更を検証するときは、リポジトリ内の `ja-tech-proofread/SKILL.md` をパス指定で実行者に読ませる。
 
 機械層だけを直接使う場合は `deno task -q --cwd ja-tech-proofread/scripts textlint <絶対パス...>` (fmt は `fmt`/`fmt:check` task)。rule の正本は preset リポジトリで、このリポジトリでは上書きしない。preset の新しいタグが出たら `ja-tech-proofread/scripts/deno.json` の alias と `deno.lock` を更新する (手順は `ja-tech-proofread/scripts/README.md`)。機械層の正はリポジトリ内の `ja-tech-proofread/scripts`。preset を jsDelivr の URL で参照しているため、Dependabot は rule パッケージの更新を追えるが preset のタグ上げは追えない。タグ上げは手作業で行う。
 
