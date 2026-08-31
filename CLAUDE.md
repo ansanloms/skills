@@ -53,6 +53,14 @@ skill/プロンプトを新規作成・大幅改訂したら、empirical-prompt-
 
 textlint (日本語の文章) と deno fmt/deno lint で検査する。
 
+textlint の rule は `textlint-rule-preset-ansanloms` (jsDelivr の tag 付き URL を `deno.json` の import map で alias) をそのまま有効化している。rule の追加・変更・緩和は preset 側で行い、このリポジトリの `.textlintrc.js` では上書きしない。
+
+preset への移行 (2026-08-31) で検出範囲が変わった点: `no-ai-list-formatting` は無効から `{ disableBoldListItems: true }` になり、箇条書き先頭の太字ラベルは許容、絵文字は検出される。JTF の `1.1.1.本文` (`no-mix-dearu-desumasu` と矛盾する指摘を出していた) と `2.1.5.カタカナ` (旧設定では有効化が効いていなかった) は無効。各 rule の設定理由は preset の README に書く。
+
+preset を jsDelivr の URL で参照しているため、このリポジトリの Dependabot は textlint の rule パッケージの更新を追えない。rule パッケージの更新は preset リポジトリ側の Dependabot が行い、preset の新しいタグが出たら `deno.json` の alias のタグを手で上げ、`rm -f deno.lock` の後に `deno task lint:textlint` を 1 回実行して `deno.lock` を再生成し、両方をコミットする。
+
+textlint は preset を裸の名前 (`preset-ansanloms`) で解決するため、`textlint/textlint-rule-preset-ansanloms/index.js` に import map の alias を re-export する 1 行のラッパーを置き、`deno.json` の `textlint` task で `--rules-base-directory` にそのディレクトリを渡している。`No rules found` が出たら、この 2 点 (alias の URL が到達可能か、`--rules-base-directory` が絶対パスか) を疑う。
+
 - 検査: `deno task lint`
 - 自動修正: `deno task fix`
 
