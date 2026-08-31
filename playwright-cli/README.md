@@ -16,7 +16,7 @@ playwright-cli でブラウザを駆動し Web 画面をブラックボックス
 
 ## 修正時の追加要件
 
-リポジトリ共通のルール (lint、`empirical-prompt-tuning` での磨き、PR 作成手順) は [.claude/CLAUDE.md](../.claude/CLAUDE.md) に従う。このスキル固有の追加要件は次のとおり。
+リポジトリ共通のルール (lint、`empirical-prompt-tuning` での磨き、PR 作成手順) は [CLAUDE.md](../CLAUDE.md) に従う。このスキル固有の追加要件は次のとおり。
 
 - ref は snapshot 時点の DOM に対応する。DOM 変更後は取り直し、古い ref を使わないルールを保つ。
 - コンテナ・自己署名証明書・HTTPS エラーは `--no-sandbox`/`ignoreHTTPSErrors` で対応する MUST と、DNS・リダイレクト誤診の落とし穴を残す。

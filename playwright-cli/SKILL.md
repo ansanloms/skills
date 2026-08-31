@@ -19,7 +19,11 @@ Web 画面をブラウザ越しに検証する際は `playwright-cli`(`@playwrig
 - playwright-cli 本体がインストール済みであること。`playwright-cli --version` で確認できる。npm パッケージは `@playwright/cli`。
 - ブラウザ本体がインストール済みであること。未導入なら `playwright-cli install-browser chromium`(導入先は `--dry-run` で確認できる)。
 - MUST: コンテナ等 sandbox が使えない環境では `launchOptions.args` に `--no-sandbox` を付ける(下記 config 参照)。これが無いと chromium が起動できないことがある。環境が sandbox を使えるか不明な場合の既定は「付ける」(起動が失敗する方向の害はない。信頼できないサイトを開く時だけサンドボックス保護が無くなる点に注意)。
-- MUST: ローカル HTTPS(自己署名・社内 CA など、ブラウザが信頼しない証明書のホスト)を開く場合は `contextOptions.ignoreHTTPSErrors` を `true` にする(下記 config 参照)。これが無いと navigate が `net::ERR_CERT_AUTHORITY_INVALID` で失敗する。curl は OS の証明書ストアを使うため 200 を返すが、playwright の chromium は独自プロファイルで起動し別系統で弾く。「curl は 200 なのにブラウザが繋がらない/別 URL に飛んだ」と見えたら、まず証明書(ignoreHTTPSErrors 未設定)を疑うこと。DNS やリダイレクトと誤診しやすい。証明書の信頼状態が不明な検証対象での既定は「付ける」(証明書エラーの検証を素通しするだけで、信頼済み証明書のサイトでも動作に害はない)。
+- MUST: ローカル HTTPS(自己署名・社内 CA など、ブラウザが信頼しない証明書のホスト)を開く場合は `contextOptions.ignoreHTTPSErrors` を `true` にする。設定は下記 config を参照する。
+  - これが無いと navigate が `net::ERR_CERT_AUTHORITY_INVALID` で失敗する。
+  - 理由: curl は OS の証明書ストアを使うため 200 を返すが、playwright の chromium は独自プロファイルで起動し別系統で弾く。
+  - 「curl は 200 なのにブラウザが繋がらない/別 URL に飛んだ」と見えたら、まず証明書(ignoreHTTPSErrors 未設定)を疑うこと。DNS やリダイレクトと誤診しやすい。
+  - 証明書の信頼状態が不明な検証対象での既定は「付ける」(証明書エラーの検証を素通しするだけで、信頼済み証明書のサイトでも動作に害はない)。
 
 スナップショット等の出力は作業ディレクトリ直下の `.playwright-cli/` に書かれる。VCS で追跡しないよう `.gitignore` に加える。
 
@@ -190,12 +194,15 @@ playwright-cli kill-all       # 残留プロセスを強制終了
 
 ## 落とし穴・注意
 
-- 要素操作は基本 ref を使う。ref は snapshot 時点の DOM に対応し、DOM が変わるまで複数操作に使える。DOM が変わったら snapshot を取り直し、取り直し前の古い ref は使わない。
-- スクショだけでは「描画が遅延しているだけ」と「要素が DOM に存在しない」を区別できないことがある。要素の有無まで断定したい場合は `snapshot`(accessibility tree)や `eval` で DOM を直接確認する。合否の読み替えは「snapshot に要素が現れる = accessibility tree 上に存在する(表示されている)」を基準にし、`display:none` 等の非表示要素は snapshot に現れない。モーダルやメニューの開閉など状態変化の検証は、操作前後の snapshot を比較し「何が現れる/消えるはずか」を操作前に言語化しておく。CSS だけで隠すメニュー等、開閉しても snapshot に差分が出ない実装では、`aria-expanded` 等の属性や computed style を `eval` で確認する。「DOM に無い」と「DOM にはあるが非表示」の切り分けは次の eval で機械的に行える。
+- 要素操作は基本 ref を使う。ref の有効範囲と取り直しのルールは「基本フロー」を参照。
+- スクショだけでは「描画が遅延しているだけ」と「要素が DOM に存在しない」を区別できないことがある。要素の有無まで断定したい場合は `snapshot`(accessibility tree)や `eval` で DOM を直接確認する。
+  - 合否の読み替えは「snapshot に要素が現れる = accessibility tree 上に存在する(表示されている)」を基準にし、`display:none` 等の非表示要素は snapshot に現れない。
+  - モーダルやメニューの開閉など状態変化の検証は、操作前後の snapshot を比較し「何が現れる/消えるはずか」を操作前に言語化しておく。CSS だけで隠すメニュー等、開閉しても snapshot に差分が出ない実装では、`aria-expanded` 等の属性や computed style を `eval` で確認する。
+  - 「DOM に無い」と「DOM にはあるが非表示」の切り分けは次の eval で機械的に行える。
 
-  ```bash
-  playwright-cli --raw eval "() => ({ inDom: document.body.outerHTML.includes('対象テキスト'), visible: document.body.innerText.includes('対象テキスト') })"
-  ```
+    ```bash
+    playwright-cli --raw eval "() => ({ inDom: document.body.outerHTML.includes('対象テキスト'), visible: document.body.innerText.includes('対象テキスト') })"
+    ```
 - 動的 ID(`#v-0-N` 等、Vue/React が実行時に生成する ID)はセッションをまたぐと壊れる。生成コードをテストへ転写する際は `getByRole()`/`getByLabel()`/`[name="..."]` 等の安定したセレクタへ書き直す。
 - 操作が終わったら `close`(または `close-all`)でブラウザを閉じる。残留したら `kill-all`。
 
@@ -205,4 +212,3 @@ playwright-cli kill-all       # 残留プロセスを強制終了
 
 - 同梱公式 SKILL.md: `playwright-cli --help` の冒頭に表示される `Agent skill:` のパス(`@playwright/cli` パッケージ内の `.../skill/SKILL.md`)。`references/` に request mocking・tracing・video・running-code 等の個別ガイドがある。
 - npm パッケージ: `@playwright/cli`。
-- 各コマンドの詳細は `playwright-cli <command> --help` で確認できる。
