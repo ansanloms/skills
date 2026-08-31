@@ -350,7 +350,7 @@
         "@textlint/resolver",
         "@textlint/types@15.8.0",
         "debug",
-        "js-yaml@4.3.1",
+        "js-yaml@4.3.2",
         "lodash",
         "pluralize",
         "string-width",
@@ -1475,8 +1475,8 @@
       ],
       "bin": true
     },
-    "js-yaml@4.3.1": {
-      "integrity": "sha512-CY6crGq313MX8GkwvB7tzgp99vjQxY1++5y10/BKN/GUfHqWaOGQMNZkBvqSzsZKWk/ijwHlWzzkLulsGHhjWQ==",
+    "js-yaml@4.3.2": {
+      "integrity": "sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==",
       "dependencies": [
         "argparse@2.0.1"
       ],
@@ -1921,7 +1921,7 @@
       "integrity": "sha512-3GiwEzklkbXTDp52UR5nT8iXgYAx1V9ZG/kDZT7p60u2GCv2XTwQq4NzinMoMpNtXhmt3WkhYXcj6HH8HdwCEQ==",
       "dependencies": [
         "debug",
-        "js-yaml@4.3.1",
+        "js-yaml@4.3.2",
         "json5",
         "require-from-string"
       ]
@@ -2867,8 +2867,8 @@
     "zlibjs@0.3.1": {
       "integrity": "sha512-+J9RrgTKOmlxFSDHo0pI1xM6BLVUv+o0ZT9ANtCxGkjIVCCUdx9alUF8Gm+dGLKbkkkidWIHFDZHDMpfITt4+w=="
     },
-    "zod@4.4.3": {
-      "integrity": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="
+    "zod@4.5.4": {
+      "integrity": "sha512-sC95tT5iHHH9gtpj6A81kh+NEaRAUFN+qlUPDUbRfOMvNf5QCBqsb3WgvnpVtK5Y+4UfA6KqufotuTvMGiTlsA=="
     },
     "zwitch@1.0.5": {
       "integrity": "sha512-V50KMwwzqJV0NpZIZFwfOD5/lyny3WlSzRiXgA0G7VUnRlqttta1L6UQIHzd6EuBY/cHGfwTIck7w1yH6Q5zUw=="
