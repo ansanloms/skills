@@ -152,7 +152,7 @@ lint が意図的に開けた穴を意味の側から判定する群。lint の 
 
 報告はファイルに書く。呼び出し側が出力先を指定していればそこが正本で、指定はディレクトリとして解釈する。指定が無ければ非汚染領域 (`$CLAUDE_JOB_DIR/tmp` があればそこ、無ければ `mktemp -d` の結果) に書く。出力ディレクトリの確保は 1 回の実行につき 1 回だけ行い、一時入力ファイルと報告の両方に使う。タイムスタンプ `<YYYYMMDD-HHMMSS>` は実行開始時に 1 回だけ取り、以後リテラルで使う。報告名は `proofread-<対象の basename (拡張子なし)>-<YYYYMMDD-HHMMSS>.md`。貼り付け本文は例外で `proofread-input-<YYYYMMDD-HHMMSS>.md`。同じ実行で basename が重複する対象があれば、重複するものは `proofread-<親ディレクトリ名>-<basename>-<YYYYMMDD-HHMMSS>.md` とする。会話にはファイルのパスと集計 1 行だけを返す。
 
-会話への返答の形:。
+会話への返答は次の 2 行の形にする。
 
 ```
 /home/user/.claude/jobs/xxxx/tmp/proofread-nvim-rule-20260831-235723.md
