@@ -9,3 +9,6 @@ coverage/**
 
 # テスト fixture (lint 対象外。内容変更がテストに影響するため)
 e2e/scripts/samples/**
+
+# 隔離 worktree (他タスクの checkout。lint 対象外)
+.claude/worktrees/**
