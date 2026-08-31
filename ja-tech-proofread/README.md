@@ -1,6 +1,6 @@
 # ja-tech-proofread
 
-日本語で書かれた技術文書 (markdown) を推敲する skill。文や項目の局所的な修正はファイルへ直接適用し、構成の変更は箇所・規範 ID・理由・修正案の一覧で返す。表記と文法の機械判定と markdown の整形は skill 内の textlint (`textlint-rule-preset-ansanloms`) と `deno fmt` が行い、この skill は機械判定できない層だけを見る。
+日本語で書かれた技術文書 (markdown) を推敲する skill。本文だけから決まる修正は構成の変更も含めて直接適用し、著者の判断が要る箇所はその場で確認してから適用する。表記と文法の機械判定と markdown の整形は skill 内の textlint (`textlint-rule-preset-ansanloms`) と `deno fmt` が行い、この skill は機械判定できない層だけを見る。
 
 ## できること
 
@@ -33,7 +33,7 @@
 /ja-tech-proofread [fix|lint] <path...>
 ```
 
-- `fix` (既定): 局所修正をファイルへ適用し、構成変更は指摘に留める
+- `fix` (既定): 修正を skill 内で完結させる。要判断はその場でユーザに確認する
 - `lint`: ファイルを変更せず、指摘のみを返す
 - 自動発動時 (args 無し) は `fix` で、対象は会話文脈から取る
 
