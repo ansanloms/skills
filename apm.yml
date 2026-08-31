@@ -10,5 +10,6 @@ dependencies:
 devDependencies:
   apm:
     - mizchi/skills/meta/empirical-prompt-tuning
+    - ansanloms/skills/ja-tech-proofread
 includes: auto
 scripts: {}

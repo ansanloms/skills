@@ -1,5 +1,6 @@
 # APM dependencies
 apm_modules/**
+.claude/skills/**
 
 # テストカバレッジ
 coverage/**

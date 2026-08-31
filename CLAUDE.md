@@ -12,13 +12,13 @@
 - `<name>/SKILL.md` を 1 skill = 1 ディレクトリで配置する。これがこのリポジトリの提供する skill。
 - frontmatter は `name` と `description` が必須。`description` が skill の発動トリガになる。「何をするか + いつ発動するか」を具体的に書く。曖昧だと発動しない。
 - `<name>/README.md` は各 skill の人間向け説明で、SKILL.md の frontmatter を情報源にする。SKILL.md とは別に用意し、新設・更新時に追随させる (後述のフロー参照)。
-- `apm.yml` の `devDependencies` は skill を磨くための道具 (empirical-prompt-tuning)。配布対象ではない。
-- コミットするのは `apm.yml`/`apm.lock.yaml` と各 `<name>/SKILL.md`・`<name>/README.md`、lint・plugin 構成。`apm_modules/`/`.claude/skills/` (依存 skill)/`index.js` (plugin の bundle)/`coverage/` は gitignore 済みで、それぞれ `apm install`/`deno task build`/`deno task test` で再生成する。
+- `apm.yml` の `devDependencies` は skill を磨く・使うための道具。empirical-prompt-tuning は外部由来で配布対象ではない。ja-tech-proofread は自リポジトリの配布 skill を自分でも使うための自己参照で、複製は remote main のスナップショット。
+- コミットするのは `apm.yml`/`apm.lock.yaml`、各 skill の `SKILL.md`・`README.md`・`scripts/`・`references/`・`assets/`、`.github/`、`.gitignore`、`CLAUDE.md`。`apm_modules/`・`.claude/skills/` (依存 skill)・`coverage/` は gitignore 済みで、依存 skill は `apm install` で再生成する。
 
 ## クローン後のセットアップ
 
 ```sh
-apm install     # devDependency (empirical-prompt-tuning) を .claude/skills/ に復元
+apm install     # 依存 skill (ja-tech-proofread、empirical-prompt-tuning) を .claude/skills/ に復元
 ```
 
 ## skill を追加・修正するフロー
@@ -27,7 +27,7 @@ apm install     # devDependency (empirical-prompt-tuning) を .claude/skills/ �
 2. `<name>/README.md` を同じ内容に合わせて作成・修正する。skill を新設したら必ず用意し、既存 skill の frontmatter や対象範囲を変えたら追随させる。
 3. 外部 API やコマンドを叩く skill なら、レスポンスの実サンプルを本文に載せる (後述)。
 4. empirical-prompt-tuning skill でブラッシュアップする (後述)。
-5. lint を通す (後述)。
+5. 変更した md に ja-tech-proofread の fix を当てる (後述)。
 6. コミットする (Conventional Commits、日本語、絵文字なし)。
 
 ## レスポンスの実サンプル
@@ -49,20 +49,15 @@ skill/プロンプトを新規作成・大幅改訂したら、empirical-prompt-
 
 バイアスを排した subagent に実際に skill を読ませて両面評価し、不明瞭点を潰すまで反復する手法。`description` と本文の整合、発動トリガの曖昧さの検出に効く。
 
-## lint フロー
+## 推敲と検査
 
-textlint (日本語の文章) と deno fmt/deno lint で検査する。
+日本語の markdown は skill `ja-tech-proofread` で推敲する。機械層 (textlint-rule-preset-ansanloms + deno fmt) を含み、既定の fix モードは修正を skill 内で完結させる (著者の判断が要る箇所はその場で確認される)。変更したファイルを列挙して渡す。一括で見たい場合も対象ファイルを列挙する (ディレクトリ走査はしない)。
 
-textlint の rule は `textlint-rule-preset-ansanloms` (jsDelivr の tag 付き URL を `deno.json` の import map で alias) をそのまま有効化している。rule の追加・変更・緩和は preset 側で行い、このリポジトリの `.textlintrc.js` では上書きしない。
+実行する時期: md を変更したら、コミット前にその md へ fix を当てる。skill の `scripts/` (TS・設定) を変更したら、そのディレクトリで `deno task lint` を通す。`.claude/skills/` の実体は apm が remote の main から解決したスナップショットで、ローカルの編集は反映されない。skill への変更は main に入った後に `apm install` で複製へ反映される。skill として実行される定義も複製側のため、探索順を含む定義の変更は main 反映後に効く。開発中に変更を検証するときは、リポジトリ内の `ja-tech-proofread/SKILL.md` をパス指定で実行者に読ませる。
 
-preset への移行 (2026-08-31) で検出範囲が変わった点: `no-ai-list-formatting` は無効から `{ disableBoldListItems: true }` になり、箇条書き先頭の太字ラベルは許容、絵文字は検出される。JTF の `1.1.1.本文` (`no-mix-dearu-desumasu` と矛盾する指摘を出していた) と `2.1.5.カタカナ` (旧設定では有効化が効いていなかった) は無効。各 rule の設定理由は preset の README に書く。
+機械層だけを直接使う場合は `deno task -q --cwd ja-tech-proofread/scripts textlint <絶対パス...>` (fmt は `fmt`/`fmt:check` task)。rule の正本は preset リポジトリで、このリポジトリでは上書きしない。preset の新しいタグが出たら `ja-tech-proofread/scripts/deno.json` の alias と `deno.lock` を更新する (手順は `ja-tech-proofread/scripts/README.md`)。機械層の正はリポジトリ内の `ja-tech-proofread/scripts`。preset を jsDelivr の URL で参照しているため、Dependabot は rule パッケージの更新を追えるが preset のタグ上げは追えない。タグ上げは手作業で行う。
 
-preset を jsDelivr の URL で参照しているため、このリポジトリの Dependabot は textlint の rule パッケージの更新を追えない。rule パッケージの更新は preset リポジトリ側の Dependabot が行い、preset の新しいタグが出たら `deno.json` の alias のタグを手で上げ、`rm -f deno.lock` の後に `deno install` と `deno task fix && deno task lint` を実行して `deno.lock` を再生成し、両方をコミットする。
-
-textlint は preset を裸の名前 (`preset-ansanloms`) で解決するため、`textlint/textlint-rule-preset-ansanloms/index.js` に import map の alias を re-export する 1 行のラッパーを置き、`deno.json` の `textlint` task で `--rules-base-directory` にそのディレクトリを渡している。`No rules found` が出たら、この 2 点 (alias の URL が到達可能か、`--rules-base-directory` が絶対パスか) を疑う。
-
-- 検査: `deno task lint`
-- 自動修正: `deno task fix`
+TS を含む skill の `scripts/` は各ディレクトリの `deno.json` で自己完結しており、`deno task lint`/`deno task fix` をそのディレクトリで実行する。root に deno の設定・task は無い。
 
 textlint と markdown 記法が衝突しやすい点は次のとおり。
 
