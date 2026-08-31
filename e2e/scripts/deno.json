@@ -14,7 +14,7 @@
     "@std/path": "jsr:@std/path@1.1.5",
     "@std/yaml": "jsr:@std/yaml@1.1.1",
     "ajv": "npm:ajv@8.20.0",
-    "json-schema-to-typescript": "npm:json-schema-to-typescript@15.0.4",
+    "json-schema-to-typescript": "npm:json-schema-to-typescript@16.0.0",
     "remark-frontmatter": "npm:remark-frontmatter@5.0.0",
     "remark-gfm": "npm:remark-gfm@4.0.1",
     "remark-parse": "npm:remark-parse@11.0.0",
