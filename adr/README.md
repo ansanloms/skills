@@ -4,7 +4,7 @@
 
 ## できること
 
-- テンプレート (`assets/template.md`) に沿った新規 ADR の起票 (`docs/adr/NNNN-<kebab-case の要約>.md`)
+- テンプレート (`assets/template.md`) に沿った新規 ADR の起票 (`docs/adr/NNNN-<kebab-case の要約>.md`。配置先は変更可で `docs/adr/` は既定)
 - ADR にする閾値の判定 (層の境界・データモデル・外部依存に触れる決定、覆すコストが大きい決定、やらないと決めたこと)
 - status の遷移 (proposed から accepted/rejected へ、accepted から deprecated/superseded へ、deprecated から superseded へ) と supersede による決定の置き換え
 - 合意済みの決定の遡及起票

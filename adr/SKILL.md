@@ -1,7 +1,7 @@
 ---
 name: adr
 description: >-
-  ADR (Architecture Decision Record) の作成と運用の手順。テンプレートに沿った新規 ADR の起票、status の遷移 (proposed から accepted / rejected へ、accepted から deprecated / superseded へ、deprecated から superseded へ)、supersede による決定の置き換え、合意済みの決定の遡及起票、docs/adr/ の初回導入 (ADR-0000 の生成) を行う。層の境界・データモデル・外部依存に触れる決定、覆すと書き直しやデータ移行が要る決定、やらないと決めたことを記録する場面や、「ADR を書いて」「この決定を記録して」と頼まれた場面で使う。影響が局所的な決定 (命名規約・フォーマッタ設定等) の記録や、ADR 以外の設計文書・議事録の作成には使わない。
+  ADR (Architecture Decision Record) の作成と運用の手順。テンプレートに沿った新規 ADR の起票、status の遷移 (proposed から accepted / rejected へ、accepted から deprecated / superseded へ、deprecated から superseded へ)、supersede による決定の置き換え、合意済みの決定の遡及起票、ADR ディレクトリ (既定 docs/adr/、配置先は変更可) の初回導入 (ADR-0000 の生成) を行う。層の境界・データモデル・外部依存に触れる決定、覆すと書き直しやデータ移行が要る決定、やらないと決めたことを記録する場面や、「ADR を書いて」「この決定を記録して」と頼まれた場面で使う。影響が局所的な決定 (命名規約・フォーマッタ設定等) の記録や、ADR 以外の設計文書・議事録の作成には使わない。
 ---
 
 # ADR の作成と運用
@@ -20,7 +20,8 @@ description: >-
 
 ## 配置・採番・ファイル名
 
-- ADR は `docs/adr/` 直下に置く。
+- 配置先ディレクトリは任意に決められる。既定は `docs/adr/` 直下で、本 skill の以降の記述は既定の配置で書く (変更したリポジトリでは読み替える)。
+- 既定以外の配置先は初回導入時に決めて ADR-0000 の Decision に書き、以降の ADR はそれに従う。
 - ID は 4 桁ゼロ埋めの連番。次の番号は既存ファイルの最大 ID + 1 とし (`ls docs/adr/` で確認する)、欠番は再利用しない。`0000` は ADR 運用自体の決定 (下記「初回導入」) に予約する。
 - ファイル名は `NNNN-<要約>.md`。要約は英語またはローマ字の kebab-case (ASCII) で書く。理由: 日本語ファイル名は macOS の NFD 正規化や URL エンコードでリンク事故を起こしやすく、ADR は supersedes/refs の相互参照でリンクを多用するため。要約の語形は固定しない。動詞を含む形でも名詞句でもよく (例: `use-postgresql-as-primary-store`、`no-native-mobile-app`)、決定を識別できる 3〜6 語程度にする。
 - 本文の H1 は `# ADR-NNNN: <決定の要約>`。要約は日本語で「〜する」「〜しない」の形の 1 行にする。日本語での検索性はこの H1 で担保する。
@@ -28,7 +29,7 @@ description: >-
 ## 作成手順
 
 1. 上記の閾値を判定する。当たらなければ起票せず、その判断と理由を伝える。
-2. `docs/adr/` が無いリポジトリでは、先に「初回導入」を行う。
+2. ADR の配置先 (既定 `docs/adr/`) が無いリポジトリでは、先に「初回導入」を行う。
 3. 採番し、`assets/template.md` を `docs/adr/NNNN-<要約>.md` へコピーする。
 4. テンプレート内の案内コメントに従って本文を書く。status は `proposed`、date は起票日時 (ISO 8601 の UTC 表記。例: `2021-05-22T00:00:00Z`) とする。使わない frontmatter キー (supersedes/superseded-by/refs/tags) は削除する。
 5. 案内コメント (frontmatter 内の `#` 行と HTML コメント) をすべて削除したことを確認する。
@@ -81,10 +82,10 @@ description: >-
 
 ## 初回導入
 
-`docs/adr/` が無いリポジトリで ADR 運用を始めるときは、運用自体の決定を ADR-0000 として最初に置く。
+ADR の配置先が無いリポジトリで ADR 運用を始めるときは、運用自体の決定を ADR-0000 として最初に置く。
 
-1. `docs/adr/` を作成する。
-2. `assets/adr-0000.md` を `docs/adr/0000-record-architecture-decisions.md` へコピーし、雛形の案内コメントに従って date を記入し、リポジトリ固有の調整があれば反映し、案内コメントを削除する。
+1. 配置先ディレクトリを作成する (既定 `docs/adr/`)。既定以外にする場合はここで決める。
+2. `assets/adr-0000.md` を配置先へ `0000-record-architecture-decisions.md` としてコピーし、雛形の案内コメントに従って date を記入し、リポジトリ固有の調整 (既定以外の配置先を含む) があれば Decision に反映し、案内コメントを削除する。
 3. ADR-0000 も他の ADR と同じ遷移規則に従う。`proposed` で置き、合意を得てから `accepted` にする。
 
 一覧 (README) は作らない。理由: ファイル名が `NNNN-<要約>` であればディレクトリ一覧がそのまま索引になり、手動で維持する索引は実態と乖離する。

@@ -25,7 +25,7 @@ tags: []
 ADR (Architecture Decision Record) のテンプレート。
 
 使い方:
-- このファイルを docs/adr/NNNN-<短い要約>.md にコピーして書く。NNNN は 4 桁ゼロ埋めの連番。欠番は再利用しない。
+- このファイルを ADR の配置先 (既定 docs/adr/) に NNNN-<短い要約>.md としてコピーして書く。NNNN は 4 桁ゼロ埋めの連番。欠番は再利用しない。
 - ファイル名の要約は英語またはローマ字の kebab-case (ASCII) で書く。例: 0001-use-postgresql-as-primary-store.md
 - 本文は日本語で、通常の文書体で書く。
 - 案内コメント (frontmatter 内の # 行と、この HTML コメントを含む) は、書き終えたらすべて削除する。
