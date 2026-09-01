@@ -1,7 +1,7 @@
 ---
 name: adr
 description: >-
-  ADR (Architecture Decision Record) の作成と運用の手順。テンプレートに沿った新規 ADR の起票、status の遷移 (proposed から accepted / rejected へ、accepted から deprecated / superseded へ、deprecated から superseded へ)、supersede による決定の置き換え、合意済みの決定の遡及起票、ADR ディレクトリ (既定 docs/adr/、配置先は変更可) の初回導入 (ADR-0000 の生成) を行う。層の境界・データモデル・外部依存に触れる決定、覆すと書き直しやデータ移行が要る決定、やらないと決めたことを記録する場面や、「ADR を書いて」「この決定を記録して」と頼まれた場面で使う。影響が局所的な決定 (命名規約・フォーマッタ設定等) の記録や、ADR 以外の設計文書・議事録の作成には使わない。
+  ADR (Architecture Decision Record) の作成と運用の手順。テンプレートに沿った新規 ADR の起票、status の遷移 (proposed から accepted / rejected へ、accepted から deprecated / superseded へ、deprecated から superseded へ)、supersede による決定の置き換え、合意済みの決定の遡及起票、ADR ディレクトリ (既定 docs/adr/、配置先は変更可) の初回導入 (ADR-0000 の生成)、書き上げた ADR のチェックリスト検証を行う。層の境界・データモデル・外部依存に触れる決定、覆すと書き直しやデータ移行が要る決定、やらないと決めたことを記録する場面や、「ADR を書いて」「この決定を記録して」と頼まれた場面で使う。影響が局所的な決定 (命名規約・フォーマッタ設定等) の記録や、ADR 以外の設計文書・議事録の作成には使わない。
 ---
 
 # ADR の作成と運用
@@ -34,6 +34,7 @@ description: >-
 4. テンプレート内の案内コメントに従って本文を書く。status は `proposed`、date は起票日時 (ISO 8601 の UTC 表記。例: `2021-05-22T00:00:00Z`) とする。使わない frontmatter キー (supersedes/superseded-by/refs/tags) は削除する。
 5. 案内コメント (frontmatter 内の `#` 行と HTML コメント) をすべて削除したことを確認する。
 6. 書き上げた本文を推敲する (下記「推敲」)。
+7. 成果物とする直前に、検証チェックリストを実行する (下記「検証」)。
 
 本文全体に次を適用する。
 
@@ -94,3 +95,28 @@ ADR の配置先が無いリポジトリで ADR 運用を始めるときは、�
 
 - ja-tech-proofread skill が利用できる環境 (skill 一覧にあるか、`apm install` で導入済み) では、書き上げた ADR に ja-tech-proofread の fix を当ててから成果物とする。
 - 利用できない環境では推敲工程を省略し、省略した旨を報告に含める。推敲できないことを理由に ADR の作成自体を止めない。
+
+## 検証
+
+作業で作成・変更した ADR (新規ファイルと、遷移で frontmatter を変更した既存ファイル) を、成果物とする直前に検査する。
+
+判定・報告は checklist skill に従う。checklist skill が導入されていない環境では、本節の項目を ○/×/対象外で自己点検し、× の該当箇所と根拠、対象外の理由とともに報告へ含める。
+
+### 形式
+
+1. `[critical]` ファイル名が `NNNN-<要約>.md` (4 桁ゼロ埋めの連番で既存最大 + 1、要約は英語またはローマ字の kebab-case) に適合している。
+2. `[critical]` status が許容 5 値のいずれかで、遷移規則 (「status の遷移」) と整合している。
+3. frontmatter の案内コメント (`#` 行)・HTML コメント・テンプレートのプレースホルダが残っていない。
+4. date が ISO 8601 の UTC 日時である。
+5. H1 が `# ADR-NNNN: <日本語の「〜する」「〜しない」形の 1 行>` で、NNNN がファイル名の ID と一致している。
+6. 節構成 (Context/Decision Drivers/Considered Options/Decision/Consequences の利点・代償・禁止事項/Assumptions/References) が欠落なく揃っている。
+7. supersede を行った場合、supersedes/superseded-by が相互に設定され、旧側の本文が status と superseded-by 以外変わっていない。supersede をしていない作業ではこの項目は対象外。
+
+### 内容
+
+1. `[critical]` 依頼文とリポジトリに無い固有の事情・資産・数値が、どの節にも書かれていない (「作成手順」の可・不可の基準で判定する)。
+2. `[critical]` 本文に、完了すれば嘘になる記述 (執筆の経緯・レビュー対応・合意の状態・作業予定) が無い。
+3. Context が事実のみで、結論や評価が混ざっていない。
+4. Considered Options の却下した選択肢に理由が付いている。
+5. Decision の各項目が「〜する」「〜しない」の形で、後からコードと照合できる粒度になっている。
+6. References の issue・PR が URL で書かれ、URL を持たない出典には日付と内容の要約がある。

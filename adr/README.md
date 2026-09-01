@@ -9,6 +9,7 @@
 - status の遷移 (proposed から accepted/rejected へ、accepted から deprecated/superseded へ、deprecated から superseded へ) と supersede による決定の置き換え
 - 合意済みの決定の遡及起票
 - ADR 運用の初回導入 (ADR-0000 の生成)
+- 書き上げた ADR のチェックリスト検証 (判定・報告は checklist skill に従い、導入されていない環境では自己点検へ縮退)
 
 ## 対象外
 
