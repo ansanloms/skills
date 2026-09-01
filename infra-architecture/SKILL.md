@@ -121,4 +121,4 @@ PNG/SVG の出力コマンド、オプション、使い分けの詳細は [expo
 
 ## 謝辞
 
-`references/` の一部 (drawio-cli・xml-format・troubleshooting・layout-best-practices) は jgraph/drawio-mcp の drawio skill を Apache License 2.0 で翻訳・改変して取り込んでいる。
+`references/` の一部 (drawio-cli・xml-format・troubleshooting・layout-best-practices) は jgraph/drawio-mcp の drawio skill (Apache License 2.0) を翻訳・改変して取り込んでいる。
