@@ -30,7 +30,7 @@ description: >-
 1. 上記の閾値を判定する。当たらなければ起票せず、その判断と理由を伝える。
 2. `docs/adr/` が無いリポジトリでは、先に「初回導入」を行う。
 3. 採番し、`assets/template.md` を `docs/adr/NNNN-<要約>.md` へコピーする。
-4. テンプレート内の案内コメントに従って本文を書く。status は `proposed`、date は起票日とする。使わない frontmatter キー (supersedes/superseded-by/refs/tags) は削除する。
+4. テンプレート内の案内コメントに従って本文を書く。status は `proposed`、date は起票日時 (ISO 8601 の UTC 表記。例: `2021-05-22T00:00:00Z`) とする。使わない frontmatter キー (supersedes/superseded-by/refs/tags) は削除する。
 5. 案内コメント (frontmatter 内の `#` 行と HTML コメント) をすべて削除したことを確認する。
 6. 書き上げた本文を推敲する (下記「推敲」)。
 
@@ -56,7 +56,7 @@ description: >-
 遷移は `proposed -> accepted | rejected`、`accepted -> deprecated | superseded`、`deprecated -> superseded` に限る。
 
 - MUST: 新規 ADR は必ず `proposed` で起こす。合意済み・却下済みの決定でも、記録は `proposed` からの遷移で行う (下記「遡及起票」)。
-- MUST: 本文 (Context/Decision/Consequences 等) を変更できるのは `proposed` の間だけ。`accepted`/`rejected` へ遷移させたら date をその日で更新し、以後 `proposed` へ戻さない。決定を覆すときは新しい ADR で supersede する (下記)。
+- MUST: 本文 (Context/Decision/Consequences 等) を変更できるのは `proposed` の間だけ。`accepted`/`rejected` へ遷移させたら date をその日時で更新し、以後 `proposed` へ戻さない。決定を覆すときは新しい ADR で supersede する (下記)。
 - `rejected`/`superseded` の ADR は更新しない。更新が必要になったら新しい ADR を起こす。
 - 例外として、`accepted`/`deprecated` の ADR でも Assumptions の「状態」列は検証が進んだら更新してよい。理由: 事実の追記であり、決定の変更ではない。棄却された前提が出たら、その ADR を supersede する ADR を検討する。
 
@@ -74,7 +74,7 @@ description: >-
 
 - Context は決定した当時の状況で書く。現在から見た後知恵の評価を混ぜない。
 - 合意の事実が辿れる出典 (PR・会話ログ・コミット等) を References に記録する。
-- 出典で合意が確認できたら status を `accepted` へ遷移させ、date を遷移させた日で更新する。`accepted` へ遷移できるのは、依頼の発話以外に合意が辿れる記録 (PR・議事録・レビュー等) が出典にある場合に限る。依頼の発話だけが出典の場合や合意の所在が確認できない場合は `proposed` のまま残し、扱いをユーザに確認する。
+- 出典で合意が確認できたら status を `accepted` へ遷移させ、date を遷移させた日時で更新する。`accepted` へ遷移できるのは、依頼の発話以外に合意が辿れる記録 (PR・議事録・レビュー等) が出典にある場合に限る。依頼の発話だけが出典の場合や合意の所在が確認できない場合は `proposed` のまま残し、扱いをユーザに確認する。
 - 却下の結論が既に出ている案を記録する場合も同様に `proposed` で起票する。タイトルと Decision は提案内容のまま「〜する」の形で書き、却下の判断とその理由が辿れる出典を References に記録した上で `rejected` へ遷移させる。
 - 合意済みの決定が既存 ADR を覆すものである場合は、本節と「決定を覆す (supersede)」を併用する。新 ADR は本節の手順で `accepted` まで進め、旧 ADR の遷移と相互参照は supersede の手順に従う。
 - 起票から `accepted` への遷移までを一連の作業で行う場合、中間の `proposed` 状態をファイルやコミットとして残す必要は無く、最終状態のみを書き出せばよい。`proposed` からの遷移という規則は判断の手続きを定めるものであり、途中状態の保存を求めるものではない。

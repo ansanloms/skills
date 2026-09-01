@@ -4,8 +4,8 @@
 # 新規作成時は proposed とする (合意済みの決定でも、合意の記録は proposed からの遷移で行う)。
 status: proposed
 
-# 決定日 (YYYY-MM-DD)。起票時は起票日を書き、accepted / rejected へ遷移させた日で更新する。
-date: YYYY-MM-DD
+# 決定日時 (ISO 8601 の UTC 表記。例: 2021-05-22T00:00:00Z)。起票時は起票日時を書き、accepted / rejected へ遷移させた日時で更新する。
+date: YYYY-MM-DDThh:mm:ssZ
 
 # この ADR が置き換える ADR の ID (数値の配列)。無いなら削除する。
 supersedes: []
