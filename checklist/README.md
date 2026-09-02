@@ -24,8 +24,8 @@ skill に検証チェックリストを新設・改訂するとき。他の skil
 - killer 項目への絞り込み・妥協の禁止・致命的項目の先頭配置・「望ましい状態そのもの」を書く判定文: [NASA CR-177549 (Degani & Wiener, 1990)](https://ntrs.nasa.gov/api/citations/19910017830/downloads/19910017830.pdf) と Atul Gawande「The Checklist Manifesto」
 - 判定ごとの根拠の義務・1 項目 1 判定 (基準の混同と halo effect の回避): [Autorubric (arXiv:2603.00077)](https://arxiv.org/html/2603.00077)
 - 対象外 (N/A) へ理由を添える運用: [W3C WAI Evaluation Task Force の議論](https://lists.w3.org/Archives/Public/public-wai-evaltf/2012Feb/0103.html)
-- 重要度の語彙: RFC 5424 (syslog severity) の critical/error/warning。区分の少なさは Fagan inspection の major/minor defect に倣う
-- チェックリストを生きた文書として付記から改訂する運用: コードレビュー実務の形骸化対策
+- 重要度の語彙: RFC 5424 (syslog severity) の critical/error/warning。区分の少なさは [Fagan inspection](https://en.wikipedia.org/wiki/Fagan_inspection) の major/minor defect に倣う
+- チェックリストを生きた文書として付記から改訂する運用: [コードレビュー実務の形骸化対策](https://getdx.com/blog/code-review-checklist/)
 - `[critical]` タグと成否判定: mizchi/skills の empirical-prompt-tuning の requirements checklist
 
 ## 導入
