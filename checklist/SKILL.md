@@ -6,7 +6,7 @@ description: >-
 
 # チェックリストのプロトコル
 
-成果物を検査するチェックリストの、ドメインに依存しない運用規約。項目の書き方・判定・重要度・実行モード・報告を定める。チェックリストの体裁は `assets/checklist-template.md`、報告の体裁は `assets/report-template.md` が正本で、記入済みの実例が `assets/checklist-example.md`・`assets/report-example.md` にある。本文の規則と実例が食い違えば実例を正とする。
+成果物を検査するチェックリストの、ドメインに依存しない運用規約。項目の書き方・判定・重要度・実行モード・報告を定める。チェックリストの体裁は `assets/checklist-template.md`、報告の体裁は `assets/report-template.md` が正本で、記入済みの実例が `references/checklist-example.md`・`references/report-example.md` にある。本文の規則と実例が食い違えば実例を正とする。
 
 ## 分担
 
@@ -16,7 +16,7 @@ description: >-
 
 ## 項目の書き方
 
-呼び出し側が検査項目を書くときの規範。体裁は `assets/checklist-template.md` に、記入例は `assets/checklist-example.md` に従う。
+呼び出し側が検査項目を書くときの規範。体裁は `assets/checklist-template.md` に、記入例は `references/checklist-example.md` に従う。
 
 - MUST: 1 項目 1 判定。1 文で ○/× に分解できる形で書く。理由: 複数の品質次元を 1 項目に混ぜると、判定が互いに引きずられる。
 - MUST: 項目は killer 項目 (成果物が成立しなくなるもの、見落とされやすいもの) に絞り、全手順を列挙しない。理由: 網羅列挙はノイズになり遵守率を下げる。網羅性は報告の「チェックリスト外の付記」が受け、チェックリストは検証の下限として扱う。
@@ -77,7 +77,7 @@ description: >-
 
 ## 報告
 
-体裁は `assets/report-template.md` に、記入例は `assets/report-example.md` に従う。構成要素は次のとおり。
+体裁は `assets/report-template.md` に、記入例は `references/report-example.md` に従う。構成要素は次のとおり。
 
 - ヘッダ: 対象、使ったチェックリスト (どの skill のどの節か)、実行モード (縮退した場合はその経緯も)。
 - 集計行: 観点ごとに「N 項目中 ○ a、× b、対象外 c」。対象外は ○ にも × にも含めない。全体の成否 (`[critical]` 全 ○ か) を添える。

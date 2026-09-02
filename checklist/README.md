@@ -8,7 +8,7 @@
 - 判定の 3 値 (○/×/対象外) と共通規定 (× への根拠の義務、対象外への理由の義務、前提欠落の連鎖、機械判定結果の転記)
 - 重要度 (high/low) の定義と、レビュア間で割れた場合の裁定
 - 実行モード: self-check (既定) とレビュア subagent (観点別に起動し統合する)
-- 報告書式 (集計・判定表・指摘・修正と再判定・チェックリスト外の付記)。体裁は `assets/checklist-template.md`・`assets/report-template.md` が正本で、記入済みの実例が `assets/checklist-example.md`・`assets/report-example.md` にある
+- 報告書式 (集計・判定表・指摘・修正と再判定・チェックリスト外の付記)。体裁は `assets/checklist-template.md`・`assets/report-template.md` が正本で、記入済みの実例が `references/checklist-example.md`・`references/report-example.md` にある
 
 ## 対象外
 
