@@ -111,7 +111,7 @@ PNG/SVG の出力コマンド、オプション、使い分けの詳細は [expo
 
 ### 形式
 
-1. `[critical]` 配布用の `diagram.drawio.svg` が、最終版の `.drawio` から `-e` (`--embed-diagram`) 付きでエクスポートされている。
+1. `[critical]` 配布用の `diagram.drawio.svg` が、最終版の `.drawio` から `-e` (`--embed-diagram`) 付きでエクスポートされている。埋め込みの有無は `.drawio.svg` の `content` 属性に mxfile が含まれるかを grep で確認する (Read で全文を読まない)。
 2. `[critical]` 編集用ソースの `.drawio` と配布用の `.drawio.svg` の両方が成果物として残っている。
 3. 幾何チェックが error を出さない。判定: `deno run --allow-read <skill の絶対パス>/scripts/check-readability.ts --drawio <対象.drawio> --svg <対象.drawio.svg>` の終了コード 0 で ○、1 で ×。コマンドと入力の詳細は [readability-checks.md](./references/readability-checks.md)。見ないもの: ラベル文字の幅、回転・拡大を含む図 (目視 3・4 が担当)。× のとき error。
 
