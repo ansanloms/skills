@@ -1,15 +1,15 @@
 ---
 name: google-health
 description: >-
-  Google Health API (REST v4) から Fitbit・Pixel Watch の歩数・運動・消費カロリー・心拍・睡眠を取得する手順。
-  「歩数」「今日の運動」「消費カロリー」「心拍」「睡眠時間」「Fitbit」「Pixel Watch」「Google Health」などを聞かれた際に使う。
+  Google Health API (REST v4) から Fitbit・Pixel Watch の歩数・運動・消費カロリー・心拍・睡眠・体重・体脂肪率を取得する手順。
+  「歩数」「今日の運動」「消費カロリー」「心拍」「睡眠時間」「体重」「体脂肪率」「Fitbit」「Pixel Watch」「Google Health」などを聞かれた際に使う。
   初回は認可コードの取得とトークン交換が必要で、Testing 状態のリフレッシュトークンは同意から 7 日で失効するため定期的な再認可が要る。
   データの取得専用で、Fitbit Web API を直接叩く用途・Google Fit (廃止済み)・Health Connect (端末内 API でサーバから読めない) の代替ではない。データ源としての Fitbit 機器・Pixel Watch は対象。
 ---
 
 # Google Health のデータ取得
 
-Google Health API (REST v4) から、Fitbit・Pixel Watch が記録した歩数・Active Minutes・Active Zone Minutes・距離・運動セッション・総消費カロリー・心拍・睡眠の記録を取得する手順。
+Google Health API (REST v4) から、Fitbit・Pixel Watch が記録した歩数・Active Minutes・Active Zone Minutes・距離・運動セッション・総消費カロリー・心拍・睡眠・体重・体脂肪率の記録を取得する手順。
 
 ## scripts の絶対パスを確定する
 
@@ -31,7 +31,7 @@ done
 ## 前提と制約
 
 - Google Fit REST API は廃止済み (新規登録は 2024-05-01 終了、サポートは 2026 年末まで、代替なし)。Health Connect は端末内 API でサーバから読めない。Google Health API がサーバから叩ける唯一の公式手段。出典: <https://developer.android.com/health-and-fitness/health-connect/migration/fit/faq>
-- データ源は Fitbit と Pixel Watch のみ。出典: <https://developers.google.com/health/about>
+- データ源は Fitbit・Pixel Watch と、Health Connect 経由の一部データ型。公式ドキュメントでは Health Connect のデータ型は 2026 Q4 に追加予定で未提供とされていた。出典: <https://developers.google.com/health/about>。ただし 2026-09-27 時点の実測では、少なくとも体重 (`weight`) と体脂肪率 (`body-fat`) は取得できた。Health Planet アプリが Health Connect に書き込んだデータで、`dataSource.platform` が `HEALTH_CONNECT` として返る。
 - 全スコープが Restricted だが、OAuth 同意画面を Testing (External) のままにし自分をテストユーザに登録すれば審査なしで使える (100 ユーザ上限)。出典: <https://developers.google.com/health/setup>, <https://developers.google.com/health/app-verification>
 - Testing 状態のリフレッシュトークンは同意から 7 日で失効する。出典: <https://developers.google.com/health/setup>, <https://support.google.com/cloud/answer/15549945>。Internal (Google Cloud Organization 必須) や審査は使わない前提で、週 1 回の再認可を運用で受け入れる。再認可の手順は「初回認可」節と同じ。
 - レート制限: ユーザ単位 300 requests/minute。超過時は 429 (「エラー時の挙動」参照)。出典: <https://developers.google.com/health/rate-limits>
@@ -163,23 +163,24 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
 | 引数          | 必須 | 意味                                                                                                                                                                                                                                                                      |
 | ------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 位置引数      | 必須 | dataType: `steps` / `active-minutes` / `active-zone-minutes` / `distance` / `exercise` / `heart-rate` / `sleep`                                                                                                                                                           |
+| 位置引数      | 必須 | dataType: `steps` / `active-minutes` / `active-zone-minutes` / `distance` / `exercise` / `heart-rate` / `sleep` / `weight` / `body-fat`                                                                                                                                   |
 | `--from`      | 必須 | 取得範囲の開始。`YYYY-MM-DD` または RFC3339 (両方とも同じ形式で指定する)                                                                                                                                                                                                  |
 | `--to`        | 必須 | 取得範囲の終了。`YYYY-MM-DD` または RFC3339。exclusive (filter は `>= from AND < to`)。日付なら `--to` の当日は含まれない。2026-09-26 を含めたければ `--to 2026-09-27` と指定する (`daily-rollup` の `--to` は inclusive で、内部で翌日 00:00:00 を end にする点と対照的) |
-| `--reconcile` | 任意 | 指定すると `dataPoints:reconcile` (dataSourceFamily=google-wearables) で複数ソースをマージして取得する                                                                                                                                                                    |
+| `--reconcile` | 任意 | 指定すると `dataPoints:reconcile` (dataSourceFamily=google-wearables) で複数ソースをマージして取得する。google-wearables (Fitbit・Pixel Watch) 由来のデータだけをマージするため、Health Connect 由来の型 (`weight` ・ `body-fat`) では空になる (2026-09-27 実測)          |
 
-- `heart-rate` (Sample 型) は RFC3339 のみ受け付ける。日付形式 (`YYYY-MM-DD`) を渡すとエラーになる。
+- `heart-rate` ・ `weight` ・ `body-fat` (いずれも Sample 型) は RFC3339 のみ受け付ける。日付形式 (`YYYY-MM-DD`) を渡すとエラーになる。
 - `exercise` は日付 (`YYYY-MM-DD`) のみ受け付ける。RFC3339 を渡すとエラーになる。理由: 実 API が `exercise.interval.start_time` を filter member として認めない。
 - `sleep` は `--from`/`--to` が起床時刻 (interval の終端) で切られる。理由: 実 API は開始基準の filter member (`civil_start_time`・`start_time`) を認めない。終了基準の `civil_end_time`・`end_time` だけが通る。
 - sleep は期間内の全セッション (昼寝を含む) を返す。夜の主睡眠は各レコードの `metadata.mainSleep: true` で見分ける (実測サンプルの `metadata.mainSleep` フィールドを参照)。
 - `dataPoints:reconcile` も `dataPoints` (list) と同じ `pageSize` を受ける (2026-09-26 実測: sleep に `pageSize=25`、steps・heart-rate に `pageSize=10000` を付けて HTTP 200、件数も list と整合)。
+- `weight` ・ `body-fat` は `--reconcile` を付けると `dataSourceFamily=users/me/dataSourceFamilies/google-wearables` に一致するデータが無く、空の `{"dataPoints":[]}` になる。2026-09-27 の実測では `health-connect` という family も無く、指定すると 400 (`Data family is missing or is not supported`) になる。この 2 型には `--reconcile` を付けない。
 - 「直近の睡眠」は `sleep.interval.endTime` が最新のレコード、「昨夜の睡眠」は `mainSleep: true` かつ `endTime` に `endUtcOffset` (JST なら `32400s`) を足して得た暦日が当日のレコード、というように目的に応じてどちらの基準で選ぶかを明示する (sleep の `interval` には `civilStartTime`/`civilEndTime` が無い。実測サンプル参照)。
 - `--from` と `--to` は同じ形式 (どちらも `YYYY-MM-DD`、またはどちらも RFC3339) でなければエラーになる。
 - filter の組み立ては `lib/filter.ts` の表に集約してある (2026-09-26、Pixel Watch 4 で実測)。
   - steps・active-minutes・distance は `<snake>.interval.start_time` (RFC3339) と `<snake>.interval.civil_start_time` (日付) の両方が通る。active-zone-minutes は未実測で同じ表に乗せてあるだけ。
   - exercise は `exercise.interval.civil_start_time` (日付) のみ通る。
   - sleep は `sleep.interval.end_time` (RFC3339) と `sleep.interval.civil_end_time` (日付) のみ通る。
-  - heart-rate (Sample 型) は `heart_rate.sample_time.physical_time` (RFC3339 のみ) を使う。
+  - heart-rate・weight・body-fat (Sample 型) は、それぞれ `heart_rate.sample_time.physical_time`・`weight.sample_time.physical_time`・`body_fat.sample_time.physical_time` を使う。いずれも RFC3339 のみ受け付ける。
   - 非対応の組み合わせ (exercise + RFC3339、heart-rate + 日付など) はリクエスト前にエラーになり、メッセージにどちらの形式なら通るかを書く。
 - 出力は `nextPageToken` が空になるまで全ページ結合した `{"dataPoints": [...]}`。最終ページは `dataPoints`・`nextPageToken` の両キーが省略された `{}` で返ることがある (2026-09-26 実測、steps 6 ページ目。proto3 の JSON マッピングで空の repeated field がまるごと省略されるため)。この場合はページ終端として扱い、それまでに集めた結果をそのまま返す。
 
@@ -206,16 +207,18 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
 出典: issue #77 (`gh issue view 77`)。
 
-| データ              | identifier            | scope (`https://www.googleapis.com/auth/googlehealth` 配下) | 種別                      | filter で通るメンバー (実測、2026-09-26)                                                   |
-| ------------------- | --------------------- | ----------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------ |
-| 歩数                | `steps`               | `.activity_and_fitness.readonly`                            | Interval (1 分)           | `interval.civil_start_time` (日付) / `interval.start_time` (RFC3339)                       |
-| Active Minutes      | `active-minutes`      | 同上                                                        | Interval (1 分)           | 同上                                                                                       |
-| Active Zone Minutes | `active-zone-minutes` | 同上                                                        | Interval                  | 未実測 (上と同じ扱いにしてある)                                                            |
-| 距離                | `distance`            | 同上                                                        | Interval (1 分)           | 同上 (steps と同じ)                                                                        |
-| 運動セッション      | `exercise`            | 同上                                                        | Session                   | `interval.civil_start_time` (日付) のみ。RFC3339 は 400                                    |
-| 総消費カロリー      | `total-calories`      | 同上                                                        | rollUp / dailyRollUp のみ | 対象外 (dailyRollUp は filter を使わない)                                                  |
-| 心拍                | `heart-rate`          | `.health_metrics_and_measurements.readonly`                 | Sample (1 秒)             | `sample_time.physical_time` (RFC3339 のみ)                                                 |
-| 睡眠                | `sleep`               | `.sleep.readonly`                                           | Session                   | `interval.civil_end_time` (日付) / `interval.end_time` (RFC3339)。どちらも終了 (起床) 基準 |
+| データ              | identifier            | scope (`https://www.googleapis.com/auth/googlehealth` 配下) | 種別                      | filter で通るメンバー (実測、2026-09-26)                                                           |
+| ------------------- | --------------------- | ----------------------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------- |
+| 歩数                | `steps`               | `.activity_and_fitness.readonly`                            | Interval (1 分)           | `interval.civil_start_time` (日付) / `interval.start_time` (RFC3339)                               |
+| Active Minutes      | `active-minutes`      | 同上                                                        | Interval (1 分)           | 同上                                                                                               |
+| Active Zone Minutes | `active-zone-minutes` | 同上                                                        | Interval                  | 未実測 (上と同じ扱いにしてある)                                                                    |
+| 距離                | `distance`            | 同上                                                        | Interval (1 分)           | 同上 (steps と同じ)                                                                                |
+| 運動セッション      | `exercise`            | 同上                                                        | Session                   | `interval.civil_start_time` (日付) のみ。RFC3339 は 400                                            |
+| 総消費カロリー      | `total-calories`      | 同上                                                        | rollUp / dailyRollUp のみ | 対象外 (dailyRollUp は filter を使わない)                                                          |
+| 心拍                | `heart-rate`          | `.health_metrics_and_measurements.readonly`                 | Sample (1 秒)             | `sample_time.physical_time` (RFC3339 のみ)                                                         |
+| 睡眠                | `sleep`               | `.sleep.readonly`                                           | Session                   | `interval.civil_end_time` (日付) / `interval.end_time` (RFC3339)。どちらも終了 (起床) 基準         |
+| 体重                | `weight`              | `.health_metrics_and_measurements.readonly`                 | Sample                    | `sample_time.physical_time` (RFC3339 のみ)。`--reconcile` は空になるため付けない (2026-09-27 実測) |
+| 体脂肪率            | `body-fat`            | `.health_metrics_and_measurements.readonly`                 | Sample                    | `sample_time.physical_time` (RFC3339 のみ)。`--reconcile` は空になるため付けない (2026-09-27 実測) |
 
 `pageSize` の既定は 1440・最大 10000。`exercise` と `sleep` は既定・最大とも 25。スクリプトはデータ型ごとに上限値を `pageSize` として付ける (interval・sample 型は 10000、`exercise`・`sleep` は 25)。ただし `heart-rate` は `pageSize` 未指定で 50 件/ページだった (2026-09-26 実測)。既定値は型によって公式リファレンスの記載と異なりうるため、スクリプトでは常に上限値を明示指定している。
 
@@ -680,6 +683,108 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       }
     }
     // 全 138 件中先頭 2 件に絞った。以下省略。
+  ]
+}
+```
+
+### datapoints weight (実測)
+
+取得コマンド (2026-09-27 JST 取得): `deno task -q datapoints weight --from 2026-09-01T00:00:00Z --to 2026-09-28T00:00:00Z`。全 2 件を掲載した (省略なし)。データ源は Health Planet アプリが Health Connect に書き込んだ体重で、`dataSource.platform` は `HEALTH_CONNECT`。
+
+```json
+{
+  "dataPoints": [
+    {
+      "name": "users/1173016576421350648/dataTypes/weight/dataPoints/8107172512320991248",
+      "dataSource": {
+        "recordingMethod": "UNKNOWN",
+        "device": {},
+        "application": { "packageName": "jp.healthplanet.healthplanetapp" },
+        "platform": "HEALTH_CONNECT"
+      },
+      "weight": {
+        "sampleTime": {
+          "physicalTime": "2026-09-25T22:15:10Z",
+          "utcOffset": "32400s",
+          "civilTime": {
+            "date": { "year": 2026, "month": 9, "day": 26 },
+            "time": { "hours": 7, "minutes": 15, "seconds": 10 }
+          }
+        },
+        "weightGrams": 90200
+      }
+    },
+    {
+      "name": "users/1173016576421350648/dataTypes/weight/dataPoints/886503075782888464",
+      "dataSource": {
+        "recordingMethod": "UNKNOWN",
+        "device": {},
+        "application": { "packageName": "jp.healthplanet.healthplanetapp" },
+        "platform": "HEALTH_CONNECT"
+      },
+      "weight": {
+        "sampleTime": {
+          "physicalTime": "2026-09-13T22:57:30Z",
+          "utcOffset": "32400s",
+          "civilTime": {
+            "date": { "year": 2026, "month": 9, "day": 14 },
+            "time": { "hours": 7, "minutes": 57, "seconds": 30 }
+          }
+        },
+        "weightGrams": 88300
+      }
+    }
+  ]
+}
+```
+
+### datapoints body-fat (実測)
+
+取得コマンド (2026-09-27 JST 取得): `deno task -q datapoints body-fat --from 2026-09-01T00:00:00Z --to 2026-09-28T00:00:00Z`。全 2 件を掲載した (省略なし)。データ源は `weight` と同じく Health Planet アプリが Health Connect に書き込んだ体脂肪率。
+
+```json
+{
+  "dataPoints": [
+    {
+      "name": "users/1173016576421350648/dataTypes/body-fat/dataPoints/911827026476164016",
+      "dataSource": {
+        "recordingMethod": "UNKNOWN",
+        "device": {},
+        "application": { "packageName": "jp.healthplanet.healthplanetapp" },
+        "platform": "HEALTH_CONNECT"
+      },
+      "bodyFat": {
+        "sampleTime": {
+          "physicalTime": "2026-09-25T22:15:10Z",
+          "utcOffset": "32400s",
+          "civilTime": {
+            "date": { "year": 2026, "month": 9, "day": 26 },
+            "time": { "hours": 7, "minutes": 15, "seconds": 10 }
+          }
+        },
+        "percentage": 25.8
+      }
+    },
+    {
+      "name": "users/1173016576421350648/dataTypes/body-fat/dataPoints/4226214199077062968",
+      "dataSource": {
+        "recordingMethod": "UNKNOWN",
+        "device": {},
+        "application": { "packageName": "jp.healthplanet.healthplanetapp" },
+        "platform": "HEALTH_CONNECT"
+      },
+      "bodyFat": {
+        "sampleTime": {
+          "physicalTime": "2026-09-13T22:57:30Z",
+          "utcOffset": "32400s",
+          "civilTime": {
+            "date": { "year": 2026, "month": 9, "day": 14 },
+            "time": { "hours": 7, "minutes": 57, "seconds": 30 }
+          }
+        },
+        "percentage": 26.6
+      }
+    }
   ]
 }
 ```

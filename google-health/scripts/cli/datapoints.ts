@@ -12,18 +12,18 @@ const command = define({
     from: {
       type: "string",
       description:
-        "取得範囲の開始 (YYYY-MM-DD または RFC3339。heart-rate は RFC3339 のみ、exercise は YYYY-MM-DD のみ。sleep は起床時刻 (interval の終端) 基準で切られる)",
+        "取得範囲の開始 (YYYY-MM-DD または RFC3339。heart-rate・weight・body-fat は RFC3339 のみ、exercise は YYYY-MM-DD のみ。sleep は起床時刻 (interval の終端) 基準で切られる)",
     },
     to: {
       type: "string",
       description:
-        "取得範囲の終了 (YYYY-MM-DD または RFC3339。heart-rate は RFC3339 のみ、exercise は YYYY-MM-DD のみ。sleep は起床時刻 (interval の終端) 基準で切られる)",
+        "取得範囲の終了 (YYYY-MM-DD または RFC3339。heart-rate・weight・body-fat は RFC3339 のみ、exercise は YYYY-MM-DD のみ。sleep は起床時刻 (interval の終端) 基準で切られる)",
     },
     reconcile: {
       type: "boolean",
       default: false,
       description:
-        "dataPoints:reconcile (dataSourceFamily=google-wearables) を使う",
+        "dataPoints:reconcile (dataSourceFamily=google-wearables) を使う。google-wearables (Fitbit・Pixel Watch) 由来のデータだけをマージする。Health Connect 由来の型 (weight・body-fat) では空になるので付けない",
     },
   },
   run: async (ctx) => {

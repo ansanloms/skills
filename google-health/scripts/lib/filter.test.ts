@@ -58,24 +58,30 @@ Deno.test("buildFilter: exercise は日付 (civil_start_time) のみ通り、RFC
   );
 });
 
-Deno.test("buildFilter: sample 型 (heart-rate) は sample_time.physical_time で組み立てる", () => {
-  const filter = buildFilter(
-    "heart-rate",
-    "2026-04-20T00:00:00Z",
-    "2026-04-21T00:00:00Z",
-  );
-  assertEquals(
-    filter,
-    `heart_rate.sample_time.physical_time >= "2026-04-20T00:00:00Z" AND heart_rate.sample_time.physical_time < "2026-04-21T00:00:00Z"`,
-  );
-});
+Deno.test("buildFilter: sample 型は sample_time.physical_time (RFC3339) で組み立て、日付形式はエラーになる", () => {
+  for (
+    const { dataType, field } of [
+      { dataType: "heart-rate", field: "heart_rate" },
+      { dataType: "weight", field: "weight" },
+      { dataType: "body-fat", field: "body_fat" },
+    ]
+  ) {
+    const filter = buildFilter(
+      dataType,
+      "2026-04-20T00:00:00Z",
+      "2026-04-21T00:00:00Z",
+    );
+    assertEquals(
+      filter,
+      `${field}.sample_time.physical_time >= "2026-04-20T00:00:00Z" AND ${field}.sample_time.physical_time < "2026-04-21T00:00:00Z"`,
+    );
 
-Deno.test("buildFilter: sample 型に日付形式を渡すとエラー (RFC3339 を使えと案内する)", () => {
-  assertThrows(
-    () => buildFilter("heart-rate", "2026-04-20", "2026-04-21"),
-    Error,
-    "RFC3339",
-  );
+    assertThrows(
+      () => buildFilter(dataType, "2026-04-20", "2026-04-21"),
+      Error,
+      "RFC3339",
+    );
+  }
 });
 
 Deno.test("buildFilter: from/to の形式が食い違うとエラー", () => {
@@ -139,6 +145,8 @@ Deno.test("DATA_TYPE_FILTER_FIELDS: exercise・sleep の pageSize は 25、そ�
       "active-zone-minutes",
       "distance",
       "heart-rate",
+      "weight",
+      "body-fat",
     ]
   ) {
     assertEquals(DATA_TYPE_FILTER_FIELDS[dataType].pageSize, 10000);
