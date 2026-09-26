@@ -23,7 +23,6 @@ for d in "$PWD/.claude/skills/google-health" "$HOME/.claude/skills/google-health
 done
 ```
 
-- 配布先 (`apm install` 後) では、プロジェクトローカルな配置の `$PWD/.claude/skills/google-health/scripts` またはユーザーレベルな配置の `$HOME/.claude/skills/google-health/scripts` がヒットする。
 - この skill のリポジトリ本体 (`ansanloms/skills`) 内で作業している場合は `$PWD/google-health/scripts` がヒットする。
 - 複数ヒットしたら先に見つかったものを使う。
 - 0 件のときは実際のインストール先を確認してから進める (推測でパスを組み立てない)。
