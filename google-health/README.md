@@ -1,6 +1,6 @@
 # google-health
 
-Google Health API (REST v4) から、Fitbit・Pixel Watch が記録した歩数・運動・消費カロリー・心拍・睡眠を取得する skill。
+Google Health API (REST v4) から、Fitbit・Pixel Watch が記録した歩数・運動・消費カロリー・心拍・睡眠・体重・体脂肪率を取得する skill。
 
 ## できること
 
@@ -8,7 +8,7 @@ Google Health API (REST v4) から、Fitbit・Pixel Watch が記録した歩数�
   - `auth`: 認可 URL の表示から localhost でのコード受信・トークン交換・保存までを 1 コマンドで実行
   - `auth-url` + `token`: localhost に届かない環境向けの手動退路
 - アクセストークンの期限切れを自動検出し、リフレッシュトークンで更新してからデータ取得
-- 歩数・Active Minutes・Active Zone Minutes・距離・運動セッション・心拍・睡眠の記録を取得 (`datapoints`)
+- 歩数・Active Minutes・Active Zone Minutes・距離・運動セッション・心拍・睡眠・体重・体脂肪率の記録を取得 (`datapoints`)
 - 総消費カロリーなど 14 日上限のある集計データを取得 (`daily-rollup`)
 - リフレッシュトークンの残り日数の確認 (`token-status`)。理由: Testing 状態のリフレッシュトークンは同意から 7 日で失効する
 
@@ -22,7 +22,7 @@ Google Health API (REST v4) から、Fitbit・Pixel Watch が記録した歩数�
 
 ## 発動する場面
 
-「歩数」「今日の運動」「消費カロリー」「心拍」「睡眠時間」「Pixel Watch」「Google Health」などを聞かれたとき。
+「歩数」「今日の運動」「消費カロリー」「心拍」「睡眠時間」「体重」「体脂肪率」「Pixel Watch」「Google Health」などを聞かれたとき。
 
 ## 導入
 

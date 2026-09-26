@@ -30,7 +30,8 @@ export type FilterFieldEntry =
  * - exercise は日付 (civil_start_time) のみ通り、RFC3339 (start_time) は 400 (`Member 'exercise.interval.start_time' is not supported for filtering`)。
  * - sleep は開始基準 (civil_start_time・start_time) がどちらも 400 (`INVALID_DATA_POINT_FILTER_DATA_TYPE_MEMBER`) で、終了基準 (civil_end_time・end_time) のみ通る。
  *   つまり --from/--to は起床時刻 (interval の終端) で切られる。
- * - heart-rate (sample 型) は sample_time.physical_time (RFC3339 のみ) が通る。
+ * - heart-rate・weight・body-fat (いずれも sample 型) は sample_time.physical_time (RFC3339 のみ) が通る
+ *   (weight・body-fat は 2026-09-27 実測、Health Planet アプリが Health Connect に書いたデータ)。
  *
  * pageSize は公式リファレンス (https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints/list)
  * の既定は 1440・最大は 10000 (exercise・sleep は既定・最大とも 25)。ただし heart-rate は
@@ -82,6 +83,8 @@ export const DATA_TYPE_FILTER_FIELDS: Readonly<
     pageSize: 25,
   },
   "heart-rate": { kind: "sample", field: "heart_rate", pageSize: 10000 },
+  "weight": { kind: "sample", field: "weight", pageSize: 10000 },
+  "body-fat": { kind: "sample", field: "body_fat", pageSize: 10000 },
 };
 
 const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
