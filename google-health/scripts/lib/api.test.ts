@@ -46,6 +46,42 @@ Deno.test("getPaginated: nextPageToken を辿って全ページの配列を結�
   assertEquals(calls, 2);
 });
 
+Deno.test("getPaginated: 呼び出し元が付けた pageSize クエリを全ページで維持する", async () => {
+  let calls = 0;
+  const mockFn: typeof fetch = (input) => {
+    calls++;
+    const u = new URL(input instanceof URL ? input : String(input));
+    assertEquals(u.searchParams.get("pageSize"), "10000");
+    if (u.searchParams.get("pageToken") === null) {
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({ dataPoints: [{ id: 1 }], nextPageToken: "p2" }),
+          { status: 200 },
+        ),
+      );
+    }
+    assertEquals(u.searchParams.get("pageToken"), "p2");
+    return Promise.resolve(
+      new Response(
+        JSON.stringify({ dataPoints: [{ id: 2 }], nextPageToken: "" }),
+        { status: 200 },
+      ),
+    );
+  };
+
+  const items = await withMockedFetch(
+    mockFn,
+    () =>
+      getPaginated(
+        "https://health.googleapis.com/v4/x?pageSize=10000",
+        "token",
+        "dataPoints",
+      ),
+  );
+  assertEquals(items, [{ id: 1 }, { id: 2 }]);
+  assertEquals(calls, 2);
+});
+
 Deno.test("getPaginated: 非 2xx は HTTP ステータスとボディを含む HttpError", async () => {
   const mockFn: typeof fetch = () =>
     Promise.resolve(new Response("bad request body", { status: 400 }));

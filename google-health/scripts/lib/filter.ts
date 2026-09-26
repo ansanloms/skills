@@ -13,11 +13,15 @@ export type FilterFieldEntry =
     dateMember?: string;
     /** RFC3339 のとき interval.<member> に使うメンバー名。undefined なら RFC3339 は非対応。 */
     rfc3339Member?: string;
+    /** dataPoints.list に付ける pageSize (公式リファレンス実測値)。 */
+    pageSize: number;
   }
   | {
     kind: "sample";
     /** filter 文字列で使う snake_case のフィールド名。 */
     field: string;
+    /** dataPoints.list に付ける pageSize (公式リファレンス実測値)。 */
+    pageSize: number;
   };
 
 /**
@@ -27,6 +31,11 @@ export type FilterFieldEntry =
  * - sleep は開始基準 (civil_start_time・start_time) がどちらも 400 (`INVALID_DATA_POINT_FILTER_DATA_TYPE_MEMBER`) で、終了基準 (civil_end_time・end_time) のみ通る。
  *   つまり --from/--to は起床時刻 (interval の終端) で切られる。
  * - heart-rate (sample 型) は sample_time.physical_time (RFC3339 のみ) が通る。
+ *
+ * pageSize は公式リファレンス (https://developers.google.com/health/reference/rest/v4/users.dataTypes.dataPoints/list)
+ * の既定は 1440・最大は 10000 (exercise・sleep は既定・最大とも 25)。ただし heart-rate は
+ * pageSize 未指定で 50 件/ページだった (2026-09-26 実測)。ここでは全型で上限値を明示指定し、
+ * 実際の既定値に関わらずリクエスト数の膨張を避ける。
  */
 export const DATA_TYPE_FILTER_FIELDS: Readonly<
   Record<string, FilterFieldEntry>
@@ -36,37 +45,43 @@ export const DATA_TYPE_FILTER_FIELDS: Readonly<
     field: "steps",
     dateMember: "civil_start_time",
     rfc3339Member: "start_time",
+    pageSize: 10000,
   },
   "active-minutes": {
     kind: "interval",
     field: "active_minutes",
     dateMember: "civil_start_time",
     rfc3339Member: "start_time",
+    pageSize: 10000,
   },
   "active-zone-minutes": {
     kind: "interval",
     field: "active_zone_minutes",
     dateMember: "civil_start_time",
     rfc3339Member: "start_time",
+    pageSize: 10000,
   },
   "distance": {
     kind: "interval",
     field: "distance",
     dateMember: "civil_start_time",
     rfc3339Member: "start_time",
+    pageSize: 10000,
   },
   "exercise": {
     kind: "interval",
     field: "exercise",
     dateMember: "civil_start_time",
+    pageSize: 25,
   },
   "sleep": {
     kind: "interval",
     field: "sleep",
     dateMember: "civil_end_time",
     rfc3339Member: "end_time",
+    pageSize: 25,
   },
-  "heart-rate": { kind: "sample", field: "heart_rate" },
+  "heart-rate": { kind: "sample", field: "heart_rate", pageSize: 10000 },
 };
 
 const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;

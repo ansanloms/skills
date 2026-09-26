@@ -172,6 +172,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 - `exercise` は日付 (`YYYY-MM-DD`) のみ受け付ける。RFC3339 を渡すとエラーになる。理由: 実 API が `exercise.interval.start_time` を filter member として認めない。
 - `sleep` は `--from`/`--to` が起床時刻 (interval の終端) で切られる。理由: 実 API は開始基準の filter member (`civil_start_time`・`start_time`) を認めない。終了基準の `civil_end_time`・`end_time` だけが通る。
 - sleep は期間内の全セッション (昼寝を含む) を返す。夜の主睡眠は各レコードの `metadata.mainSleep: true` で見分ける (実測サンプルの `metadata.mainSleep` フィールドを参照)。
+- `dataPoints:reconcile` も `dataPoints` (list) と同じ `pageSize` を受ける (2026-09-26 実測: sleep に `pageSize=25`、steps・heart-rate に `pageSize=10000` を付けて HTTP 200、件数も list と整合)。
 - 「直近の睡眠」は `sleep.interval.endTime` が最新のレコード、「昨夜の睡眠」は `mainSleep: true` かつ `endTime` に `endUtcOffset` (JST なら `32400s`) を足して得た暦日が当日のレコード、というように目的に応じてどちらの基準で選ぶかを明示する (sleep の `interval` には `civilStartTime`/`civilEndTime` が無い。実測サンプル参照)。
 - `--from` と `--to` は同じ形式 (どちらも `YYYY-MM-DD`、またはどちらも RFC3339) でなければエラーになる。
 - filter の組み立ては `lib/filter.ts` の表に集約してある (2026-09-26、Pixel Watch 4 で実測)。
@@ -216,7 +217,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 | 心拍                | `heart-rate`          | `.health_metrics_and_measurements.readonly`                 | Sample (1 秒)             | `sample_time.physical_time` (RFC3339 のみ)                                                 |
 | 睡眠                | `sleep`               | `.sleep.readonly`                                           | Session                   | `interval.civil_end_time` (日付) / `interval.end_time` (RFC3339)。どちらも終了 (起床) 基準 |
 
-`pageSize` の既定は 1440・最大 10000。`exercise` と `sleep` は既定・最大とも 25 (スクリプトでは指定せず API の既定に任せる)。
+`pageSize` の既定は 1440・最大 10000。`exercise` と `sleep` は既定・最大とも 25。スクリプトはデータ型ごとに上限値を `pageSize` として付ける (interval・sample 型は 10000、`exercise`・`sleep` は 25)。ただし `heart-rate` は `pageSize` 未指定で 50 件/ページだった (2026-09-26 実測)。既定値は型によって公式リファレンスの記載と異なりうるため、スクリプトでは常に上限値を明示指定している。
 
 ## レスポンスの形
 

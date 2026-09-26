@@ -56,6 +56,13 @@ const command = define({
           : `${API_BASE}/users/me/dataTypes/${dataType}/dataPoints`,
       );
       url.searchParams.set("filter", filter);
+      // dataPoints:reconcile も dataPoints (list) と同じ pageSize を受理する
+      // (2026-09-26 実測: sleep に pageSize=25、steps・heart-rate に pageSize=10000 で
+      // HTTP 200、件数も list と整合)。
+      url.searchParams.set(
+        "pageSize",
+        String(DATA_TYPE_FILTER_FIELDS[dataType].pageSize),
+      );
       if (reconcile) {
         url.searchParams.set(
           "dataSourceFamily",

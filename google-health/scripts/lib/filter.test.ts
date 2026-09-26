@@ -1,5 +1,5 @@
 import { assertEquals, assertThrows } from "@std/assert";
-import { buildFilter } from "./filter.ts";
+import { buildFilter, DATA_TYPE_FILTER_FIELDS } from "./filter.ts";
 
 Deno.test("buildFilter: interval 型 (RFC3339) は snake_case.interval.start_time で組み立てる", () => {
   const filter = buildFilter(
@@ -129,6 +129,23 @@ Deno.test("buildFilter: from >= to (RFC3339) はエラー", () => {
     Error,
     "exclusive",
   );
+});
+
+Deno.test("DATA_TYPE_FILTER_FIELDS: exercise・sleep の pageSize は 25、それ以外は 10000", () => {
+  for (
+    const dataType of [
+      "steps",
+      "active-minutes",
+      "active-zone-minutes",
+      "distance",
+      "heart-rate",
+    ]
+  ) {
+    assertEquals(DATA_TYPE_FILTER_FIELDS[dataType].pageSize, 10000);
+  }
+  for (const dataType of ["exercise", "sleep"]) {
+    assertEquals(DATA_TYPE_FILTER_FIELDS[dataType].pageSize, 25);
+  }
 });
 
 Deno.test("buildFilter: 未対応の dataType はエラー", () => {
