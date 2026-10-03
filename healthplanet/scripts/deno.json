@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
+  "fmt": {
+    "proseWrap": "preserve"
+  },
+  "lint": {
+    "rules": { "tags": ["recommended"] },
+    "plugins": ["jsr:@aireone/deno-lint-curly"]
+  },
+  "exclude": ["coverage/"],
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1.0.19",
+    "@std/path": "jsr:@std/path@1.1.6",
+    "gunshi": "jsr:@gunshi/gunshi@0.37.1"
+  },
+  "tasks": {
+    "auth-url": "deno run --allow-env=HEALTHPLANET_CLIENT_ID,HEALTHPLANET_REDIRECT_URI cli/auth-url.ts",
+    "token": "deno run --allow-net=www.healthplanet.jp --allow-env=HEALTHPLANET_CLIENT_ID,HEALTHPLANET_CLIENT_SECRET,HEALTHPLANET_REDIRECT_URI,HEALTHPLANET_TOKEN_PATH --allow-read=\"$HEALTHPLANET_TOKEN_PATH\" --allow-write=\"$HEALTHPLANET_TOKEN_PATH\" cli/token.ts",
+    "status": "deno run --allow-net=www.healthplanet.jp --allow-env=HEALTHPLANET_CLIENT_ID,HEALTHPLANET_CLIENT_SECRET,HEALTHPLANET_REDIRECT_URI,HEALTHPLANET_TOKEN_PATH --allow-read=\"$HEALTHPLANET_TOKEN_PATH\" --allow-write=\"$HEALTHPLANET_TOKEN_PATH\" cli/status.ts",
+    "lint": "deno lint && deno check && deno fmt --check",
+    "fix": "deno lint --fix && deno fmt",
+    "test": "deno test -A --parallel --shuffle --coverage"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  }
+}
