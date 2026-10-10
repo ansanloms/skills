@@ -22,9 +22,9 @@
  * .drawio はセルの意味づけ (種別・接続・所属) だけに使い、両者を id (= data-cell-id) で突き合わせる。
  *
  * Usage:
- *   node check-readability.ts --drawio diagram.drawio --svg diagram.drawio.svg
- *   node check-readability.ts --drawio d.drawio --svg d.svg --json
- *   node check-readability.ts --drawio d.drawio --svg d.svg --legend-id legend
+ *   npx --no check-readability --drawio diagram.drawio --svg diagram.drawio.svg
+ *   npx --no check-readability --drawio d.drawio --svg d.svg --json
+ *   npx --no check-readability --drawio d.drawio --svg d.svg --legend-id legend
  *
  * 終了コード: ERROR 重大度の指摘が 1 件でもあれば 1、無ければ 0。
  */

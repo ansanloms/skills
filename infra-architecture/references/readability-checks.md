@@ -48,22 +48,24 @@
 drawio -x -f svg -e -o diagram.drawio.svg diagram.drawio --disable-gpu --no-sandbox
 
 # 幾何チェック
-node scripts/check-readability.ts \
+npx --no --prefix scripts check-readability \
   --drawio diagram.drawio --svg diagram.drawio.svg
 ```
+
+`--no` は未インストールのパッケージを registry から取りに行かないための指定。
 
 スクリプトは skill 配下の絶対パス、対象ファイルは任意の絶対パスで渡せる。図が skill 外のディレクトリにある場合は両方とも絶対パスで指定する。
 
 ```bash
-node <skillの絶対パス>/scripts/check-readability.ts \
+npx --no --prefix "<skillの絶対パス>/scripts" check-readability \
   --drawio /path/to/diagram.drawio --svg /path/to/diagram.drawio.svg
 ```
 
-`scripts/` には `package.json` があり、そのディレクトリからは `npm run check -- ...` でも呼べる (`--` 以降が引数としてスクリプトに渡る)。
+`scripts/` を cwd にすれば `npx --no check-readability --drawio ... --svg ...` で呼べる。
 
 ```bash
 cd scripts
-npm run check -- --drawio ../diagram.drawio --svg ../diagram.drawio.svg
+npx --no check-readability --drawio ../diagram.drawio --svg ../diagram.drawio.svg
 ```
 
 オプション。
