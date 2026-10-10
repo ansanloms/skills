@@ -1,9 +1,11 @@
 {
   "name": "infra-architecture-scripts",
   "private": true,
+  "bin": {
+    "check-readability": "./check-readability.ts"
+  },
   "type": "module",
   "scripts": {
-    "check": "node ./check-readability.ts",
     "test": "node --test",
     "lint": "oxlint && oxfmt --check && tsc --noEmit",
     "fix": "oxlint --fix && oxfmt"
