@@ -34,6 +34,8 @@ done
 
 Node.js 24 以上が必要。`<scripts の絶対パス>/node_modules` が無いとき、または skill を更新 (`apm update` 等) した直後は、`npm ci --omit=dev --prefix "<scripts の絶対パス>"` で依存 (gunshi) を入れる。実行に要るのは gunshi だけなので、devDependencies (typescript・oxlint・oxfmt) は入れない。依存が無いまま実行すると 4 コマンドすべてが `gunshi` の解決エラーで失敗する。
 
+`--prefix` は bin の解決先を指定するだけで、CLI の cwd は呼び出し元のまま変わらない。`--file` 等でファイルパスを渡すときは絶対パスで渡す (相対パスは呼び出し元基準で解決される)。
+
 ## 前提: 何が取れて何が取れないか
 
 山頂のピンポイントな気象数値そのものは一般に保証されないが、判断材料となる指標は無料で取得できる。

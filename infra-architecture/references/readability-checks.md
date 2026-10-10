@@ -54,7 +54,7 @@ npx --no --prefix scripts check-readability \
 
 `--no` は未インストールのパッケージを registry から取りに行かないための指定。
 
-スクリプトは skill 配下の絶対パス、対象ファイルは任意の絶対パスで渡せる。図が skill 外のディレクトリにある場合は両方とも絶対パスで指定する。
+スクリプトは skill 配下の絶対パス、対象ファイルは任意の絶対パスで渡せる。図が skill 外のディレクトリにある場合は両方とも絶対パスで指定する。`--prefix` は bin の解決先を指定するだけで、cwd は呼び出し元のまま変わらない。`--drawio`/`--svg` の相対パスは呼び出し元基準で解決される。
 
 ```bash
 npx --no --prefix "<skillの絶対パス>/scripts" check-readability \
