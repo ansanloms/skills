@@ -9,10 +9,9 @@ Web 画面をブラウザ越しに検証する際は `playwright-cli`(`@playwrig
 
 公式ドキュメント: <https://github.com/microsoft/playwright-cli>
 
-## `e2e` skill との役割分担
+## 対象範囲
 
-- `e2e` skill: 試験項目書(spec)の作成・生成・Excel 出力・spec 駆動のテスト実行という上位ワークフロー。
-- 本 skill: その下層で使う playwright-cli そのものの操作リファレンス。spec を介さない ad-hoc な画面検証(再現確認など)はこちらを直接使う。
+本 skill は playwright-cli そのものの操作リファレンスで、spec を介さない ad-hoc な画面検証(再現確認など)に使う。試験仕様(spec)駆動のワークフローは対象外。
 
 ## 前提
 

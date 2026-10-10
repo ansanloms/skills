@@ -12,7 +12,7 @@ playwright-cli でブラウザを駆動し Web 画面をブラックボックス
 - SP 画面検証は config の `viewport` で指定する (`deviceScaleFactor`/`isMobile` は併記しない)。
 - セッション分離 (`-s=name`) で複数画面を並行検証できる。
 - 操作コマンドが出力する Playwright コードを収集し、動作確認済みコードとしてテストへ転写できる。
-- 試験仕様ベースのワークフローは e2e skill の担当。本 skill は spec を介さない ad-hoc な画面検証に使う。
+- 試験仕様 (spec) 駆動のワークフローは本 skill の対象外。spec を介さない ad-hoc な画面検証に使う。
 
 ## 修正時の追加要件
 
