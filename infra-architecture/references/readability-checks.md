@@ -48,22 +48,22 @@
 drawio -x -f svg -e -o diagram.drawio.svg diagram.drawio --disable-gpu --no-sandbox
 
 # 幾何チェック
-deno run --allow-read scripts/check-readability.ts \
+node scripts/check-readability.ts \
   --drawio diagram.drawio --svg diagram.drawio.svg
 ```
 
 スクリプトは skill 配下の絶対パス、対象ファイルは任意の絶対パスで渡せる。図が skill 外のディレクトリにある場合は両方とも絶対パスで指定する。
 
 ```bash
-deno run --allow-read <skillの絶対パス>/scripts/check-readability.ts \
+node <skillの絶対パス>/scripts/check-readability.ts \
   --drawio /path/to/diagram.drawio --svg /path/to/diagram.drawio.svg
 ```
 
-`scripts/` には `deno.json` があり、そのディレクトリからは task でも呼べる。
+`scripts/` には `package.json` があり、そのディレクトリからは `npm run check -- ...` でも呼べる (`--` 以降が引数としてスクリプトに渡る)。
 
 ```bash
 cd scripts
-deno task check --drawio ../diagram.drawio --svg ../diagram.drawio.svg
+npm run check -- --drawio ../diagram.drawio --svg ../diagram.drawio.svg
 ```
 
 オプション。
