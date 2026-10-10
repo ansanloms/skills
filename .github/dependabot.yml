@@ -9,6 +9,7 @@ updates:
     directories:
       - "/infra-architecture/scripts"
       - "/mountain-weather/scripts"
+      - "/google-health/scripts"
     schedule:
       interval: "weekly"
     groups:

@@ -57,7 +57,7 @@ skill/プロンプトを新規作成・大幅改訂したら、empirical-prompt-
 
 機械層だけを直接使う場合は `deno task -q --cwd ja-tech-proofread/scripts textlint <絶対パス...>` (fmt は `fmt`/`fmt:check` task)。rule の正本は preset リポジトリで、このリポジトリでは上書きしない。preset の新しいタグが出たら `ja-tech-proofread/scripts/deno.json` の alias と `deno.lock` を更新する (手順は `ja-tech-proofread/scripts/README.md`)。機械層の正はリポジトリ内の `ja-tech-proofread/scripts`。preset を jsDelivr の URL で参照しているため、Dependabot は rule パッケージの更新を追えるが preset のタグ上げは追えない。タグ上げは手作業で行う。
 
-TS を含む skill の `scripts/` は各ディレクトリの設定で自己完結している。`package.json` を持つもの (infra-architecture、mountain-weather) は `npm run lint`/`npm run fix` (初回はそのディレクトリで `npm ci` を実行して devDependencies を入れる)、`deno.json` を持つもの (ja-tech-proofread、google-health) は `deno task lint`/`deno task fix` をそのディレクトリで実行する。Deno 依存は順次 Node へ移行中 (issue #86〜#89)。root に共通の設定・task は無い。
+TS を含む skill の `scripts/` は各ディレクトリの設定で自己完結している。`package.json` を持つもの (infra-architecture、mountain-weather、google-health) は `npm run lint`/`npm run fix` (初回はそのディレクトリで `npm ci` を実行して devDependencies を入れる)、`deno.json` を持つもの (ja-tech-proofread) は `deno task lint`/`deno task fix` をそのディレクトリで実行する。Deno 依存は順次 Node へ移行中 (issue #86〜#89)。root に共通の設定・task は無い。
 
 textlint と markdown 記法が衝突しやすい点は次のとおり。
 
