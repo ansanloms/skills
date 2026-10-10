@@ -1,0 +1,20 @@
+{
+  "name": "infra-architecture-scripts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node ./check-readability.ts",
+    "test": "node --test",
+    "lint": "oxlint && oxfmt --check && tsc --noEmit",
+    "fix": "oxlint --fix && oxfmt"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "oxfmt": "0.72.0",
+    "oxlint": "1.87.0",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=24.2"
+  }
+}
