@@ -14,7 +14,7 @@ Google Health API (REST v4) から、Fitbit・Pixel Watch が記録した歩数�
 
 ## scripts の絶対パスを確定する
 
-この skill のコマンド (`auth` ・ `auth-url` ・ `token` ・ `token-status` ・ `datapoints` ・ `daily-rollup` ・ `get` ・ `rollup` ・ `create` ・ `update` ・ `batch-delete`、いずれも後述) は `google-health/scripts` を `--cwd` に指定して実行する。パスは変数に代入せず、最初に 1 度だけ次のコマンドで絶対パスを確定し、以降の各コマンド例ではその結果をそのままリテラルで書き下す。理由: エージェントのシェルはコール間で cwd・変数を失う。
+この skill のコマンド (`auth` ・ `auth-url` ・ `token` ・ `token-status` ・ `datapoints` ・ `daily-rollup` ・ `get` ・ `rollup` ・ `create` ・ `update` ・ `batch-delete`、いずれも後述) は `google-health/scripts` を `npx --no --prefix` に指定して実行する。`--no` は未インストールのパッケージを registry から取りに行かないための指定で、bin 名が汎用名のため必須。パスは変数に代入せず、最初に 1 度だけ次のコマンドで絶対パスを確定し、以降の各コマンド例ではその結果をそのままリテラルで書き下す。理由: エージェントのシェルはコール間で cwd・変数を失う。
 
 ```sh
 for d in "$PWD/.claude/skills/google-health" "$HOME/.claude/skills/google-health" "$PWD/google-health"; do
@@ -31,6 +31,7 @@ done
 
 ## 前提と制約
 
+- Node.js 24.2 以上。`<scripts の絶対パス>/node_modules` が無いとき、または skill を更新 (`apm update` 等) した直後は、`npm ci --omit=dev --prefix "<scripts の絶対パス>"` で依存 (gunshi) を入れる。devDependencies は実行に不要なので入れない。 `--prefix` は bin の解決先を指定するだけで、CLI の cwd は呼び出し元のまま変わらない。本 skill の CLI にファイルパス引数は無い (`--body` は JSON 文字列か `-` で標準入力) が、`GOOGLE_HEALTH_TOKEN_PATH` は cwd に依存しないよう絶対パスで設定する。
 - Google Fit REST API は廃止済み (新規登録は 2024-05-01 終了、サポートは 2026 年末まで、代替なし)。Health Connect は端末内 API でサーバから読めない。Google Health API がサーバから叩ける唯一の公式手段。出典: <https://developer.android.com/health-and-fitness/health-connect/migration/fit/faq>
 - データ源は Fitbit・Pixel Watch と、Health Connect 経由の一部データ型。公式ドキュメントでは Health Connect のデータ型は 2026 Q4 に追加予定で未提供とされていた。出典: <https://developers.google.com/health/about>。ただし 2026-09-27 時点の実測では、少なくとも体重 (`weight`) と体脂肪率 (`body-fat`) は取得できた。Health Planet アプリが Health Connect に書き込んだデータで、`dataSource.platform` が `HEALTH_CONNECT` として返る。
 - 全スコープが Restricted だが、OAuth 同意画面を Testing (External) のままにし自分をテストユーザに登録すれば審査なしで使える (100 ユーザ上限)。出典: <https://developers.google.com/health/setup>, <https://developers.google.com/health/app-verification>
@@ -69,14 +70,14 @@ mkdir -p -m 700 ~/.local/state/google-health
 GOOGLE_HEALTH_CLIENT_ID=<client_id> \
   GOOGLE_HEALTH_CLIENT_SECRET=<client_secret> \
   GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
-  deno task -q --cwd "<scripts の絶対パス>" auth
+  npx --no --prefix "<scripts の絶対パス>" auth
 ```
 
 1. 標準出力に認可 URL、標準エラーに「ブラウザで開いて認可すること」の案内を出す。URL をユーザに提示し、ブラウザで開いてログイン・認可してもらう。
 2. 認可後 `http://localhost:8765/?code=...` へリダイレクトされ、`auth` がそれを受信して自動でトークン交換・保存まで行い、ブラウザには「認可完了。このタブは閉じてよい」の HTML を返して終了する (exit 0)。
 3. 認可がエラーだった場合 (`?error=...`) は標準エラーにエラー内容を出し、ブラウザには 400 の HTML を返して終了する (exit 1)。5 分以内に応答が無ければタイムアウトとして exit 1 になる。
 4. 既定スコープは `activity_and_fitness` ・ `health_metrics_and_measurements` ・ `sleep` ・ `nutrition` の readonly・writeonly 計 8 種。絞る・広げる場合は `--scope` を繰り返し指定する (`-s <scope> -s <scope> ...`)。
-5. `--port` (既定 8765) で待ち受け port を変えられる。`deno task` の `--allow-net` は port を指定しない形にしてあるため `--port <n>` は task 経由でそのまま通る。変えた場合は Cloud Console の Authorized redirect URIs (登録 URI) も同じ port の `http://localhost:<port>` に変更しておく。
+5. `--port` (既定 8765) で待ち受け port を変えられる (`npx --no --prefix "<scripts の絶対パス>" auth --port <n>`)。変えた場合は Cloud Console の Authorized redirect URIs (登録 URI) も同じ port の `http://localhost:<port>` に変更しておく。
 
 成功するとトークンファイル (`GOOGLE_HEALTH_TOKEN_PATH`) に `access_token` ・ `expires_in` ・ `refresh_token` ・ `refresh_token_expires_in` ・ `scope` ・ `token_type` ・ `obtained_at` ・ `refresh_token_obtained_at` を書き込む。`obtained_at` ・ `refresh_token_obtained_at` はいずれも RFC3339 形式の UTC で、ファイルのパーミッションは 0o600。トークン自体は標準出力に出さない。
 
@@ -103,7 +104,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
    ```sh
    GOOGLE_HEALTH_CLIENT_ID=<client_id> \
-     deno task -q --cwd "<scripts の絶対パス>" auth-url
+     npx --no --prefix "<scripts の絶対パス>" auth-url
    ```
 
 2. 出力された URL をユーザに提示し、ブラウザで開いてログイン・認可してもらう。認可後 `http://localhost:8765/?code=...` へのリダイレクトで接続失敗ページになるので、アドレスバーの `code` パラメータの値をユーザから受け取る。
@@ -113,7 +114,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
    GOOGLE_HEALTH_CLIENT_ID=<client_id> \
      GOOGLE_HEALTH_CLIENT_SECRET=<client_secret> \
      GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
-     deno task -q --cwd "<scripts の絶対パス>" token <認可コード>
+     npx --no --prefix "<scripts の絶対パス>" token <認可コード>
    ```
 
    成功するとトークンファイル (`GOOGLE_HEALTH_TOKEN_PATH`) に `access_token` ・ `expires_in` ・ `refresh_token` ・ `refresh_token_expires_in` ・ `scope` ・ `token_type` ・ `obtained_at` ・ `refresh_token_obtained_at` を書き込む (構造は「auth (主)」節のトークンファイルの実例を参照)。`obtained_at` ・ `refresh_token_obtained_at` はいずれも RFC3339 形式の UTC で、ファイルのパーミッションは 0o600。標準出力へは次を返し、トークン自体は出力しない。
@@ -135,8 +136,10 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
 ```sh
 GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
-  deno task -q --cwd "<scripts の絶対パス>" token-status
+  npx --no --prefix "<scripts の絶対パス>" token-status
 ```
+
+この実測は Deno 実行時 (2026-09-26) のもの。出力は実行方式に依存しない。
 
 実行結果 (実測、2026-09-26 JST 取得): `deno task -q token-status`。
 
@@ -162,7 +165,7 @@ GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
 GOOGLE_HEALTH_CLIENT_ID=<client_id> \
   GOOGLE_HEALTH_CLIENT_SECRET=<client_secret> \
   GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
-  deno task -q --cwd "<scripts の絶対パス>" datapoints steps --from=2026-04-20 --to=2026-04-21
+  npx --no --prefix "<scripts の絶対パス>" datapoints steps --from=2026-04-20 --to=2026-04-21
 ```
 
 | 引数          | 必須 | 意味                                                                                                                                                                                                                                                                      |
@@ -196,7 +199,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 GOOGLE_HEALTH_CLIENT_ID=<client_id> \
   GOOGLE_HEALTH_CLIENT_SECRET=<client_secret> \
   GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
-  deno task -q --cwd "<scripts の絶対パス>" daily-rollup total-calories --from=2026-04-01 --to=2026-04-14
+  npx --no --prefix "<scripts の絶対パス>" daily-rollup total-calories --from=2026-04-01 --to=2026-04-14
 ```
 
 | 引数     | 必須 | 意味                                                                                                                                                                  |
@@ -215,7 +218,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 GOOGLE_HEALTH_CLIENT_ID=<client_id> \
   GOOGLE_HEALTH_CLIENT_SECRET=<client_secret> \
   GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
-  deno task -q --cwd "<scripts の絶対パス>" get users/me/dataTypes/steps/dataPoints/<id>
+  npx --no --prefix "<scripts の絶対パス>" get users/me/dataTypes/steps/dataPoints/<id>
 ```
 
 `GET <name>` で dataPoint 1 件を取得し、応答をそのまま標準出力へ出す。`<name>` は `datapoints` ・ `create` の応答に含まれる `name` フィールドの値をそのまま使う。
@@ -226,7 +229,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 GOOGLE_HEALTH_CLIENT_ID=<client_id> \
   GOOGLE_HEALTH_CLIENT_SECRET=<client_secret> \
   GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
-  deno task -q --cwd "<scripts の絶対パス>" rollup steps --from=2026-04-20T00:00:00Z --to=2026-04-21T00:00:00Z --window=5m
+  npx --no --prefix "<scripts の絶対パス>" rollup steps --from=2026-04-20T00:00:00Z --to=2026-04-21T00:00:00Z --window=5m
 ```
 
 | 引数       | 必須 | 意味                                                                                                          |
@@ -244,7 +247,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 GOOGLE_HEALTH_CLIENT_ID=<client_id> \
   GOOGLE_HEALTH_CLIENT_SECRET=<client_secret> \
   GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
-  deno task -q --cwd "<scripts の絶対パス>" create nutrition-log --body='<JSON>'
+  npx --no --prefix "<scripts の絶対パス>" create nutrition-log --body='<JSON>'
 ```
 
 | 引数     | 必須 | 意味                                                                  |
@@ -275,7 +278,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 GOOGLE_HEALTH_CLIENT_ID=<client_id> \
   GOOGLE_HEALTH_CLIENT_SECRET=<client_secret> \
   GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
-  deno task -q --cwd "<scripts の絶対パス>" update users/me/dataTypes/nutrition-log/dataPoints/<id> --body='<JSON>'
+  npx --no --prefix "<scripts の絶対パス>" update users/me/dataTypes/nutrition-log/dataPoints/<id> --body='<JSON>'
 ```
 
 | 引数            | 必須 | 意味                                                                        |
@@ -296,7 +299,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 GOOGLE_HEALTH_CLIENT_ID=<client_id> \
   GOOGLE_HEALTH_CLIENT_SECRET=<client_secret> \
   GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
-  deno task -q --cwd "<scripts の絶対パス>" batch-delete nutrition-log users/me/dataTypes/nutrition-log/dataPoints/<id1> users/me/dataTypes/nutrition-log/dataPoints/<id2>
+  npx --no --prefix "<scripts の絶対パス>" batch-delete nutrition-log users/me/dataTypes/nutrition-log/dataPoints/<id1> users/me/dataTypes/nutrition-log/dataPoints/<id2>
 ```
 
 位置引数は dataType と、削除する dataPoint name を 1 つ以上並べる。`POST .../dataTypes/<dataType>/dataPoints:batchDelete` を `{"names": [...]}` で叩く (body の形は 2026-09-27 実測 (`nutrition-log`) で確認済み)。応答 (`Operation`) をそのまま標準出力へ出す。`response` に `BatchDeleteDataPointsResponse` (削除した DataPoint の配列。サンプルは「レスポンスの形」節) が入る。応答の `done` が `false` の場合は標準エラーに警告を出す (応答自体は出力する。exit code は 0 のまま)。
@@ -336,6 +339,8 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 `hydration-log` は `hydration_log.interval.civil_start_time` で 200 になる (2026-09-27 実測、該当期間 0 件)。
 
 ## レスポンスの形
+
+次の実測は Deno 実行時 (2026-09-26) のもの。応答は API 由来で実行方式に依存しない。
 
 ### datapoints sleep --reconcile (公式ドキュメント掲載の例)
 
@@ -1345,7 +1350,7 @@ invalid_grant (実測、2026-09-26 JST 取得): OAuth token endpoint (`https://o
 ## エラー時の挙動
 
 - `datapoints` ・ `daily-rollup` ・ `get` ・ `rollup` ・ `create` ・ `update` ・ `batch-delete` ・ `/token` のいずれも、非 2xx レスポンス (429 を含む) は HTTP ステータスと生のレスポンスボディを stderr に出力し、exit code 1 で終了する。リトライしない。値を捏造しない。
-- アクセストークンの更新 (refresh) に失敗した場合は、リフレッシュトークンが失効している可能性がある旨と `deno task auth` での再認可が必要な旨 (localhost に届かない端末では `auth-url` と `token <code>`) を stderr に出力し、exit code 1 で終了する。
+- アクセストークンの更新 (refresh) に失敗した場合は、リフレッシュトークンが失効している可能性がある旨と `npx --no --prefix "<scripts の絶対パス>" auth` での再認可が必要な旨 (localhost に届かない端末では `auth-url` と `token <code>`) を stderr に出力し、exit code 1 で終了する。
 - `token-status` はリフレッシュトークンが失効済み (残り日数 0 以下) なら再認可が必要な旨を stderr に出力し、exit code 1 で終了する。このとき JSON は出力しない。
 - トークンファイルが読めない・必要なフィールドが揃っていない場合も、理由を添えて stderr に出力し exit code 1 で終了する。
 
