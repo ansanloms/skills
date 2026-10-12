@@ -48,24 +48,24 @@
 drawio -x -f svg -e -o diagram.drawio.svg diagram.drawio --disable-gpu --no-sandbox
 
 # 幾何チェック
-npx --no --prefix scripts check-readability \
+npx --no --prefix scripts -- check-readability \
   --drawio diagram.drawio --svg diagram.drawio.svg
 ```
 
-`--no` は未インストールのパッケージを registry から取りに行かないための指定。
+`--no` は未インストールのパッケージを registry から取りに行かないための指定。`--` は必須。無いと npm 11 が `--config` 等のフラグを自分の設定として取り込む。
 
 スクリプトは skill 配下の絶対パス、対象ファイルは任意の絶対パスで渡せる。図が skill 外のディレクトリにある場合は両方とも絶対パスで指定する。`--prefix` は bin の解決先を指定するだけで、cwd は呼び出し元のまま変わらない。`--drawio`/`--svg` の相対パスは呼び出し元基準で解決される。
 
 ```bash
-npx --no --prefix "<skillの絶対パス>/scripts" check-readability \
+npx --no --prefix "<skillの絶対パス>/scripts" -- check-readability \
   --drawio /path/to/diagram.drawio --svg /path/to/diagram.drawio.svg
 ```
 
-`scripts/` を cwd にすれば `npx --no check-readability --drawio ... --svg ...` で呼べる。
+`scripts/` を cwd にすれば `npx --no -- check-readability --drawio ... --svg ...` で呼べる。
 
 ```bash
 cd scripts
-npx --no check-readability --drawio ../diagram.drawio --svg ../diagram.drawio.svg
+npx --no -- check-readability --drawio ../diagram.drawio --svg ../diagram.drawio.svg
 ```
 
 オプション。
