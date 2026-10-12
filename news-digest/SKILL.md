@@ -65,6 +65,48 @@ description: >-
   - RSS/Atom の取得を試みたが、HTTP エラーやタイムアウトで失敗した。
   - RSS/Atom は取得できたが、テーマに合致する記事が無かった。
 
+### 取得結果の実サンプル
+
+読む対象の実物を示す。いずれも実際に取得した結果で、長いため途中を省略している。
+
+RSS 2.0 フィード (取得日: 2026-10-12、先頭 1 項目のみ。`<channel>` 内の後続の `<item>` は省略)。コマンドは次のとおり。
+
+```sh
+curl -sL -A "Mozilla/5.0 (compatible; news-digest-skill/1.0; +https://github.com/ansanloms/skills)" "https://gigazine.net/news/rss_2.0/"
+```
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" ...>
+    <channel>
+    <title>GIGAZINE</title>
+    <link>https://gigazine.net/</link>
+    ...
+    <item>
+      <title>7年前に発売されたNVIDIA製品がAIブームで1.5倍に値上がり</title>
+      <link>https://gigazine.net/news/20261012&#45;nvidia&#45;shield&#45;tv&#45;price&#45;hike/</link>
+      <guid isPermaLink="true">https://gigazine.net/news/20261012-nvidia-shield-tv-price-hike/</guid>
+      <description><![CDATA[NVIDIAが7年前に発売した、...値上げされました。<p><b><a href="...">続きを読む...</a></b></p>]]></description>
+      <pubDate>Mon, 12 Oct 2026 23:15:00 +0900</pubDate>
+      <dc:subject>AI, ハードウェア,</dc:subject>
+      <dc:date>2026-10-12T23:15:00+09:00</dc:date>
+    </item>
+    ...
+```
+
+`<link>` の URL には `&#45;` (ハイフンの文字参照) が含まれる。個別 URL として使うときは `-` に戻す (`<guid>` は `-` のまま入っている)。`<description>` は冒頭の概要のみで、要約の根拠にはならない。
+
+取得失敗の例 (取得日: 2026-10-12)。同じ URL を短時間に繰り返し取得すると、フィードの代わりに Cloudflare のボット判定ページが HTTP 429 で返った。XML ではなく HTML が返るため、`<item>` が無いことで取得失敗と判断する (本文は先頭のみ、以降は省略)。コマンドと本文の先頭は次のとおり。
+
+```sh
+curl -sL -A "Mozilla/5.0 (compatible; news-digest-skill/1.0; +https://github.com/ansanloms/skills)" -o /dev/null -w '%{http_code} %{content_type}\n' "https://gigazine.net/news/rss_2.0/"
+# 429 text/html; charset=UTF-8
+```
+
+```html
+<!DOCTYPE html><html lang="en-US"><head><title>Just a moment...</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">...
+```
+
 ## 出力
 
 記事ごとに次の 4 項目を、`**ラベル:** 値` の形式で 1 記事につき 4 行にまとめて返す。ラベルは日本語 (タイトル・要約・公開日・個別 URL) を使う。`**` によるラベルの太字はこの書式そのものであり、除去しない。複数件を返す場合は、この 4 行ブロックを記事ごとに空行で区切って並べる。ラベルの太字以外の媒体固有の記法 (Discord の見出し記法・メンション・カスタム絵文字・チャンネルリンク等) は付けない。整形は呼び出し側が行う。
