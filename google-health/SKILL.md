@@ -340,7 +340,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
 ## レスポンスの形
 
-次の実測は Deno 実行時 (2026-09-26) のもの。応答は API 由来で実行方式に依存しない。
+次の実測は Deno 実行時 (2026-09-26 と 2026-09-27) のもの。応答は API 由来で実行方式に依存しない。各サンプルの取得コマンドにある `deno task -q <サブコマンド>` は Deno 実行時の形で、現在は `npx --no --prefix "<scripts の絶対パス>" -- <サブコマンド>` に相当する。
 
 ### datapoints sleep --reconcile (公式ドキュメント掲載の例)
 
@@ -1289,7 +1289,7 @@ filter は `nutrition_log.interval.civil_start_time` (日付) のみ通る。`st
 
 ### エラー応答 (非 2xx 全般)
 
-401 (実測、2026-09-26 JST 取得): `Authorization: Bearer bad` で不正なアクセストークンを渡して `datapoints` の URL を直接 curl で叩いた。
+401 (実測、2026-10-12 取得): 不正なアクセストークンを渡して `datapoints steps` と同じエンドポイントを curl で叩いた。取得コマンドは `curl -sS -w '\n%{http_code}\n' 'https://health.googleapis.com/v4/users/me/dataTypes/steps/dataPoints?pageSize=1' -H 'Authorization: Bearer invalid-token'`。本文の後ろの `401` は `-w` が付けた HTTP ステータスで、本文ではない。
 
 ```json
 {
