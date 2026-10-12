@@ -53,11 +53,32 @@ curl -s 'https://api.yamareco.com/api/v1/getReclist/user/1005182/1' --header 'Ac
 
 上記は一部フィールドを抜粋したもので、実レスポンスにはこのほか `uname`/`nickname`/`avatar`/`area_id`/`genre_id`/`group_id`/`other_members`/`is_track`/`draft`/`cheer`/`comment`/`rank`/`members`/`thumb_url`/`notes`/`photos` 等のキーもある。`start`/`end` は `YYYY-MM-DD` の文字列、`days` は数値文字列、`permission.guest`/`permission.user` 等は `"1"`/`"0"` の文字列。
 
+終端を過ぎたときのエラー応答 (取得日: 2026-10-12、HTTP 200、`application/json`)。`reclist` キーが無い。
+
+```bash
+curl -s 'https://api.yamareco.com/api/v1/getReclist/user/1005182/9999' --header 'Accept: application/json'
+```
+
+```json
+{ "err": 1, "errcode": "NODATA", "message": "" }
+```
+
 `page_url` はこの skill では使わない (詳細 URL は下記「HTML から抽出する手順」で `rec_id` から直接組み立てる。理由: `page_url` はスキームが `http` で不整合)。
 
 ## 個別山行の詳細取得
 
-`GET /api/v1/getRec/{rec_id}` は OAuth 認証が必要で、未認証だと `{"err":1,"message":"App does not have a valid scope."}` が返る。
+`GET /api/v1/getRec/{rec_id}` は OAuth 認証が必要で、未認証だと HTTP 403 が返り、本文は JSON ではなくプレーンテキストの `App does not have a valid scope.` になる。
+
+未認証時の実応答 (取得日: 2026-10-12、HTTP 403、`Content-Type` は `application/json` だが本文はプレーンテキスト)。
+
+```bash
+curl -sS -w '\nHTTP %{http_code} %{content_type}\n' 'https://api.yamareco.com/api/v1/getRec/10012224' --header 'Accept: application/json'
+```
+
+```text
+App does not have a valid scope.
+HTTP 403 application/json; charset=utf-8
+```
 
 現状は API では詳細取れない。HTML から抽出する。
 
@@ -115,6 +136,35 @@ grep -oE 'font-weight:bold;font-size:18px;">[0-9.,]+</span>(km|m)' "/tmp/yamarec
 ```bash
 grep -oE 'pace[1-4]">[^<]+' "/tmp/yamareco-{rec_id}-utf8.html"
 grep -oE 'pace-num.{1,150}' "/tmp/yamareco-{rec_id}-utf8.html" | grep -oE 'font-en">[0-9.]+'
+```
+
+次は実際に抽出した出力 (取得日: 2026-10-12、rec_id `10012224`、`head -3` で先頭 3 件までに絞っており、以降は省略。`time1` は複数マッチし、先頭 1 件が山行時間、2 件目以降は別文脈の値)。
+
+```bash
+curl -s -A "Mozilla/5.0" "https://www.yamareco.com/modules/yamareco/detail-10012224.html" -o "/tmp/yamareco-10012224.html"
+iconv -f EUC-JP -t UTF-8//IGNORE "/tmp/yamareco-10012224.html" > "/tmp/yamareco-10012224-utf8.html"
+grep -oE 'class="time1">[0-9:]+' "/tmp/yamareco-10012224-utf8.html" | head -3
+grep -oE 'class="time2">[0-9:]+' "/tmp/yamareco-10012224-utf8.html" | head -3
+grep -oE 'class="time3">[0-9:]+' "/tmp/yamareco-10012224-utf8.html" | head -3
+grep -oE 'font-weight:bold;font-size:18px;">[0-9.,]+</span>(km|m)' "/tmp/yamareco-10012224-utf8.html" | head -3
+grep -oE 'pace[1-4]">[^<]+' "/tmp/yamareco-10012224-utf8.html"
+grep -oE 'pace-num.{1,150}' "/tmp/yamareco-10012224-utf8.html" | grep -oE 'font-en">[0-9.]+'
+```
+
+```text
+class="time1">6:29
+class="time1">10:42
+class="time1">10:55
+class="time2">1:17
+class="time2">10:43
+class="time2">11:10
+class="time3">7:46
+font-weight:bold;font-size:18px;">15.8</span>km
+font-weight:bold;font-size:18px;">1,511</span>m
+font-weight:bold;font-size:18px;">1,511</span>m
+pace3">速い
+font-en">0.7
+font-en">0.8
 ```
 
 ### 抽出結果の検証
@@ -304,6 +354,20 @@ iconv -f EUC-JP -t UTF-8//IGNORE "/tmp/yamareco-plan-{plan_id}.html" > "/tmp/yam
 レスポンスは `getPlanlist` と同型で、判定も同じ規則を使う (`planlist` キーの有無で判定し `errcode` の文字列値には依存しない。「登山計画リスト取得」参照)。`err: 1` は一括りの「サーバ処理エラー」ではない。0 件ヒットとページ終端はどちらも `err: 1`/`errcode: "NODATA"` で返る (実測: `place` に該当計画の無い文字列を指定、または `page` を大きくしすぎたとき、いずれも `{"err":1,"errcode":"NODATA","message":""}`)。これは異常ではなく、`getPlanlist` の終端判定と同じ「`planlist` キーが無い」ケースとして扱う。
 
 一方、必須パラメータの欠落は `errcode: "FORMAT"` で返る (実測: `area_id`/`genre_id`/`is_track`/`ptid` を省略すると `{"err":1,"errcode":"FORMAT","message":"<p>The area_id field is required.</p>…"}`)。こちらはリクエストの組み立てが誤っているサインで、`NODATA` (=正常な 0 件/終端) とは区別して修正する。
+
+必須パラメータ欠落時の実応答 (取得日: 2026-10-12、HTTP 200。`area_id`/`genre_id`/`is_track`/`ptid` を省略)。
+
+```bash
+curl -sS -X POST 'https://api.yamareco.com/api/v1/searchPlan' -H 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'page=1' --data-urlencode 'place=塔ノ岳'
+```
+
+```json
+{
+  "err": 1,
+  "errcode": "FORMAT",
+  "message": "<p>The area_id field is required.</p>\n<p>The genre_id field is required.</p>\n<p>The is_track field is required.</p>\n<p>The ptid field is required.</p>\n"
+}
+```
 
 レスポンスには `track_time`/`track_dist` を含まない。
 
