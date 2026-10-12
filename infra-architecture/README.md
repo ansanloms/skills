@@ -4,14 +4,15 @@
 
 ## できること
 
-- AWS・Google Cloud・Azure のサービスアイコン、オンプレミス (汎用ネットワーク機器・Cisco・ラック)・Kubernetes のアイコンを用いた単一クラウド・マルチクラウド・ハイブリッド構成図の XML 生成
-- PNG (確認用) へのエクスポート
-- drawio XML を埋め込んだ編集可能な SVG (`.drawio.svg`, 成果物) へのエクスポート
-- 成果物の検証チェックリスト (幾何チェック + PNG 目視。判定・報告は checklist skill に従い、未導入環境では自己点検へ縮退)
+AWS・Google Cloud・Azure のサービスアイコン、オンプレミス (汎用ネットワーク機器・Cisco・ラック)・Kubernetes のアイコンを用いた、単一クラウド・マルチクラウド・ハイブリッド構成図の XML を生成する。
+
+生成した図は、確認用の PNG と、drawio XML を埋め込んだ編集可能な SVG (`.drawio.svg`, 成果物) にエクスポートできる。
+
+成果物の検証チェックリスト (幾何チェック + PNG 目視) も備える。判定・報告は checklist skill に従い、未導入環境では自己点検へ縮退する。
 
 ## 対象外
 
-- フローチャート・シーケンス図・ER 図などベンダーアイコン不要の汎用図 (mermaid 等を使う)
+フローチャート・シーケンス図・ER 図などベンダーアイコン不要の汎用図は対象外で、mermaid 等を使う。
 
 ## 発動する場面
 
@@ -39,4 +40,4 @@ npm run fix     # oxlint --fix と oxfmt で整形する
 
 ## 謝辞・ライセンス
 
-`references/` の一部 (drawio-cli・xml-format・troubleshooting・layout-best-practices) は [jgraph/drawio-mcp](https://github.com/jgraph/drawio-mcp) の drawio skill (Apache License 2.0) を翻訳・改変して取り込んでいる。
+`references/` の一部は [jgraph/drawio-mcp](https://github.com/jgraph/drawio-mcp) の drawio skill (Apache License 2.0) を翻訳・改変して取り込んでいる。該当するのは drawio-cli・xml-format・troubleshooting・layout-best-practices である。
