@@ -10,7 +10,7 @@
 ## 構成
 
 - `<name>/SKILL.md` を 1 skill = 1 ディレクトリで配置する。これがこのリポジトリの提供する skill。
-- frontmatter は `name` と `description` が必須。`description` が skill の発動トリガになる。「何をするか + いつ発動するか」を具体的に書く。曖昧だと発動しない。
+- frontmatter は `name` と `description` が必須。`description` が skill の発動トリガになる。「何をするか + いつ発動するか」を具体的に書く。理由: 曖昧だと発動しない。
 - `<name>/README.md` は各 skill の人間向け説明で、SKILL.md の frontmatter を情報源にする。SKILL.md とは別に用意し、新設・更新時に追随させる (後述のフロー参照)。
 - `apm.yml` の `devDependencies` は skill を磨く・使うための道具。empirical-prompt-tuning と yomiyasu は外部由来で配布対象ではない。ja-tech-proofread は自リポジトリの配布 skill を自分でも使うための自己参照で、複製は remote main のスナップショット。
 - コミットするのは `apm.yml`/`apm.lock.yaml`、各 skill の `SKILL.md`・`README.md`・`scripts/`・`references/`・`assets/`、`.github/`、`.gitignore`、`CLAUDE.md`。`apm_modules/`・`.claude/skills/` (依存 skill)・`coverage/` は gitignore 済みで、依存 skill は `apm install` で再生成する。
@@ -35,11 +35,11 @@ apm install     # 依存 skill (ja-tech-proofread、yomiyasu、empirical-prompt-
 外部 API やコマンドを叩き、その出力をパースして値を取り出す skill は、代表的なエンドポイント・コマンドについて**実際のレスポンスのサンプルを最低 1 つ**本文に載せる。キー名の表と散文の説明だけで代用しない。エラー時のレスポンスの形も同様に載せる。出力を人間がそのまま読むだけで機械処理しないものは対象外とする。
 
 - サンプルは実際に叩いて得た実物を使う。記憶や推測から再構成しない。
-- **サンプルの直上に、取得に使った完全なコマンドと取得日を書く。**実物であるという主張を後から検証できるようにするため。これが無いとレビュー時に毎回 API を叩き直すはめになり、対象が消えた後は検証不能になる。
+- **サンプルの直上に、取得に使った完全なコマンドと取得日を書く**。理由: 実物であるという主張を後から検証できるようにするため。これが無いとレビュー時に毎回 API を叩き直すはめになり、対象が消えた後は検証不能になる。
 - 長い場合は後続の処理に必要な構造が読み取れる範囲へ絞り、省略した旨をサンプル内に明記する。エントリの途中で切った場合も同様に明記する。
 - 実行できない場合 (認証情報が無い、副作用がある等) は捏造せず、公式ドキュメントの該当箇所を出典 URL 付きで引用し、出所を本文に明記する。実測したものと引用したものを 1 つの見出しで括らない。
 
-リクエストの完全な例だけがあってレスポンスの実サンプルが無いと、値の型・ネストの深さ・欠測時の形が本文から確定できず、パースが推測になる。しかも外れ方はエラーで止まる方向ではなく、黙って誤った値を返す方向へ倒れる。失敗として表面化しないぶん質が悪い。
+リクエストの完全な例だけがあってレスポンスの実サンプルが無いと、値の型・ネストの深さ・欠測時の形が本文から確定できず、パースが推測になる。しかも外れたときは、エラーで止まるのではなく、気づかないうちに誤った値を返す。失敗として表面化しないぶん質が悪い。
 
 書き手は API の応答を既に知っているため、この情報を書く必要を感じにくい。自明に見える情報ほど落ちる。
 
@@ -47,15 +47,21 @@ apm install     # 依存 skill (ja-tech-proofread、yomiyasu、empirical-prompt-
 
 skill/プロンプトを新規作成・大幅改訂したら、empirical-prompt-tuning skill を使って磨く。
 
-バイアスを排した subagent に実際に skill を読ませて両面評価し、不明瞭点を潰すまで反復する手法。`description` と本文の整合、発動トリガの曖昧さの検出に効く。
+バイアスを排した subagent に実際に skill を読ませて両面評価し、不明瞭点をなくすまで反復する手法。`description` と本文の整合、発動トリガの曖昧さの検出に効く。
 
 ## 推敲と検査
 
-日本語の markdown は skill `yomiyasu` で推敲した後、skill `ja-tech-proofread` で推敲する。順序はこの通りに固定する。yomiyasu は文の構造と語の選び方を書き換え、ja-tech-proofread は preset の表記規則で最終形を揃える。逆順にすると、yomiyasu の書き換えが持ち込んだ preset 違反が残る。yomiyasu の lint スクリプトは Python 製で、実行には `python3` が要る。ja-tech-proofread は機械層 (@ansanloms/textlint-rule-preset-ansanloms + oxfmt) を含み、既定の fix モードは修正を skill 内で完結させる (著者の判断が要る箇所はその場で確認される)。変更したファイルを列挙して渡す。一括で見たい場合も対象ファイルを列挙する (ディレクトリ走査はしない)。
+日本語の markdown は skill `yomiyasu` で推敲した後、skill `ja-tech-proofread` で推敲する。順序はこの通りに固定する。yomiyasu は文の構造と語の選び方を書き換え、ja-tech-proofread は preset の表記規則で最終形を揃える。逆順にすると、yomiyasu の書き換えが持ち込んだ preset 違反が残る。
 
-実行する時期: md を変更したら、コミット前にその md へ yomiyasu を当て、続けて ja-tech-proofread の fix を当てる。skill の `scripts/` (TS・設定) を変更したら、そのディレクトリの lint task (`npm run lint`) を通す。`.claude/skills/` の実体は apm が remote の main から解決したスナップショットで、ローカルの編集は反映されない。skill への変更は main に入った後に `apm update` で複製へ反映される (`apm install` は lock の resolved_commit に固定されたままで、複製を更新しない)。skill として実行される定義も複製側のため、探索順を含む定義の変更は main 反映後に効く。開発中に変更を検証するときは、リポジトリ内の `ja-tech-proofread/SKILL.md` をパス指定で実行者に読ませる。
+yomiyasu の lint スクリプトは Python 製で、実行には `python3` が要る。ja-tech-proofread は機械層 (@ansanloms/textlint-rule-preset-ansanloms + oxfmt) を含む。既定の fix モードは修正を skill 内で完結させる (著者の判断が要る箇所はその場で確認される)。変更したファイルを列挙して渡す。一括で見たい場合も対象ファイルを列挙する (ディレクトリ走査はしない)。
 
-機械層だけを直接使う場合は `npx --no --prefix <scripts の絶対パス> -- textlint --config <scripts の絶対パス>/.textlintrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--fix] <絶対パス...>` と `npx --no --prefix <scripts の絶対パス> -- oxfmt -c <scripts の絶対パス>/.oxfmtrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--check] <絶対パス...>` (`<scripts の絶対パス>` は `ja-tech-proofread/scripts` の絶対パス。初回は `npm ci --omit=dev --prefix <scripts の絶対パス>` で依存を入れる)。rule の正本は preset リポジトリで、このリポジトリでは上書きしない。preset の新しいタグが出たら `ja-tech-proofread/scripts/package.json` の preset の ref (`#<タグ>`) を書き換え、`npm install` で `package-lock.json` を更新する (手順は `ja-tech-proofread/scripts/README.md`)。機械層の正はリポジトリ内の `ja-tech-proofread/scripts`。git 依存のため Dependabot は preset のタグ上げを追えない (textlint と oxfmt は追える)。タグ上げは手作業で行う。
+skill の `scripts/` (TS・設定) を変更したら、そのディレクトリの lint task を通す。lint task は `npm run lint` で実行する。
+
+`.claude/skills/` の実体は apm が remote の main から解決したスナップショットで、ローカルの編集は反映されない。skill への変更は main に入った後に `apm update` で複製へ反映される (`apm install` は lock の resolved_commit に固定されたままで、複製を更新しない)。skill として実行される定義も複製側のため、探索順を含む定義の変更は main 反映後に効く。開発中に変更を検証するときは、リポジトリ内の `ja-tech-proofread/SKILL.md` をパス指定で実行者に読ませる。
+
+機械層だけを直接使う場合は `npx --no --prefix <scripts の絶対パス> -- textlint --config <scripts の絶対パス>/.textlintrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--fix] <絶対パス...>` と `npx --no --prefix <scripts の絶対パス> -- oxfmt -c <scripts の絶対パス>/.oxfmtrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--check] <絶対パス...>` (`<scripts の絶対パス>` は `ja-tech-proofread/scripts` の絶対パス。初回は `npm ci --omit=dev --prefix <scripts の絶対パス>` で依存を入れる)。
+
+rule の正本は preset リポジトリで、このリポジトリでは上書きしない。preset の新しいタグが出たら `ja-tech-proofread/scripts/package.json` の preset の ref (`#<タグ>`) を書き換え、`npm install` で `package-lock.json` を更新する。手順は `ja-tech-proofread/scripts/README.md` にある。機械層の正本はリポジトリ内の `ja-tech-proofread/scripts`。git 依存のため Dependabot は preset のタグ上げを追えない (textlint と oxfmt は追える)。タグ上げは手作業で行う。
 
 TS を含む skill の `scripts/` は各ディレクトリの設定で自己完結している。各ディレクトリで `npm run lint`/`npm run fix` を実行する (初回はそのディレクトリで `npm ci` を実行して devDependencies を入れる)。root に共通の設定・task は無い。
 
