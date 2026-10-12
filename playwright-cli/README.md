@@ -7,6 +7,7 @@ playwright-cli でブラウザを駆動し Web 画面をブラックボックス
 ## 概要
 
 - ページ遷移・スナップショット・クリック/入力/セレクト・スクリーンショットで画面の動作を実操作で確認する。
+- コンソールエラーとネットワークリクエストを確認し、バグ再現や不具合調査の手がかりを採る。
 - 要素は ref ベースで操作する。snapshot で ref を取得し、その ref をコマンドに渡す。
 - コンテナや自己署名証明書のローカル HTTPS 環境では config ファイル (`--no-sandbox`/`ignoreHTTPSErrors`) を指定する。
 - SP 画面検証は config の `viewport` で指定する (`deviceScaleFactor`/`isMobile` は併記しない)。
@@ -25,3 +26,4 @@ playwright-cli でブラウザを駆動し Web 画面をブラックボックス
 - 条件付き MUST (`--no-sandbox`/`ignoreHTTPSErrors`) には「条件が不明な場合の既定は付ける」を対で保つ。
 - 実行せず手順書だけを提示する場合の規約 (ref・テストデータ等の未確定値はプレースホルダとし実行時に読み替える) を残す。
 - 全コマンド・全オプションの一次リファレンスは playwright-cli 同梱の公式 SKILL.md である旨を明記する。
+- 出力の実サンプル (`open`/`snapshot`/`--raw eval` の成功例とエラー例) は、取得コマンドと取得日を直上に添えて残す。

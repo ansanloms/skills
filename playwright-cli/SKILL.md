@@ -109,8 +109,8 @@ playwright-cli click "getByTestId('submit-button')"
 playwright-cli --raw eval "el => el.textContent" e5
 playwright-cli --raw eval "el => el.getAttribute('data-testid')" e5
 
-# 例: 取り出した値を期待値と比較して合否にする
-[ "$(playwright-cli --raw eval "el => el.textContent.trim()" e5)" = "期待値" ] && echo OK || echo NG
+# 例: 取り出した値を期待値と比較して合否にする(--raw eval は文字列を JSON の引用符つきで返すため、引用符込みで比較する)
+[ "$(playwright-cli --raw eval "el => el.textContent.trim()" e5)" = '"期待値"' ] && echo OK || echo NG
 ```
 
 ## 生成コードの収集
@@ -155,7 +155,7 @@ viewport 412x915/タッチ有効/モバイル UA の例は次の通り。例の 
 # 上記を /tmp/pw-sp.json に保存して使う例
 playwright-cli -s=sp open "https://example.com/" --config=/tmp/pw-sp.json
 playwright-cli -s=sp --raw eval "JSON.stringify({w:innerWidth,h:innerHeight,touch:navigator.maxTouchPoints})"
-# -> {"w":412,"h":915,"touch":1}
+# -> "{\"w\":412,\"h\":915,\"touch\":1}"  (実測。JSON 文字列として返る)
 # 合格条件: w/h が config の viewport と等値、かつ touch >= 1。不一致なら config を直すまで先へ進まない
 playwright-cli -s=sp close
 ```
@@ -189,6 +189,88 @@ playwright-cli -s=front snapshot
 playwright-cli -s=admin snapshot
 playwright-cli close-all      # 全セッション終了
 playwright-cli kill-all       # 残留プロセスを強制終了
+```
+
+## 出力の実サンプル
+
+playwright-cli 0.1.22 で実測した出力。取得日は 2026-10-12。長い出力は省略し、省略箇所を明記した。
+
+`open` の出力。スナップショット本体は `.playwright-cli/` 内ファイルへのリンクで返ることがある。
+
+```bash
+playwright-cli open "https://example.com/"
+```
+
+````
+### Browser `default` opened with pid <pid>
+### Ran Playwright code
+```js
+await page.goto('https://example.com/');
+```
+### Page
+- Page URL: https://example.com/
+- Page Title: Example Domain
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-10-12T14-23-52-780Z.yml)
+````
+
+`snapshot` の出力。段落 `e8`〜`e12` (アラビア語・中国語など他言語の本文) は省略した。pid は伏せた。
+
+```bash
+playwright-cli snapshot
+```
+
+````
+### Page
+- Page URL: https://example.com/
+- Page Title: Example Domain
+### Snapshot
+```yaml
+- generic [active] [ref=e1]:
+  - paragraph [ref=e7]: This domain is for use in documentation examples without needing permission. ...
+  # (e8 から e12 は省略)
+  - link "Learn more" [ref=e13] [cursor=pointer]:
+    - /url: https://iana.org/help/example-domains
+```
+````
+
+`--raw eval` の出力。結果は JSON として直列化される。文字列は引用符付きで返るため、シェルで文字列比較する場合は引用符を含めて比較するか、`--json` で処理する。
+
+```bash
+playwright-cli --raw eval "el => el.textContent.trim()" e13
+# -> "Learn more"
+playwright-cli --raw eval "JSON.stringify({w:innerWidth,h:innerHeight})"
+# -> "{\"w\":1280,\"h\":720}"
+```
+
+エラー時の出力は `### Error` 見出しで始まり、終了コードは非 0 になることがある。
+
+```bash
+playwright-cli goto "https://self-signed.badssl.com/"
+```
+
+```
+### Error
+Error: net::ERR_CERT_AUTHORITY_INVALID at https://self-signed.badssl.com/
+Call log:
+  - navigating to "https://self-signed.badssl.com/", waiting until "domcontentloaded"
+```
+
+```bash
+playwright-cli click e999
+```
+
+```
+### Error
+Error: Ref e999 not found in the current page snapshot. Try capturing new snapshot.
+```
+
+ブラウザ未起動のセッションを指定した場合 (`playwright-cli -s=x --raw eval "1"`) は、`### Error` ではなく次の平文が出る。
+
+```
+The browser 'x' is not open, please run open first
+
+  playwright-cli -s=x open [params]
 ```
 
 ## 落とし穴・注意
