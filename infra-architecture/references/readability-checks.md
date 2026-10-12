@@ -77,6 +77,94 @@ npx --no -- check-readability --drawio ../diagram.drawio --svg ../diagram.drawio
 
 チェッカ本体・テスト・fixture の開発手順は [README](../README.md) を参照。
 
+## 出力例
+
+実際に実行して得た出力。入力は `scripts/testdata/` の fixture で、`<skill>` は skill ディレクトリの絶対パス、cwd は `/tmp`。
+
+### 指摘なし (終了コード 0)
+
+取得日: 2026-10-12。
+
+```bash
+npx --no --prefix "<skill>/scripts" -- check-readability \
+  --drawio <skill>/scripts/testdata/clean.drawio --svg <skill>/scripts/testdata/clean.svg
+```
+
+```text
+OK: 見やすさの幾何チェックで指摘なし
+```
+
+### 指摘あり (終了コード 1)
+
+取得日: 2026-10-12。`bad.drawio` は 4 観点すべてに違反する fixture。
+
+```bash
+npx --no --prefix "<skill>/scripts" -- check-readability \
+  --drawio <skill>/scripts/testdata/bad.drawio --svg <skill>/scripts/testdata/bad.svg
+```
+
+```text
+[ERROR] overlaps: エッジ e_ab1 と e_ab2 の線が重なっている (共線)
+[ERROR] legend-hits: エッジ e_cd が凡例 (legend) を横切っている
+[ERROR] node-cross: エッジ e_ab1 が無関係なノード mid を貫いている
+[ERROR] node-cross: エッジ e_ab2 が無関係なノード mid を貫いている
+[ERROR] group-cross: エッジ e_ef が所属しない枠 vpc を貫いている
+
+5 error / 0 warn
+```
+
+### `--json` の出力 (終了コード 1)
+
+取得日: 2026-10-12。上の `bad` に `--json` を付けた。`findings` は 5 件中 2 件だけを載せ、残りは省略した。
+
+```bash
+npx --no --prefix "<skill>/scripts" -- check-readability \
+  --drawio <skill>/scripts/testdata/bad.drawio --svg <skill>/scripts/testdata/bad.svg --json
+```
+
+```json
+{
+  "summary": { "error": 5, "warn": 0 },
+  "findings": [
+    {
+      "check": "overlaps",
+      "severity": "error",
+      "message": "エッジ e_ab1 と e_ab2 の線が重なっている (共線)",
+      "cells": ["e_ab1", "e_ab2"]
+    },
+    {
+      "check": "legend-hits",
+      "severity": "error",
+      "message": "エッジ e_cd が凡例 (legend) を横切っている",
+      "cells": ["e_cd", "legend"]
+    }
+  ]
+}
+```
+
+実出力は `summary` と `findings` を複数行に整形して出す。上は読みやすさのため `summary` と `cells` を 1 行にまとめている。
+
+### 入力エラー (終了コード 2)
+
+取得日: 2026-10-12。存在しないファイルを渡した場合と、引数が無い場合。error・warn の指摘による終了コード 1 とは区別される。
+
+```bash
+npx --no --prefix "<skill>/scripts" -- check-readability \
+  --drawio /tmp/none.drawio --svg /tmp/none.svg
+```
+
+```text
+error: cannot read drawio file: /tmp/none.drawio
+```
+
+```bash
+npx --no --prefix "<skill>/scripts" -- check-readability
+```
+
+```text
+error: usage: --drawio <file.drawio> --svg <file.svg> [--json] [--legend-id <id>]
+```
+
 ## 正当な交差の扱い
 
 幾何は「線が矩形に交わった」までしか言わない。それを欠陥とするかはポリシーで決めており、チェッカには次を組み込んである。

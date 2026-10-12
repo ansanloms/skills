@@ -25,6 +25,18 @@ apm install ansanloms/skills/infra-architecture --target claude
 
 詳細は [SKILL.md](./SKILL.md) を参照。
 
+## 開発
+
+幾何チェックのスクリプト `scripts/check-readability.ts` の開発手順。Node.js 24.2 以上が必要。
+
+```sh
+cd scripts
+npm ci          # devDependencies (oxlint・oxfmt・typescript) を入れる
+npm test        # node --test。fixture は scripts/testdata/
+npm run lint    # oxlint・oxfmt --check・tsc --noEmit
+npm run fix     # oxlint --fix と oxfmt で整形する
+```
+
 ## 謝辞・ライセンス
 
 `references/` の一部 (drawio-cli・xml-format・troubleshooting・layout-best-practices) は [jgraph/drawio-mcp](https://github.com/jgraph/drawio-mcp) の drawio skill (Apache License 2.0) を翻訳・改変して取り込んでいる。
