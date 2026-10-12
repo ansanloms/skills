@@ -53,7 +53,7 @@ skill/プロンプトを新規作成・大幅改訂したら、empirical-prompt-
 
 日本語の markdown は skill `yomiyasu` で推敲した後、skill `ja-tech-proofread` で推敲する。順序はこの通りに固定する。yomiyasu は文の構造と語の選び方を書き換え、ja-tech-proofread は preset の表記規則で最終形を揃える。逆順にすると、yomiyasu の書き換えが持ち込んだ preset 違反が残る。
 
-yomiyasu の lint スクリプトは Python 製で、実行には `python3` が要る。ja-tech-proofread は機械層 (@ansanloms/textlint-rule-preset-ansanloms + oxfmt) を含む。既定の fix モードは修正を skill 内で完結させる (著者の判断が要る箇所はその場で確認される)。変更したファイルを列挙して渡す。一括で見たい場合も対象ファイルを列挙する (ディレクトリ走査はしない)。
+yomiyasu の lint スクリプトは Python 製で、実行には `python3` が要る。README は「できること」「対象外」「発動する場面」を箇条書きで並べる書式のため、yomiyasu の lint が箇条書き比率の警告を出す。この警告は書式に由来するので許容し、散文へ書き換えない。ja-tech-proofread は機械層 (@ansanloms/textlint-rule-preset-ansanloms + oxfmt) を含む。既定の fix モードは修正を skill 内で完結させる (著者の判断が要る箇所はその場で確認される)。変更したファイルを列挙して渡す。一括で見たい場合も対象ファイルを列挙する (ディレクトリ走査はしない)。
 
 skill の `scripts/` (TS・設定) を変更したら、そのディレクトリの lint task を通す。lint task は `npm run lint` で実行する。
 
