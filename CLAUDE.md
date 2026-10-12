@@ -30,6 +30,8 @@ apm install     # 依存 skill (ja-tech-proofread、yomiyasu、empirical-prompt-
 5. 変更した md に yomiyasu を当て、続けて ja-tech-proofread の fix を当てる (後述)。
 6. コミットする (Conventional Commits、日本語、絵文字なし)。
 
+skill の実行方法・CLI 引数・出力・exit code を変える変更は、skill の外の呼び出し元 (cron・スクリプト等) を壊す破壊的変更として扱う。コミットの type に `!` を付け (例: `fix!:`)、移行手順はコミット本文の `BREAKING CHANGE:` フッタに書く。README・SKILL.md には変更前の情報を残さず、現行の状態だけを書く。理由: 外部の呼び出し元は SKILL.md を読まず、変更に気づく手段がコミット履歴しか無い。
+
 ## レスポンスの実サンプル
 
 外部 API やコマンドを叩き、その出力をパースして値を取り出す skill は、代表的なエンドポイント・コマンドについて**実際のレスポンスのサンプルを最低 1 つ**本文に載せる。キー名の表と散文の説明だけで代用しない。エラー時のレスポンスの形も同様に載せる。出力を人間がそのまま読むだけで機械処理しないものは対象外とする。
