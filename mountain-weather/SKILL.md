@@ -178,7 +178,26 @@ curl -s "https://www.jma.go.jp/bosai/amedas/data/point/50066/20260810_12.json"
 
 ```sh
 npx --no --prefix "<scripts の絶対パス>" -- find-mountain --name=旭岳
-# => {"matches": [{"code": "01150010", "name": "大雪山・旭岳", "ba": "hk", "pref": "北海道"}, ...]}
+```
+
+出力例 (取得日 2026-10-12 (JST)。上のコマンドを実際に実行して得た実物。`fetchedAt` はキャッシュ生成時刻で、実行日ではない)。
+
+```json
+{
+  "query": "旭岳",
+  "fetchedAt": "2026-07-05T18:09:19.716Z",
+  "matches": [
+    { "code": "01150322", "name": "旭岳石室", "ba": "hk", "pref": "北海道" },
+    { "code": "01150010", "name": "大雪山・旭岳", "ba": "hk", "pref": "北海道" },
+    { "code": "07150027", "name": "旭岳", "ba": "th", "pref": "福島県" }
+  ]
+}
+```
+
+0 件のとき (取得日 2026-10-12 (JST)。`npx --no --prefix "<scripts の絶対パス>" -- find-mountain --name=存在しない山XYZ` を実際に実行して得た実物)。stdout は空で、stderr に次のメッセージが出て exit 1 で終わる。
+
+```text
+「存在しない山XYZ」が 0 件。キャッシュ (2026-07-05T18:09:19.716Z 取得) が古い可能性がある。--update を付けて取り直してから再判断する。
 ```
 
 - 検索は部分一致。0 件のときは `--update` でキャッシュを取り直してから再判断する (山リストの更新頻度は低いが、新規追加・改名はありうる)。理由: exit 1 で止まる。
@@ -210,6 +229,12 @@ npx --no --prefix "<scripts の絶対パス>" -- find-mountain --name=旭岳
 ```sh
 # --code は前節 find-mountain で引いた対象の山のコード (下の 01150271 は別の山 = 青山の例。必ず引き直す)
 npx --no --prefix "<scripts の絶対パス>" -- fetch-index --code=01150271
+```
+
+停止する場合の実物 (取得日 2026-10-12 (JST)。`npx --no --prefix "<scripts の絶対パス>" -- fetch-index --code=99999999` を実際に実行した。存在しないコードの例)。stdout は空で、stderr に次のメッセージが出て exit 1 で終わる。
+
+```text
+登山指数が見つからない。type=15 の付け忘れ、または HTML 構造の変化の可能性。値を捏造せず停止する。
 ```
 
 スクリプトは取得・Shift_JIS デコード・キャッシュ照合・検証・抽出を一括で行い、今日・明日 (時間帯別) と週間の登山指数・気温・風を JSON で出力する。内部動作 (デコード・キャッシュ回避の突き合わせ・検証) は scripts/README.md。
@@ -325,7 +350,28 @@ DANGER (実行): `forecast` の取得から照合・値の抽出までを 1 つ�
 ```sh
 # 登山口の市町村・地区名 (例: 富士宮市、松本市乗鞍上高地) から細分区と気象台を引く
 npx --no --prefix "<scripts の絶対パス>" -- find-area --municipality=富士宮市
-# => {"matches": [{"class20": {"name": "富士宮市", ...}, "class10": {"code": "220030", "name": "東部"}, "office": {"code": "220000", "name": "静岡県"}}]}
+```
+
+出力例 (取得日 2026-10-12 (JST)。上のコマンドを実際に実行して得た実物。`fetchedAt` はキャッシュ生成時刻で、実行日ではない)。
+
+```json
+{
+  "query": "富士宮市",
+  "fetchedAt": "2026-07-05T18:09:19.988Z",
+  "matches": [
+    {
+      "class20": { "code": "2220700", "name": "富士宮市" },
+      "class10": { "code": "220030", "name": "東部" },
+      "office": { "code": "220000", "name": "静岡県" }
+    }
+  ]
+}
+```
+
+0 件のとき (取得日 2026-10-12 (JST)。`npx --no --prefix "<scripts の絶対パス>" -- find-area --municipality=存在しない市XYZ` を実際に実行して得た実物)。stdout は空で、stderr に次のメッセージが出て exit 1 で終わる。
+
+```text
+「存在しない市XYZ」が 0 件。より広い市名・近隣地名で引き直すか、キャッシュ (2026-07-05T18:09:19.988Z 取得) が古い可能性があれば --update を付けて取り直す。
 ```
 
 - 0 件のときは exit 1 で止まる。より広い市名・近隣地名で引き直し、市町村合併等でキャッシュが古い可能性があれば `--update` で取り直す。
@@ -458,6 +504,12 @@ npx --no --prefix "<scripts の絶対パス>" -- fetch-openmeteo --lat=35.3606 -
     // 以降 1 時間ごと × --days 日分 ...
   ]
 }
+```
+
+引数が不正なときの実物 (取得日 2026-10-12 (JST)。`npx --no --prefix "<scripts の絶対パス>" -- fetch-openmeteo --lat=35.3606 --lon=138.7274 --elevation=abc` を実際に実行した)。stdout は空で、stderr に次の usage が出て exit 1 で終わる。標高の不一致・HTTP エラー・`error: true` で停止したときのメッセージは、再現できなかったため実測サンプルが無い。
+
+```text
+usage: fetch-openmeteo --lat=<緯度> --lon=<経度> --elevation=<山頂標高 m> [--days=<1..7>]
 ```
 
 - 引数は `--lat` ・ `--lon` ・ `--elevation` (いずれも必須で、標高は山頂の m)。
