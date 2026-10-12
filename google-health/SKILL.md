@@ -139,13 +139,11 @@ GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
   npx --no --prefix "<scripts の絶対パス>" -- token-status
 ```
 
-この実測は Deno 実行時 (2026-09-26) のもの。出力は実行方式に依存しない。
-
-実行結果 (実測、2026-09-26 JST 取得): `deno task -q token-status`。
+実行結果 (実測、2026-10-12 JST 取得): `npx --no --prefix "<scripts の絶対パス>" -- token-status`。
 
 ```json
 {
-  "access_token_expires_in_sec": 72,
+  "access_token_expires_in_sec": 3556,
   "refresh_token_expires_in_days": 7,
   "refresh_token_expired": false
 }
@@ -340,7 +338,9 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
 ## レスポンスの形
 
-次の実測は Deno 実行時 (2026-09-26 と 2026-09-27) のもの。応答は API 由来で実行方式に依存しない。各サンプルの取得コマンドにある `deno task -q <サブコマンド>` は Deno 実行時の形で、現在は `npx --no --prefix "<scripts の絶対パス>" -- <サブコマンド>` に相当する。
+公開リポジトリのため、サンプル中の測定値・ID・日時はダミー値に置き換えている。構造と型は実測のまま。
+
+次のうち、読み取り系の `datapoints` ・ `daily-rollup` の各サンプル (sleep・steps・active-minutes・distance・exercise・heart-rate・weight・body-fat・total-calories・daily-rollup steps) は 2026-10-12 に現行のコマンド `npx --no --prefix "<scripts の絶対パス>" -- <サブコマンド>` で再測定したもの。`token-status` の出力例 (「再認可」節) も同日の再測定。以降の `create nutrition-log` ・ `get` ・ `update` ・ `datapoints nutrition-log` ・ `batch-delete` のサンプルは Deno 実行時 (2026-09-27) のもので、取得コマンドの `deno task -q <サブコマンド>` は Deno 実行時の形。現在は `npx --no --prefix "<scripts の絶対パス>" -- <サブコマンド>` に相当する。これらは書き込みや、その削除済みの記録を対象とするため再測定していない。応答は API 由来で実行方式に依存しない。
 
 ### datapoints sleep --reconcile (公式ドキュメント掲載の例)
 
@@ -378,39 +378,39 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
 ### datapoints sleep --reconcile (実測)
 
-取得コマンド (2026-09-26 JST 取得): `deno task -q datapoints sleep --from 2026-09-23 --to 2026-09-27 --reconcile` (Pixel Watch 4)。6 件中 1 件目。`stages` は全 13 件中先頭 2 件、`shortAwakenings` は全 11 件中先頭 1 件に絞った。`--reconcile` は複数ソースをマージするため、`summary.stagesSummary` に同じ内訳が重複して現れることがある (実測でもそうなっている)。
+取得コマンド (2026-10-12 JST 取得): `npx --no --prefix "<scripts の絶対パス>" -- datapoints sleep --from 2026-09-23 --to 2026-09-27 --reconcile` (Pixel Watch 4)。6 件中 1 件目。`stages` は全 13 件中先頭 2 件、`shortAwakenings` は全 11 件中先頭 1 件に絞った。2026-09-26 の取得では `summary.stagesSummary` に同じ内訳が重複して現れたが、2026-10-12 の再測定では重複は無かった。重複の有無は再現しないため、`stagesSummary` の件数に依存した処理を書かない。
 
 ```jsonc
 {
   "dataPoints": [
     {
-      "dataPointName": "users/1173016576421350648/dataTypes/sleep/dataPoints/8808518358174752984",
+      "dataPointName": "users/<USER_ID>/dataTypes/sleep/dataPoints/<DATA_POINT_ID>",
       "sleep": {
         "interval": {
-          "startTime": "2026-09-26T04:09:00Z",
+          "startTime": "2026-01-01T00:00:00Z",
           "startUtcOffset": "32400s",
-          "endTime": "2026-09-26T08:23:00Z",
+          "endTime": "2026-01-01T04:00:00Z",
           "endUtcOffset": "32400s"
         },
         "type": "STAGES",
         "stages": [
           {
-            "startTime": "2026-09-26T04:09:00Z",
+            "startTime": "2026-01-01T00:00:00Z",
             "startUtcOffset": "32400s",
-            "endTime": "2026-09-26T04:15:00Z",
+            "endTime": "2026-01-01T00:10:00Z",
             "endUtcOffset": "32400s",
             "type": "AWAKE",
-            "createTime": "2026-09-26T08:33:37.998943Z",
-            "updateTime": "2026-09-26T08:33:37.998943Z"
+            "createTime": "2026-01-01T04:10:00.000000Z",
+            "updateTime": "2026-01-01T04:10:00.000000Z"
           },
           {
-            "startTime": "2026-09-26T04:15:00Z",
+            "startTime": "2026-01-01T00:10:00Z",
             "startUtcOffset": "32400s",
-            "endTime": "2026-09-26T04:28:00Z",
+            "endTime": "2026-01-01T00:25:00Z",
             "endUtcOffset": "32400s",
             "type": "LIGHT",
-            "createTime": "2026-09-26T08:33:37.998943Z",
-            "updateTime": "2026-09-26T08:33:37.998943Z"
+            "createTime": "2026-01-01T04:10:00.000000Z",
+            "updateTime": "2026-01-01T04:10:00.000000Z"
           }
           // 全 13 件中先頭 2 件に絞った。以下省略。
         ],
@@ -420,30 +420,25 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
           "mainSleep": true
         },
         "summary": {
-          "minutesInSleepPeriod": "254",
+          "minutesInSleepPeriod": "240",
           "minutesAfterWakeUp": "0",
           "minutesToFallAsleep": "0",
-          "minutesAsleep": "248",
-          "minutesAwake": "6",
+          "minutesAsleep": "230",
+          "minutesAwake": "10",
           "stagesSummary": [
-            { "type": "AWAKE", "minutes": "6", "count": "1" },
-            { "type": "LIGHT", "minutes": "146", "count": "6" },
-            { "type": "DEEP", "minutes": "48", "count": "3" },
-            { "type": "REM", "minutes": "54", "count": "3" },
-            { "type": "AWAKE", "minutes": "6", "count": "1" },
-            { "type": "LIGHT", "minutes": "146", "count": "6" },
-            { "type": "DEEP", "minutes": "48", "count": "3" },
-            { "type": "REM", "minutes": "54", "count": "3" }
-            // 実測どおり内訳が重複して返ってきている (--reconcile のマージによるものと見られる)。
+            { "type": "AWAKE", "minutes": "10", "count": "1" },
+            { "type": "LIGHT", "minutes": "120", "count": "6" },
+            { "type": "DEEP", "minutes": "50", "count": "3" },
+            { "type": "REM", "minutes": "60", "count": "3" }
           ]
         },
-        "createTime": "2026-09-26T08:33:36.038623Z",
-        "updateTime": "2026-09-26T08:33:42.827423Z",
+        "createTime": "2026-01-01T04:10:00.000000Z",
+        "updateTime": "2026-01-01T10:00:00.000000Z",
         "shortAwakenings": [
           {
-            "startTime": "2026-09-26T04:16:00Z",
+            "startTime": "2026-01-01T00:12:00Z",
             "startUtcOffset": "32400s",
-            "endTime": "2026-09-26T04:17:00Z",
+            "endTime": "2026-01-01T00:13:00Z",
             "endUtcOffset": "32400s",
             "type": "LIGHT"
           }
@@ -452,20 +447,19 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       }
     }
     // 全 6 件中 1 件目のみ掲載。
-  ],
-  "nextPageToken": ""
+  ]
 }
 ```
 
 ### datapoints sleep (--reconcile 無し、実測)
 
-取得コマンド (2026-09-26 JST 取得): `deno task -q datapoints sleep --from 2026-09-23 --to 2026-09-27` (Pixel Watch 4)。6 件中 1 件目 (`--reconcile` 版と同じ睡眠記録)。`stages` は全 13 件中先頭 2 件、`shortAwakenings` は全 11 件中先頭 1 件に絞った。`--reconcile` 無しでは `summary.stagesSummary` の重複は無い。
+取得コマンド (2026-10-12 JST 取得): `npx --no --prefix "<scripts の絶対パス>" -- datapoints sleep --from 2026-09-23 --to 2026-09-27` (Pixel Watch 4)。6 件中 1 件目 (`--reconcile` 版と同じ睡眠記録)。`stages` は全 13 件中先頭 2 件、`shortAwakenings` は全 11 件中先頭 1 件に絞った。CLI の実出力は `{"dataPoints": [...]}` の形で `nextPageToken` は含まない。
 
 ```jsonc
 {
   "dataPoints": [
     {
-      "name": "users/1173016576421350648/dataTypes/sleep/dataPoints/8808518358174752984",
+      "name": "users/<USER_ID>/dataTypes/sleep/dataPoints/<DATA_POINT_ID>",
       "dataSource": {
         "recordingMethod": "DERIVED",
         "device": { "displayName": "Pixel Watch 4" },
@@ -473,30 +467,30 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "sleep": {
         "interval": {
-          "startTime": "2026-09-26T04:09:00Z",
+          "startTime": "2026-01-01T00:00:00Z",
           "startUtcOffset": "32400s",
-          "endTime": "2026-09-26T08:23:00Z",
+          "endTime": "2026-01-01T04:00:00Z",
           "endUtcOffset": "32400s"
         },
         "type": "STAGES",
         "stages": [
           {
-            "startTime": "2026-09-26T04:09:00Z",
+            "startTime": "2026-01-01T00:00:00Z",
             "startUtcOffset": "32400s",
-            "endTime": "2026-09-26T04:15:00Z",
+            "endTime": "2026-01-01T00:10:00Z",
             "endUtcOffset": "32400s",
             "type": "AWAKE",
-            "createTime": "2026-09-26T08:33:37.998943Z",
-            "updateTime": "2026-09-26T08:33:37.998943Z"
+            "createTime": "2026-01-01T04:10:00.000000Z",
+            "updateTime": "2026-01-01T04:10:00.000000Z"
           },
           {
-            "startTime": "2026-09-26T04:15:00Z",
+            "startTime": "2026-01-01T00:10:00Z",
             "startUtcOffset": "32400s",
-            "endTime": "2026-09-26T04:28:00Z",
+            "endTime": "2026-01-01T00:25:00Z",
             "endUtcOffset": "32400s",
             "type": "LIGHT",
-            "createTime": "2026-09-26T08:33:37.998943Z",
-            "updateTime": "2026-09-26T08:33:37.998943Z"
+            "createTime": "2026-01-01T04:10:00.000000Z",
+            "updateTime": "2026-01-01T04:10:00.000000Z"
           }
           // 全 13 件中先頭 2 件に絞った。以下省略。
         ],
@@ -506,25 +500,25 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
           "mainSleep": true
         },
         "summary": {
-          "minutesInSleepPeriod": "254",
+          "minutesInSleepPeriod": "240",
           "minutesAfterWakeUp": "0",
           "minutesToFallAsleep": "0",
-          "minutesAsleep": "248",
-          "minutesAwake": "6",
+          "minutesAsleep": "230",
+          "minutesAwake": "10",
           "stagesSummary": [
-            { "type": "AWAKE", "minutes": "6", "count": "1" },
-            { "type": "LIGHT", "minutes": "146", "count": "6" },
-            { "type": "DEEP", "minutes": "48", "count": "3" },
-            { "type": "REM", "minutes": "54", "count": "3" }
+            { "type": "AWAKE", "minutes": "10", "count": "1" },
+            { "type": "LIGHT", "minutes": "120", "count": "6" },
+            { "type": "DEEP", "minutes": "50", "count": "3" },
+            { "type": "REM", "minutes": "60", "count": "3" }
           ]
         },
-        "createTime": "2026-09-26T08:33:36.038623Z",
-        "updateTime": "2026-09-26T08:33:42.827423Z",
+        "createTime": "2026-01-01T04:10:00.000000Z",
+        "updateTime": "2026-01-01T10:00:00.000000Z",
         "shortAwakenings": [
           {
-            "startTime": "2026-09-26T04:16:00Z",
+            "startTime": "2026-01-01T00:12:00Z",
             "startUtcOffset": "32400s",
-            "endTime": "2026-09-26T04:17:00Z",
+            "endTime": "2026-01-01T00:13:00Z",
             "endUtcOffset": "32400s",
             "type": "LIGHT"
           }
@@ -533,14 +527,13 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       }
     }
     // 全 6 件中 1 件目のみ掲載。
-  ],
-  "nextPageToken": ""
+  ]
 }
 ```
 
 ### datapoints steps・active-minutes・distance (実測)
 
-取得コマンド (2026-09-26 JST 取得): `deno task -q datapoints steps --from 2026-09-25 --to 2026-09-26` (326 件中先頭 2 件)、`deno task -q datapoints active-minutes --from 2026-09-25 --to 2026-09-26` (216 件中先頭 1 件)、`deno task -q datapoints distance --from 2026-09-25 --to 2026-09-26` (326 件中先頭 1 件)。いずれも Pixel Watch 4、CLI の実出力 (`{"dataPoints": [...]}` の形で `nextPageToken` は含まない)。`civilStartTime`/`civilEndTime` は filter に `civil_start_time` (日付形式) を使ったときも常に付いてくる。
+取得コマンド (2026-10-12 JST 取得): `npx --no --prefix "<scripts の絶対パス>" -- datapoints steps --from 2026-09-25 --to 2026-09-26` (466 件中先頭 2 件)、`npx --no --prefix "<scripts の絶対パス>" -- datapoints active-minutes --from 2026-09-25 --to 2026-09-26` (216 件中先頭 1 件)、`npx --no --prefix "<scripts の絶対パス>" -- datapoints distance --from 2026-09-25 --to 2026-09-26` (466 件中先頭 1 件)。いずれも Pixel Watch 4、CLI の実出力 (`{"dataPoints": [...]}` の形で `nextPageToken` は含まない)。`civilStartTime`/`civilEndTime` は filter に `civil_start_time` (日付形式) を使ったときも常に付いてくる。2026-09-26 の取得では steps・distance が 326 件だったが、同じ期間でも 2026-10-12 の再測定では 466 件になった (増えた原因は未確認)。
 
 ```jsonc
 // steps
@@ -554,20 +547,20 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "steps": {
         "interval": {
-          "startTime": "2026-09-25T14:58:00Z",
+          "startTime": "2026-01-01T14:58:00Z",
           "startUtcOffset": "32400s",
-          "endTime": "2026-09-25T14:59:00Z",
+          "endTime": "2026-01-01T14:59:00Z",
           "endUtcOffset": "32400s",
           "civilStartTime": {
-            "date": { "year": 2026, "month": 9, "day": 25 },
+            "date": { "year": 2026, "month": 1, "day": 1 },
             "time": { "hours": 23, "minutes": 58 }
           },
           "civilEndTime": {
-            "date": { "year": 2026, "month": 9, "day": 25 },
+            "date": { "year": 2026, "month": 1, "day": 1 },
             "time": { "hours": 23, "minutes": 59 }
           }
         },
-        "count": "2"
+        "count": "5"
       }
     },
     {
@@ -578,23 +571,23 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "steps": {
         "interval": {
-          "startTime": "2026-09-25T14:57:00Z",
+          "startTime": "2026-01-01T14:57:00Z",
           "startUtcOffset": "32400s",
-          "endTime": "2026-09-25T14:58:00Z",
+          "endTime": "2026-01-01T14:58:00Z",
           "endUtcOffset": "32400s",
           "civilStartTime": {
-            "date": { "year": 2026, "month": 9, "day": 25 },
+            "date": { "year": 2026, "month": 1, "day": 1 },
             "time": { "hours": 23, "minutes": 57 }
           },
           "civilEndTime": {
-            "date": { "year": 2026, "month": 9, "day": 25 },
+            "date": { "year": 2026, "month": 1, "day": 1 },
             "time": { "hours": 23, "minutes": 58 }
           }
         },
-        "count": "44"
+        "count": "40"
       }
     }
-    // 全 326 件中先頭 2 件に絞った。以下省略。
+    // 全 466 件中先頭 2 件に絞った。以下省略。
   ]
 }
 ```
@@ -611,16 +604,16 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "activeMinutes": {
         "interval": {
-          "startTime": "2026-09-25T14:59:00Z",
+          "startTime": "2026-01-01T14:59:00Z",
           "startUtcOffset": "32400s",
-          "endTime": "2026-09-25T15:00:00Z",
+          "endTime": "2026-01-01T15:00:00Z",
           "endUtcOffset": "32400s",
           "civilStartTime": {
-            "date": { "year": 2026, "month": 9, "day": 25 },
+            "date": { "year": 2026, "month": 1, "day": 1 },
             "time": { "hours": 23, "minutes": 59 }
           },
           "civilEndTime": {
-            "date": { "year": 2026, "month": 9, "day": 26 },
+            "date": { "year": 2026, "month": 1, "day": 2 },
             "time": {}
           }
         },
@@ -646,36 +639,36 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "distance": {
         "interval": {
-          "startTime": "2026-09-25T14:58:00Z",
+          "startTime": "2026-01-01T14:58:00Z",
           "startUtcOffset": "32400s",
-          "endTime": "2026-09-25T14:59:00Z",
+          "endTime": "2026-01-01T14:59:00Z",
           "endUtcOffset": "32400s",
           "civilStartTime": {
-            "date": { "year": 2026, "month": 9, "day": 25 },
+            "date": { "year": 2026, "month": 1, "day": 1 },
             "time": { "hours": 23, "minutes": 58 }
           },
           "civilEndTime": {
-            "date": { "year": 2026, "month": 9, "day": 25 },
+            "date": { "year": 2026, "month": 1, "day": 1 },
             "time": { "hours": 23, "minutes": 59 }
           }
         },
-        "millimeters": "1500"
+        "millimeters": "1000"
       }
     }
-    // 全 326 件中先頭 1 件に絞った。以下省略。
+    // 全 466 件中先頭 1 件に絞った。以下省略。
   ]
 }
 ```
 
 ### datapoints exercise (実測)
 
-取得コマンド (2026-09-26 JST 取得): `deno task -q datapoints exercise --from 2026-09-19 --to 2026-09-26` (Pixel Watch 4)。CLI の実出力 (`{"dataPoints": [...]}` の形で `nextPageToken` は含まない)。全 26 件のうち `exerciseType` が異なる先頭 2 件 (`CARDIO_WORKOUT`・`WEIGHTLIFTING`) を掲載した。`metricsSummary` はそのまま残した。
+取得コマンド (2026-10-12 JST 取得): `npx --no --prefix "<scripts の絶対パス>" -- datapoints exercise --from 2026-09-19 --to 2026-09-26` (Pixel Watch 4)。CLI の実出力 (`{"dataPoints": [...]}` の形で `nextPageToken` は含まない)。全 26 件のうち `exerciseType` が異なる先頭 2 件 (`CARDIO_WORKOUT`・`WEIGHTLIFTING`) を掲載した。`metricsSummary` はそのまま残した。
 
 ```jsonc
 {
   "dataPoints": [
     {
-      "name": "users/1173016576421350648/dataTypes/exercise/dataPoints/3326913505930631984",
+      "name": "users/<USER_ID>/dataTypes/exercise/dataPoints/<DATA_POINT_ID_1>",
       "dataSource": {
         "recordingMethod": "PASSIVELY_MEASURED",
         "device": { "formFactor": "WATCH", "displayName": "Pixel Watch 4" },
@@ -683,32 +676,32 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "exercise": {
         "interval": {
-          "startTime": "2026-09-25T00:33:29Z",
+          "startTime": "2026-01-02T00:00:00Z",
           "startUtcOffset": "32400s",
-          "endTime": "2026-09-25T00:55:12Z",
+          "endTime": "2026-01-02T00:20:00Z",
           "endUtcOffset": "32400s"
         },
         "exerciseType": "CARDIO_WORKOUT",
         "metricsSummary": {
-          "caloriesKcal": 202,
-          "averageHeartRateBeatsPerMinute": "115",
-          "activeZoneMinutes": "19",
+          "caloriesKcal": 200,
+          "averageHeartRateBeatsPerMinute": "100",
+          "activeZoneMinutes": "10",
           "heartRateZoneDurations": {
             "lightTime": "300s",
-            "moderateTime": "900s",
-            "vigorousTime": "120s",
+            "moderateTime": "800s",
+            "vigorousTime": "100s",
             "peakTime": "0s"
           }
         },
         "exerciseMetadata": {},
         "displayName": "アクティビティ",
-        "activeDuration": "1303s",
-        "updateTime": "2026-09-25T02:17:18.107531Z",
-        "createTime": "2026-09-25T02:17:18.107531Z"
+        "activeDuration": "1200s",
+        "updateTime": "2026-01-02T02:00:00.000000Z",
+        "createTime": "2026-01-02T02:00:00.000000Z"
       }
     },
     {
-      "name": "users/1173016576421350648/dataTypes/exercise/dataPoints/7140869748721445965",
+      "name": "users/<USER_ID>/dataTypes/exercise/dataPoints/<DATA_POINT_ID_2>",
       "dataSource": {
         "recordingMethod": "ACTIVELY_MEASURED",
         "device": { "formFactor": "WATCH", "displayName": "Pixel Watch 4" },
@@ -716,40 +709,40 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "exercise": {
         "interval": {
-          "startTime": "2026-09-24T23:00:33Z",
+          "startTime": "2026-01-01T10:00:00Z",
           "startUtcOffset": "32400s",
-          "endTime": "2026-09-24T23:58:24Z",
+          "endTime": "2026-01-01T11:00:00Z",
           "endUtcOffset": "32400s"
         },
         "exerciseType": "WEIGHTLIFTING",
         "metricsSummary": {
-          "caloriesKcal": 440,
-          "averageHeartRateBeatsPerMinute": "107",
-          "activeZoneMinutes": "30",
+          "caloriesKcal": 400,
+          "averageHeartRateBeatsPerMinute": "100",
+          "activeZoneMinutes": "20",
           "heartRateZoneDurations": {
-            "lightTime": "1620s",
-            "moderateTime": "1860s",
+            "lightTime": "1800s",
+            "moderateTime": "1800s",
             "vigorousTime": "0s",
             "peakTime": "0s"
           }
         },
         "exerciseMetadata": {},
-        "displayName": "ウエイトリフティング",
-        "activeDuration": "3471s",
+        "displayName": "ウェイトリフティング",
+        "activeDuration": "3600s",
         "exerciseEvents": [
           {
-            "eventTime": "2026-09-24T23:00:33Z",
+            "eventTime": "2026-01-01T10:00:00Z",
             "eventUtcOffset": "32400s",
             "exerciseEventType": "START"
           },
           {
-            "eventTime": "2026-09-24T23:58:24Z",
+            "eventTime": "2026-01-01T11:00:00Z",
             "eventUtcOffset": "32400s",
             "exerciseEventType": "STOP"
           }
         ],
-        "updateTime": "2026-09-24T23:58:27.169277Z",
-        "createTime": "2026-09-24T23:06:34.378717Z"
+        "updateTime": "2026-01-01T11:00:03.000000Z",
+        "createTime": "2026-01-01T10:06:00.000000Z"
       }
     }
     // 全 26 件中、exerciseType が異なる先頭 2 件に絞った。以下省略 (他は主に MOTORCYCLE)。
@@ -759,7 +752,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
 ### datapoints heart-rate (実測)
 
-取得コマンド (2026-09-26 JST 取得): `deno task -q datapoints heart-rate --from 2026-09-25T10:00:00Z --to 2026-09-25T10:05:00Z` (Pixel Watch 4)。CLI の実出力 (`{"dataPoints": [...]}` の形で `nextPageToken` は含まない)。全 138 件中先頭 2 件。
+取得コマンド (2026-10-12 JST 取得): `npx --no --prefix "<scripts の絶対パス>" -- datapoints heart-rate --from 2026-09-25T10:00:00Z --to 2026-09-25T10:05:00Z` (Pixel Watch 4)。CLI の実出力 (`{"dataPoints": [...]}` の形で `nextPageToken` は含まない)。全 138 件中先頭 2 件。
 
 ```jsonc
 {
@@ -772,14 +765,14 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "heartRate": {
         "sampleTime": {
-          "physicalTime": "2026-09-25T10:04:59Z",
+          "physicalTime": "2026-01-01T10:04:59Z",
           "utcOffset": "32400s",
           "civilTime": {
-            "date": { "year": 2026, "month": 9, "day": 25 },
+            "date": { "year": 2026, "month": 1, "day": 1 },
             "time": { "hours": 19, "minutes": 4, "seconds": 59 }
           }
         },
-        "beatsPerMinute": "49"
+        "beatsPerMinute": "60"
       }
     },
     {
@@ -790,14 +783,14 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "heartRate": {
         "sampleTime": {
-          "physicalTime": "2026-09-25T10:04:57Z",
+          "physicalTime": "2026-01-01T10:04:57Z",
           "utcOffset": "32400s",
           "civilTime": {
-            "date": { "year": 2026, "month": 9, "day": 25 },
+            "date": { "year": 2026, "month": 1, "day": 1 },
             "time": { "hours": 19, "minutes": 4, "seconds": 57 }
           }
         },
-        "beatsPerMinute": "50"
+        "beatsPerMinute": "61"
       }
     }
     // 全 138 件中先頭 2 件に絞った。以下省略。
@@ -807,13 +800,13 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
 ### datapoints weight (実測)
 
-取得コマンド (2026-09-27 JST 取得): `deno task -q datapoints weight --from 2026-09-01T00:00:00Z --to 2026-09-28T00:00:00Z`。全 2 件を掲載した (省略なし)。データ源は Health Planet アプリが Health Connect に書き込んだ体重で、`dataSource.platform` は `HEALTH_CONNECT`。
+取得コマンド (2026-10-12 JST 取得): `npx --no --prefix "<scripts の絶対パス>" -- datapoints weight --from 2026-09-01T00:00:00Z --to 2026-09-28T00:00:00Z`。全 12 件中先頭 2 件。データ源は Health Planet アプリが Health Connect に書き込んだ体重で、`dataSource.platform` は `HEALTH_CONNECT`。同一の `physicalTime` と値で `name` だけが異なる記録が 2 件ずつ返った (2026-09-27 の取得では重複は無く、同じ期間は 2 件だった)。
 
-```json
+```jsonc
 {
   "dataPoints": [
     {
-      "name": "users/1173016576421350648/dataTypes/weight/dataPoints/8107172512320991248",
+      "name": "users/<USER_ID>/dataTypes/weight/dataPoints/<DATA_POINT_ID_1>",
       "dataSource": {
         "recordingMethod": "UNKNOWN",
         "device": {},
@@ -822,18 +815,18 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "weight": {
         "sampleTime": {
-          "physicalTime": "2026-09-25T22:15:10Z",
+          "physicalTime": "2025-12-31T23:30:00Z",
           "utcOffset": "32400s",
           "civilTime": {
-            "date": { "year": 2026, "month": 9, "day": 26 },
-            "time": { "hours": 7, "minutes": 15, "seconds": 10 }
+            "date": { "year": 2026, "month": 1, "day": 1 },
+            "time": { "hours": 8, "minutes": 30, "seconds": 0 }
           }
         },
-        "weightGrams": 90200
+        "weightGrams": 60000
       }
     },
     {
-      "name": "users/1173016576421350648/dataTypes/weight/dataPoints/886503075782888464",
+      "name": "users/<USER_ID>/dataTypes/weight/dataPoints/<DATA_POINT_ID_2>",
       "dataSource": {
         "recordingMethod": "UNKNOWN",
         "device": {},
@@ -842,29 +835,30 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "weight": {
         "sampleTime": {
-          "physicalTime": "2026-09-13T22:57:30Z",
+          "physicalTime": "2025-12-31T23:30:00Z",
           "utcOffset": "32400s",
           "civilTime": {
-            "date": { "year": 2026, "month": 9, "day": 14 },
-            "time": { "hours": 7, "minutes": 57, "seconds": 30 }
+            "date": { "year": 2026, "month": 1, "day": 1 },
+            "time": { "hours": 8, "minutes": 30, "seconds": 0 }
           }
         },
-        "weightGrams": 88300
+        "weightGrams": 60000
       }
     }
+    // 全 12 件中先頭 2 件に絞った。以下省略。
   ]
 }
 ```
 
 ### datapoints body-fat (実測)
 
-取得コマンド (2026-09-27 JST 取得): `deno task -q datapoints body-fat --from 2026-09-01T00:00:00Z --to 2026-09-28T00:00:00Z`。全 2 件を掲載した (省略なし)。データ源は `weight` と同じく Health Planet アプリが Health Connect に書き込んだ体脂肪率。
+取得コマンド (2026-10-12 JST 取得): `npx --no --prefix "<scripts の絶対パス>" -- datapoints body-fat --from 2026-09-01T00:00:00Z --to 2026-09-28T00:00:00Z`。全 12 件中先頭 2 件。データ源は `weight` と同じく Health Planet アプリが Health Connect に書き込んだ体脂肪率で、こちらも同一の `physicalTime` と値で `name` だけが異なる記録が 2 件ずつ返った。
 
-```json
+```jsonc
 {
   "dataPoints": [
     {
-      "name": "users/1173016576421350648/dataTypes/body-fat/dataPoints/911827026476164016",
+      "name": "users/<USER_ID>/dataTypes/body-fat/dataPoints/<DATA_POINT_ID_1>",
       "dataSource": {
         "recordingMethod": "UNKNOWN",
         "device": {},
@@ -873,18 +867,18 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "bodyFat": {
         "sampleTime": {
-          "physicalTime": "2026-09-25T22:15:10Z",
+          "physicalTime": "2025-12-31T23:30:00Z",
           "utcOffset": "32400s",
           "civilTime": {
-            "date": { "year": 2026, "month": 9, "day": 26 },
-            "time": { "hours": 7, "minutes": 15, "seconds": 10 }
+            "date": { "year": 2026, "month": 1, "day": 1 },
+            "time": { "hours": 8, "minutes": 30, "seconds": 0 }
           }
         },
-        "percentage": 25.8
+        "percentage": 20.0
       }
     },
     {
-      "name": "users/1173016576421350648/dataTypes/body-fat/dataPoints/4226214199077062968",
+      "name": "users/<USER_ID>/dataTypes/body-fat/dataPoints/<DATA_POINT_ID_2>",
       "dataSource": {
         "recordingMethod": "UNKNOWN",
         "device": {},
@@ -893,103 +887,104 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
       },
       "bodyFat": {
         "sampleTime": {
-          "physicalTime": "2026-09-13T22:57:30Z",
+          "physicalTime": "2025-12-31T23:30:00Z",
           "utcOffset": "32400s",
           "civilTime": {
-            "date": { "year": 2026, "month": 9, "day": 14 },
-            "time": { "hours": 7, "minutes": 57, "seconds": 30 }
+            "date": { "year": 2026, "month": 1, "day": 1 },
+            "time": { "hours": 8, "minutes": 30, "seconds": 0 }
           }
         },
-        "percentage": 26.6
+        "percentage": 20.0
       }
     }
+    // 全 12 件中先頭 2 件に絞った。以下省略。
   ]
 }
 ```
 
 ### daily-rollup total-calories (実測)
 
-取得コマンド (2026-09-26 JST 取得): `deno task -q daily-rollup total-calories --from 2026-09-19 --to 2026-09-25` (Pixel Watch 4)。全 7 件を掲載した (省略なし)。
+取得コマンド (2026-10-12 JST 取得): `npx --no --prefix "<scripts の絶対パス>" -- daily-rollup total-calories --from 2026-09-19 --to 2026-09-25` (Pixel Watch 4)。CLI の実出力 (`{"rollupDataPoints": [...]}` の形で `nextPageToken` は含まない)。全 7 件を掲載した (省略なし)。
 
 ```json
 {
   "rollupDataPoints": [
     {
       "civilStartTime": {
-        "date": { "year": 2026, "month": 9, "day": 25 },
+        "date": { "year": 2026, "month": 1, "day": 7 },
         "time": {}
       },
       "civilEndTime": {
-        "date": { "year": 2026, "month": 9, "day": 26 },
+        "date": { "year": 2026, "month": 1, "day": 8 },
         "time": {}
       },
-      "totalCalories": { "kcalSum": 3028.784634 }
+      "totalCalories": { "kcalSum": 2000.1234560000003 }
     },
     {
       "civilStartTime": {
-        "date": { "year": 2026, "month": 9, "day": 24 },
+        "date": { "year": 2026, "month": 1, "day": 6 },
         "time": {}
       },
       "civilEndTime": {
-        "date": { "year": 2026, "month": 9, "day": 25 },
+        "date": { "year": 2026, "month": 1, "day": 7 },
         "time": {}
       },
-      "totalCalories": { "kcalSum": 2815.163479 }
+      "totalCalories": { "kcalSum": 2100.2345670000002 }
     },
     {
       "civilStartTime": {
-        "date": { "year": 2026, "month": 9, "day": 23 },
+        "date": { "year": 2026, "month": 1, "day": 5 },
         "time": {}
       },
       "civilEndTime": {
-        "date": { "year": 2026, "month": 9, "day": 24 },
+        "date": { "year": 2026, "month": 1, "day": 6 },
         "time": {}
       },
-      "totalCalories": { "kcalSum": 2916.273316 }
+      "totalCalories": { "kcalSum": 2200.345678 }
     },
     {
       "civilStartTime": {
-        "date": { "year": 2026, "month": 9, "day": 22 },
+        "date": { "year": 2026, "month": 1, "day": 4 },
         "time": {}
       },
       "civilEndTime": {
-        "date": { "year": 2026, "month": 9, "day": 23 },
+        "date": { "year": 2026, "month": 1, "day": 5 },
         "time": {}
       },
-      "totalCalories": { "kcalSum": 3435.855093 }
+      "totalCalories": { "kcalSum": 2300.456789 }
     },
     {
       "civilStartTime": {
-        "date": { "year": 2026, "month": 9, "day": 21 },
+        "date": { "year": 2026, "month": 1, "day": 3 },
         "time": {}
       },
       "civilEndTime": {
-        "date": { "year": 2026, "month": 9, "day": 22 },
+        "date": { "year": 2026, "month": 1, "day": 4 },
         "time": {}
       },
-      "totalCalories": { "kcalSum": 2988.19035 }
+      "totalCalories": { "kcalSum": 2400.1971 }
     },
     {
       "civilStartTime": {
-        "date": { "year": 2026, "month": 9, "day": 20 },
+        "date": { "year": 2026, "month": 1, "day": 2 },
         "time": {}
       },
       "civilEndTime": {
-        "date": { "year": 2026, "month": 9, "day": 21 },
+        "date": { "year": 2026, "month": 1, "day": 3 },
         "time": {}
       },
-      "totalCalories": { "kcalSum": 2906.124745 }
+      "totalCalories": { "kcalSum": 2500.62642 }
     },
     {
       "civilStartTime": {
-        "date": { "year": 2026, "month": 9, "day": 19 },
+        "date": { "year": 2026, "month": 1, "day": 1 },
         "time": {}
       },
       "civilEndTime": {
-        "date": { "year": 2026, "month": 9, "day": 20 },
+        "date": { "year": 2026, "month": 1, "day": 2 },
         "time": {}
       },
-      "totalCalories": { "kcalSum": 3632.937836 }
+      "totalCalories": { "kcalSum": 2600.789123 }
     }
   ]
 }
@@ -997,32 +992,32 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
 ### daily-rollup steps (実測)
 
-取得コマンド (2026-09-26 JST 取得): `deno task -q daily-rollup steps --from 2026-09-19 --to 2026-09-25` (Pixel Watch 4)。CLI の実出力 (`{"rollupDataPoints": [...]}` の形で `nextPageToken` は含まない)。全 7 件中先頭 2 件。
+取得コマンド (2026-10-12 JST 取得): `npx --no --prefix "<scripts の絶対パス>" -- daily-rollup steps --from 2026-09-19 --to 2026-09-25` (Pixel Watch 4)。CLI の実出力 (`{"rollupDataPoints": [...]}` の形で `nextPageToken` は含まない)。全 7 件中先頭 2 件。
 
 ```jsonc
 {
   "rollupDataPoints": [
     {
       "civilStartTime": {
-        "date": { "year": 2026, "month": 9, "day": 25 },
+        "date": { "year": 2026, "month": 1, "day": 7 },
         "time": {}
       },
       "civilEndTime": {
-        "date": { "year": 2026, "month": 9, "day": 26 },
+        "date": { "year": 2026, "month": 1, "day": 8 },
         "time": {}
       },
-      "steps": { "countSum": "9525" }
+      "steps": { "countSum": "9000" }
     },
     {
       "civilStartTime": {
-        "date": { "year": 2026, "month": 9, "day": 24 },
+        "date": { "year": 2026, "month": 1, "day": 6 },
         "time": {}
       },
       "civilEndTime": {
-        "date": { "year": 2026, "month": 9, "day": 25 },
+        "date": { "year": 2026, "month": 1, "day": 7 },
         "time": {}
       },
-      "steps": { "countSum": "6859" }
+      "steps": { "countSum": "6000" }
     }
     // 全 7 件中先頭 2 件に絞った。以下省略。
   ]
@@ -1061,17 +1056,17 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 {
   "nutritionLog": {
     "interval": {
-      "startTime": "2026-09-27T12:00:00+09:00",
-      "endTime": "2026-09-27T12:20:00+09:00",
+      "startTime": "2026-01-01T12:00:00+09:00",
+      "endTime": "2026-01-01T12:20:00+09:00",
       "startUtcOffset": "32400s",
       "endUtcOffset": "32400s"
     },
     "mealType": "LUNCH",
     "foodDisplayName": "テスト記録 (skill 検証、削除予定)",
-    "energy": { "kcal": 500 },
-    "totalCarbohydrate": { "grams": 60 },
-    "totalFat": { "grams": 15 },
-    "nutrients": [{ "nutrient": "PROTEIN", "quantity": { "grams": 30 } }]
+    "energy": { "kcal": 400 },
+    "totalCarbohydrate": { "grams": 50 },
+    "totalFat": { "grams": 10 },
+    "nutrients": [{ "nutrient": "PROTEIN", "quantity": { "grams": 20 } }]
   }
 }
 ```
@@ -1083,33 +1078,33 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
   "done": true,
   "response": {
     "@type": "type.googleapis.com/google.devicesandservices.health.v4.DataPoint",
-    "name": "users/1173016576421350648/dataTypes/nutrition-log/dataPoints/531608654317060358",
+    "name": "users/<USER_ID>/dataTypes/nutrition-log/dataPoints/<DATA_POINT_ID>",
     "dataSource": {
       "recordingMethod": "UNKNOWN",
       "application": {
-        "googleWebClientId": "140017516064-tcvil63rf5i8k38mpkdi8a9j7f4hgjbn.apps.googleusercontent.com"
+        "googleWebClientId": "<CLIENT_ID>.apps.googleusercontent.com"
       },
       "platform": "GOOGLE_WEB_API"
     },
     "nutritionLog": {
       "interval": {
-        "startTime": "2026-09-27T03:00:00Z",
+        "startTime": "2026-01-01T03:00:00Z",
         "startUtcOffset": "32400s",
-        "endTime": "2026-09-27T03:20:00Z",
+        "endTime": "2026-01-01T03:20:00Z",
         "endUtcOffset": "32400s",
         "civilStartTime": {
-          "date": { "year": 2026, "month": 9, "day": 27 },
+          "date": { "year": 2026, "month": 1, "day": 1 },
           "time": { "hours": 12 }
         },
         "civilEndTime": {
-          "date": { "year": 2026, "month": 9, "day": 27 },
+          "date": { "year": 2026, "month": 1, "day": 1 },
           "time": { "hours": 12, "minutes": 20 }
         }
       },
-      "nutrients": [{ "quantity": { "grams": 30 }, "nutrient": "PROTEIN" }],
-      "energy": { "kcal": 500 },
-      "totalCarbohydrate": { "grams": 60 },
-      "totalFat": { "grams": 15 },
+      "nutrients": [{ "quantity": { "grams": 20 }, "nutrient": "PROTEIN" }],
+      "energy": { "kcal": 400 },
+      "totalCarbohydrate": { "grams": 50 },
+      "totalFat": { "grams": 10 },
       "mealType": "LUNCH",
       "foodDisplayName": "テスト記録 (skill 検証、削除予定)"
     }
@@ -1121,37 +1116,37 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
 ### get (実測)
 
-取得コマンド (2026-09-27 JST 取得): `deno task -q get users/1173016576421350648/dataTypes/nutrition-log/dataPoints/531608654317060358` (上記 create で登録した記録)。応答は `Operation` で包まれず、`DataPoint` がそのまま返る (`name` ・ `dataSource` ・ `nutritionLog` のみで `create` の `response` と同じ形)。
+取得コマンド (2026-09-27 JST 取得): `deno task -q get users/<USER_ID>/dataTypes/nutrition-log/dataPoints/<DATA_POINT_ID>` (上記 create で登録した記録)。応答は `Operation` で包まれず、`DataPoint` がそのまま返る (`name` ・ `dataSource` ・ `nutritionLog` のみで `create` の `response` と同じ形)。
 
 ```json
 {
-  "name": "users/1173016576421350648/dataTypes/nutrition-log/dataPoints/531608654317060358",
+  "name": "users/<USER_ID>/dataTypes/nutrition-log/dataPoints/<DATA_POINT_ID>",
   "dataSource": {
     "recordingMethod": "UNKNOWN",
     "application": {
-      "googleWebClientId": "140017516064-tcvil63rf5i8k38mpkdi8a9j7f4hgjbn.apps.googleusercontent.com"
+      "googleWebClientId": "<CLIENT_ID>.apps.googleusercontent.com"
     },
     "platform": "GOOGLE_WEB_API"
   },
   "nutritionLog": {
     "interval": {
-      "startTime": "2026-09-27T03:00:00Z",
+      "startTime": "2026-01-01T03:00:00Z",
       "startUtcOffset": "32400s",
-      "endTime": "2026-09-27T03:20:00Z",
+      "endTime": "2026-01-01T03:20:00Z",
       "endUtcOffset": "32400s",
       "civilStartTime": {
-        "date": { "year": 2026, "month": 9, "day": 27 },
+        "date": { "year": 2026, "month": 1, "day": 1 },
         "time": { "hours": 12 }
       },
       "civilEndTime": {
-        "date": { "year": 2026, "month": 9, "day": 27 },
+        "date": { "year": 2026, "month": 1, "day": 1 },
         "time": { "hours": 12, "minutes": 20 }
       }
     },
-    "nutrients": [{ "quantity": { "grams": 30 }, "nutrient": "PROTEIN" }],
-    "energy": { "kcal": 500 },
-    "totalCarbohydrate": { "grams": 60 },
-    "totalFat": { "grams": 15 },
+    "nutrients": [{ "quantity": { "grams": 20 }, "nutrient": "PROTEIN" }],
+    "energy": { "kcal": 400 },
+    "totalCarbohydrate": { "grams": 50 },
+    "totalFat": { "grams": 10 },
     "mealType": "LUNCH",
     "foodDisplayName": "テスト記録 (skill 検証、削除予定)"
   }
@@ -1162,7 +1157,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 
 ### update (実測、失敗)
 
-取得コマンド (2026-09-27 JST 取得): `deno task -q create nutrition-log --body '{"nutritionLog": {"interval": {"startTime": "2026-09-27T03:00:00+09:00", "endTime": "2026-09-27T03:20:00+09:00"}, "mealType": "SNACK", "foodDisplayName": "テスト記録 (update 検証、削除予定)", "energy": {"kcal": 100}}}'` で `users/1173016576421350648/dataTypes/nutrition-log/dataPoints/6565990619967314302` を作成し、`deno task -q update users/1173016576421350648/dataTypes/nutrition-log/dataPoints/6565990619967314302 --body '{"nutritionLog": {"energy": {"kcal": 120}}}'` を実行した。今回も成功する形を確認できなかった。詳細と試した形は「サブコマンド」節の `update` の説明を参照。応答 (500) は次のとおり。
+取得コマンド (2026-09-27 JST 取得): `deno task -q create nutrition-log --body '{"nutritionLog": {"interval": {"startTime": "2026-09-27T03:00:00+09:00", "endTime": "2026-09-27T03:20:00+09:00"}, "mealType": "SNACK", "foodDisplayName": "テスト記録 (update 検証、削除予定)", "energy": {"kcal": 100}}}'` で `users/<USER_ID>/dataTypes/nutrition-log/dataPoints/<DATA_POINT_ID>` を作成し、`deno task -q update users/<USER_ID>/dataTypes/nutrition-log/dataPoints/<DATA_POINT_ID> --body '{"nutritionLog": {"energy": {"kcal": 120}}}'` を実行した。今回も成功する形を確認できなかった。詳細と試した形は「サブコマンド」節の `update` の説明を参照。応答 (500) は次のとおり。
 
 ```json
 {
@@ -1174,7 +1169,7 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 }
 ```
 
-検証後、`deno task -q batch-delete nutrition-log users/1173016576421350648/dataTypes/nutrition-log/dataPoints/6565990619967314302` で作成した記録を削除し、`deno task -q datapoints nutrition-log --from 2026-09-27 --to 2026-09-28` で残存なし (`{"dataPoints":[]}`) を確認した。
+検証後、`deno task -q batch-delete nutrition-log users/<USER_ID>/dataTypes/nutrition-log/dataPoints/<DATA_POINT_ID>` で作成した記録を削除し、`deno task -q datapoints nutrition-log --from 2026-09-27 --to 2026-09-28` で残存なし (`{"dataPoints":[]}`) を確認した。
 
 ### datapoints nutrition-log (実測)
 
@@ -1184,33 +1179,33 @@ GOOGLE_HEALTH_CLIENT_ID=<client_id> \
 {
   "dataPoints": [
     {
-      "name": "users/1173016576421350648/dataTypes/nutrition-log/dataPoints/531608654317060358",
+      "name": "users/<USER_ID>/dataTypes/nutrition-log/dataPoints/<DATA_POINT_ID>",
       "dataSource": {
         "recordingMethod": "UNKNOWN",
         "application": {
-          "googleWebClientId": "140017516064-tcvil63rf5i8k38mpkdi8a9j7f4hgjbn.apps.googleusercontent.com"
+          "googleWebClientId": "<CLIENT_ID>.apps.googleusercontent.com"
         },
         "platform": "GOOGLE_WEB_API"
       },
       "nutritionLog": {
         "interval": {
-          "startTime": "2026-09-27T03:00:00Z",
+          "startTime": "2026-01-01T03:00:00Z",
           "startUtcOffset": "32400s",
-          "endTime": "2026-09-27T03:20:00Z",
+          "endTime": "2026-01-01T03:20:00Z",
           "endUtcOffset": "32400s",
           "civilStartTime": {
-            "date": { "year": 2026, "month": 9, "day": 27 },
+            "date": { "year": 2026, "month": 1, "day": 1 },
             "time": { "hours": 12 }
           },
           "civilEndTime": {
-            "date": { "year": 2026, "month": 9, "day": 27 },
+            "date": { "year": 2026, "month": 1, "day": 1 },
             "time": { "hours": 12, "minutes": 20 }
           }
         },
-        "nutrients": [{ "quantity": { "grams": 30 }, "nutrient": "PROTEIN" }],
-        "energy": { "kcal": 500 },
-        "totalCarbohydrate": { "grams": 60 },
-        "totalFat": { "grams": 15 },
+        "nutrients": [{ "quantity": { "grams": 20 }, "nutrient": "PROTEIN" }],
+        "energy": { "kcal": 400 },
+        "totalCarbohydrate": { "grams": 50 },
+        "totalFat": { "grams": 10 },
         "mealType": "LUNCH",
         "foodDisplayName": "テスト記録 (skill 検証、削除予定)"
       }
@@ -1223,7 +1218,7 @@ filter は `nutrition_log.interval.civil_start_time` (日付) のみ通る。`st
 
 ### batch-delete (実測)
 
-取得コマンド (2026-09-27 JST 取得): `deno task -q batch-delete nutrition-log users/1173016576421350648/dataTypes/nutrition-log/dataPoints/531608654317060358` (上記の記録を削除)。応答は `Operation` で、`response` に `BatchDeleteDataPointsResponse` (削除した `DataPoint` の配列。要素の形は `get` と同じ) が入る。
+取得コマンド (2026-09-27 JST 取得): `deno task -q batch-delete nutrition-log users/<USER_ID>/dataTypes/nutrition-log/dataPoints/<DATA_POINT_ID>` (上記の記録を削除)。応答は `Operation` で、`response` に `BatchDeleteDataPointsResponse` (削除した `DataPoint` の配列。要素の形は `get` と同じ) が入る。
 
 ```json
 {
@@ -1232,33 +1227,33 @@ filter は `nutrition_log.interval.civil_start_time` (日付) のみ通る。`st
     "@type": "type.googleapis.com/google.devicesandservices.health.v4.BatchDeleteDataPointsResponse",
     "dataPoints": [
       {
-        "name": "users/1173016576421350648/dataTypes/nutrition-log/dataPoints/531608654317060358",
+        "name": "users/<USER_ID>/dataTypes/nutrition-log/dataPoints/<DATA_POINT_ID>",
         "dataSource": {
           "recordingMethod": "UNKNOWN",
           "application": {
-            "googleWebClientId": "140017516064-tcvil63rf5i8k38mpkdi8a9j7f4hgjbn.apps.googleusercontent.com"
+            "googleWebClientId": "<CLIENT_ID>.apps.googleusercontent.com"
           },
           "platform": "GOOGLE_WEB_API"
         },
         "nutritionLog": {
           "interval": {
-            "startTime": "2026-09-27T03:00:00Z",
+            "startTime": "2026-01-01T03:00:00Z",
             "startUtcOffset": "32400s",
-            "endTime": "2026-09-27T03:20:00Z",
+            "endTime": "2026-01-01T03:20:00Z",
             "endUtcOffset": "32400s",
             "civilStartTime": {
-              "date": { "year": 2026, "month": 9, "day": 27 },
+              "date": { "year": 2026, "month": 1, "day": 1 },
               "time": { "hours": 12 }
             },
             "civilEndTime": {
-              "date": { "year": 2026, "month": 9, "day": 27 },
+              "date": { "year": 2026, "month": 1, "day": 1 },
               "time": { "hours": 12, "minutes": 20 }
             }
           },
-          "nutrients": [{ "quantity": { "grams": 30 }, "nutrient": "PROTEIN" }],
-          "energy": { "kcal": 500 },
-          "totalCarbohydrate": { "grams": 60 },
-          "totalFat": { "grams": 15 },
+          "nutrients": [{ "quantity": { "grams": 20 }, "nutrient": "PROTEIN" }],
+          "energy": { "kcal": 400 },
+          "totalCarbohydrate": { "grams": 50 },
+          "totalFat": { "grams": 10 },
           "mealType": "LUNCH",
           "foodDisplayName": "テスト記録 (skill 検証、削除予定)"
         }
