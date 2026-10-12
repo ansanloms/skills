@@ -54,6 +54,7 @@ description: >-
   ```
 
   取得した XML は専用パーサを介さず、テキストとしてそのまま読んで項目を拾う。RSS 2.0 は `<item>` ごとの `<title>`・`<link>`・`<pubDate>`・`<description>`、Atom は `<entry>` ごとの `<title>`・`<link href="...">`・`<updated>` または `<published>`・`<summary>` を見る。
+
 - 個別記事ページ (公開日確認・要約根拠の取得): `curl -sL -A "<UA>" "<記事 URL>"` で HTML を直接取得し、返ってきたテキストをそのまま読んで本文・日付を確認する。
   - UA: RSS/Atom と同じ UA を使い、WebFetch は使わない。
   - 理由は RSS/Atom で curl を選んだ理由と同じで、AI による要約変換を介さず取得内容をそのまま扱うことで、数値 (CVSS・計測値等) の変換過程での誤りを避けるためである。詳細は「ルール/注意」の数値の扱いを参照。
