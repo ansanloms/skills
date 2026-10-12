@@ -14,7 +14,7 @@
     "fix": "oxlint --fix && oxfmt"
   },
   "dependencies": {
-    "gunshi": "0.37.1"
+    "gunshi": "0.37.3"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
