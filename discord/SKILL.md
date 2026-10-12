@@ -594,6 +594,13 @@ fi
 - **429 Too Many Requests**: 上記のレート制限を参照。
 - **5xx (500/502/503/504)**: Discord 側の一時的な障害。数秒待って 1〜2 回まで再試行し、直らなければユーザに報告する (無限リトライしない)。
 
+実レスポンス例 (401、取得日: 2026-10-12)。取得コマンド: `curl -sS -w '\n%{http_code}\n' 'https://discord.com/api/v10/users/@me' -H "Authorization: Bot invalid-token"` (無効なダミートークンで実行)
+
+```text
+{"message": "401: Unauthorized", "code": 0}
+401
+```
+
 ## 注意
 
 - トークンの扱いは「前提条件」を参照。
