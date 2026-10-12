@@ -19,7 +19,7 @@ const command = define({
 
       if (status.refresh_token_expired) {
         console.error(
-          `refresh_token が失効している。\`npx --no --prefix "${SCRIPTS_DIR}" auth\` で再認可すること (localhost に届かない端末では auth-url と token <code> の組み合わせ)。`,
+          `refresh_token が失効している。\`npx --no --prefix "${SCRIPTS_DIR}" -- auth\` で再認可すること (localhost に届かない端末では auth-url と token <code> の組み合わせ)。`,
         );
         process.exit(1);
       }

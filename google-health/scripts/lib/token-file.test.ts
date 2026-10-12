@@ -228,7 +228,7 @@ test("readTokenFile: 空ファイル (0 バイト) は未認可の案内付き�
     await writeFile(path, "");
     await assert.rejects(
       () => readTokenFile(path),
-      /npx --no --prefix ".*" auth/,
+      /npx --no --prefix ".*" -- auth/,
     );
   } finally {
     await rm(dir, { recursive: true, force: true });

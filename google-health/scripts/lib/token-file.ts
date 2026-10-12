@@ -56,7 +56,7 @@ export async function readTokenFile(path: string): Promise<StoredToken> {
   }
   if (text.length === 0) {
     throw new Error(
-      `トークンファイル (${path}) が空。未認可の可能性がある。\`npx --no --prefix "${SCRIPTS_DIR}" auth\` を実行する (localhost に届かない端末では auth-url と token <code> の組み合わせ)。`,
+      `トークンファイル (${path}) が空。未認可の可能性がある。\`npx --no --prefix "${SCRIPTS_DIR}" -- auth\` を実行する (localhost に届かない端末では auth-url と token <code> の組み合わせ)。`,
     );
   }
   let body: unknown;
@@ -264,7 +264,7 @@ export function computeTokenStatus(
     !Number.isFinite(refreshTokenObtainedAt)
   ) {
     throw new Error(
-      `トークンファイルが壊れている (obtained_at を解釈できない)。\`npx --no --prefix "${SCRIPTS_DIR}" auth\` で再認可すること (localhost に届かない端末では auth-url と token <code> の組み合わせ)。`,
+      `トークンファイルが壊れている (obtained_at を解釈できない)。\`npx --no --prefix "${SCRIPTS_DIR}" -- auth\` で再認可すること (localhost に届かない端末では auth-url と token <code> の組み合わせ)。`,
     );
   }
   const accessTokenExpiresInSec = Math.round(
@@ -311,7 +311,7 @@ export async function getValidToken(
     throw new Error(
       `アクセストークンの更新に失敗した (${
         e instanceof Error ? e.message : String(e)
-      })。refresh_token が失効している可能性がある。\`npx --no --prefix "${SCRIPTS_DIR}" auth\` で再認可すること (localhost に届かない端末では auth-url と token <code> の組み合わせ)。`,
+      })。refresh_token が失効している可能性がある。\`npx --no --prefix "${SCRIPTS_DIR}" -- auth\` で再認可すること (localhost に届かない端末では auth-url と token <code> の組み合わせ)。`,
     );
   }
   const next = applyRefresh(token, resp, now);
