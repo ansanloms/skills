@@ -1,12 +1,8 @@
 # APM dependencies
-apm_modules/**
+apm_modules/
 .claude/skills/**
 
 # テストカバレッジ
 coverage/**
 
 .env
-
-
-# APM dependencies
-apm_modules/

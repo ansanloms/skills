@@ -9,7 +9,8 @@ dependencies:
   mcp: []
 devDependencies:
   apm:
-    - mizchi/skills/meta/empirical-prompt-tuning
+    - mizchi/skills/empirical-prompt-tuning
+    - nanaism/yomiyasu/skills/yomiyasu
     - ansanloms/skills/ja-tech-proofread
 includes: auto
 scripts: {}
