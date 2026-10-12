@@ -1,6 +1,6 @@
 # ja-tech-proofread
 
-日本語で書かれた技術文書 (markdown) を推敲する skill。本文だけから決まる修正は構成の変更も含めて直接適用し、著者の判断が要る箇所はその場で確認してから適用する。表記と文法の機械判定と markdown の整形は skill 内の textlint (`textlint-rule-preset-ansanloms`) と `deno fmt` が行い、この skill は機械判定できない層だけを見る。
+日本語で書かれた技術文書 (markdown) を推敲する skill。本文だけから決まる修正は構成の変更も含めて直接適用し、著者の判断が要る箇所はその場で確認してから適用する。表記と文法の機械判定と markdown の整形は skill 内の textlint (`@ansanloms/textlint-rule-preset-ansanloms`) と `oxfmt` が行い、この skill は機械判定できない層だけを見る。
 
 ## できること
 
@@ -10,13 +10,13 @@
 - 行構造の点検と修正 (1 行 1 段落。表・コードフェンスは除く)
 - 文の一義性と語彙の点検と修正 (一文一義、根拠の無い緩和、行為者の明示、空虚な形容や動詞、術語の一貫性)
 - 事実と意見の区別、未確認の断定、演出の節度の点検と修正
-- skill 内の textlint (`textlint-rule-preset-ansanloms`) と `deno fmt` を実行し、その結果を機械層として報告に取り込む。`fix` モードでは機械層 (`--fix` と `deno fmt`) も対象ファイルを書き換える
+- skill 内の textlint (`@ansanloms/textlint-rule-preset-ansanloms`) と `oxfmt` を実行し、その結果を機械層として報告に取り込む。`fix` モードでは機械層 (`--fix` と `oxfmt`) も対象ファイルを書き換える
 
 節 (見出しブロック) ごとに「散文」か「項目」かを判定し、当てる規範を切り替える。規範は 6 群 34 項目で、ID・適用範囲・出典・修正を適用する群と指摘に留める群の区別は `SKILL.md` にある。
 
 ## 対象外
 
-- 表記と文法の機械判定。skill 内の textlint (`scripts/`、preset `textlint-rule-preset-ansanloms`) の担当。lint が拾わない表記の現象も skill は判定しない
+- 表記と文法の機械判定。skill 内の textlint (`scripts/`、preset `@ansanloms/textlint-rule-preset-ansanloms`) の担当。lint が拾わない表記の現象も skill は判定しない
 - 文体 (常体/敬体) の指定
 - 一文一行の整形 (書籍原稿向けの規範)
 - 要約、翻訳、執筆の代行
@@ -37,7 +37,7 @@
 - `lint`: ファイルを変更せず、指摘のみを返す
 - 自動発動時 (args 無し) は `fix` で、対象は会話文脈から取る
 
-機械層は skill 内のスクリプトが `textlint-rule-preset-ansanloms` (jsDelivr の `@0.0.2`) と `deno fmt` で実行する。preset を取得できない場合は機械層を実行不可として報告し、意味層の推敲だけを行う。
+機械層は skill 内のスクリプトが `@ansanloms/textlint-rule-preset-ansanloms` (git 依存、タグ 0.1.0) と `oxfmt` で実行する。preset を取得できない場合は機械層を実行不可として報告し、意味層の推敲だけを行う。
 
 ## 出力
 
