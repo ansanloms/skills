@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { DEFAULT_PORT, loadTokenConfig } from "../lib/config.ts";
 import { exchangeCode } from "../lib/oauth.ts";
 import {
@@ -8,23 +8,28 @@ import {
   writeTokenFile,
 } from "../lib/token-file.ts";
 
-const command = define({
-  name: "token",
+const USAGE = "token <code> [--port=<port>]";
+
+await runCli({
   description:
     "認可コードをアクセストークン・リフレッシュトークンに交換し、トークンファイルへ保存する (認可から数分以内に実行する。auth-url と組み合わせて使う退路)",
-  args: {
+  usage: USAGE,
+  allowPositionals: true,
+  options: {
     port: {
       type: "number",
       short: "p",
       default: DEFAULT_PORT,
-      description: `redirect_uri (http://localhost:<port>) に使う port (既定 ${DEFAULT_PORT})。auth-url 実行時と同じ値を指定する`,
+      min: 1,
+      max: 65535,
+      description: `redirect_uri (http://localhost:<port>) に使う port。auth-url 実行時と同じ値を指定する`,
     },
   },
   run: async (ctx) => {
     const code = ctx.positionals[0];
     const { port } = ctx.values;
     if (code === undefined) {
-      console.error("usage: token <code>");
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
 
@@ -57,5 +62,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

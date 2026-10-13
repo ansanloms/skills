@@ -1,15 +1,19 @@
 #!/usr/bin/env node
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { loadTokenConfig } from "../lib/config.ts";
 import { getValidToken } from "../lib/token-file.ts";
 import { checkOperationDone, parseBodyArg, readBodyArg } from "../lib/body.ts";
 import { API_BASE, request } from "../lib/api.ts";
 
-const command = define({
-  name: "update",
+const USAGE =
+  "update <dataPoint name> --body='<JSON>' (または --body=-) [--update-mask=<field,...>]";
+
+await runCli({
   description:
     "Google Health API の dataPoint 1 件を PATCH <name> で更新し、応答をそのまま標準出力へ出す",
-  args: {
+  usage: USAGE,
+  allowPositionals: true,
+  options: {
     body: {
       type: "string",
       description:
@@ -25,9 +29,7 @@ const command = define({
     const name = ctx.positionals[0];
     const { body, "update-mask": updateMask } = ctx.values;
     if (name === undefined) {
-      console.error(
-        "usage: update <dataPoint name> --body='<JSON>' (または --body=-) [--update-mask=<field,...>]",
-      );
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
     if (body === undefined) {
@@ -61,5 +63,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

@@ -1,20 +1,22 @@
 #!/usr/bin/env node
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { loadTokenConfig } from "../lib/config.ts";
 import { getValidToken } from "../lib/token-file.ts";
 import { API_BASE, request } from "../lib/api.ts";
 
-const command = define({
-  name: "get",
+const USAGE =
+  "get <dataPoint name> (例: users/me/dataTypes/steps/dataPoints/<id>)";
+
+await runCli({
   description:
     "Google Health API の dataPoint 1 件 (GET <name>) を取得し、応答をそのまま標準出力へ出す",
-  args: {},
+  usage: USAGE,
+  allowPositionals: true,
+  options: {},
   run: async (ctx) => {
     const name = ctx.positionals[0];
     if (name === undefined) {
-      console.error(
-        "usage: get <dataPoint name> (例: users/me/dataTypes/steps/dataPoints/<id>)",
-      );
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
 
@@ -30,5 +32,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

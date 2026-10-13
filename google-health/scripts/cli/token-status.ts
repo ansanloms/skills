@@ -1,19 +1,21 @@
 #!/usr/bin/env node
 import { resolve } from "node:path";
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { loadTokenPathConfig } from "../lib/config.ts";
 import { computeTokenStatus, readTokenFile } from "../lib/token-file.ts";
 
+const USAGE = "token-status";
+
 const SCRIPTS_DIR = resolve(import.meta.dirname, "..");
 
-// refresh_token 失効の専用 exit code。1 は「判定できなかった」(依存未インストール・設定欠落・トークンファイル読み取り不可等) に残す。
+// refresh_token 失効の専用 exit code。1 は「判定できなかった」(設定欠落・トークンファイル読み取り不可等) に残す。
 const EXIT_REFRESH_TOKEN_EXPIRED = 2;
 
-const command = define({
-  name: "token-status",
+await runCli({
   description:
     "トークンファイルの access_token 残り秒・refresh_token 残り日数を出す (refresh_token 失効時は再認可を促して exit code 2 で終了。それ以外の失敗は 1)",
-  args: {},
+  usage: USAGE,
+  options: {},
   run: async () => {
     try {
       const config = loadTokenPathConfig();
@@ -34,5 +36,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

@@ -1,15 +1,18 @@
 #!/usr/bin/env node
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { loadTokenConfig } from "../lib/config.ts";
 import { getValidToken } from "../lib/token-file.ts";
 import { checkOperationDone, parseBodyArg, readBodyArg } from "../lib/body.ts";
 import { API_BASE, request } from "../lib/api.ts";
 
-const command = define({
-  name: "create",
+const USAGE = "create <dataType> --body='<JSON>' (または --body=-)";
+
+await runCli({
   description:
     "Google Health API の dataPoints (POST .../dataTypes/<type>/dataPoints) へ 1 件登録し、応答 (Operation) をそのまま標準出力へ出す",
-  args: {
+  usage: USAGE,
+  allowPositionals: true,
+  options: {
     body: {
       type: "string",
       description:
@@ -20,9 +23,7 @@ const command = define({
     const dataType = ctx.positionals[0];
     const { body } = ctx.values;
     if (dataType === undefined) {
-      console.error(
-        "usage: create <dataType> --body='<JSON>' (または --body=-)",
-      );
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
     if (body === undefined) {
@@ -49,5 +50,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

@@ -1,18 +1,22 @@
 #!/usr/bin/env node
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { DEFAULT_PORT, loadAuthUrlConfig } from "../lib/config.ts";
 import { buildAuthUrl, DEFAULT_SCOPES, generateState } from "../lib/oauth.ts";
 
-const command = define({
-  name: "auth-url",
+const USAGE = "auth-url [--port=<port>] [--scope=<scope>...]";
+
+await runCli({
   description:
     "Google Health API の認可 URL を組み立てて出力する (auth コマンドが使えない場合の退路。ブラウザで開いて認可コードを取得し、token コマンドへ渡す)",
-  args: {
+  usage: USAGE,
+  options: {
     port: {
       type: "number",
       short: "p",
       default: DEFAULT_PORT,
-      description: `redirect_uri (http://localhost:<port>) に使う port (既定 ${DEFAULT_PORT})。auth コマンドの --port・token コマンドの --port と揃える`,
+      min: 1,
+      max: 65535,
+      description: `redirect_uri (http://localhost:<port>) に使う port。auth コマンドの --port・token コマンドの --port と揃える`,
     },
     scope: {
       type: "string",
@@ -43,5 +47,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

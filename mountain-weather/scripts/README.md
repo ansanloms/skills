@@ -2,7 +2,7 @@
 
 てんくらの登山指数 HTML と Open-Meteo の山頂数値予報を取得・解析し、山コード・気象庁区域コードを検索する CLI ツール。
 
-`node_modules` が無いとき、または skill を更新 (`apm update` 等) した直後は、`npm ci --omit=dev --prefix "<scripts の絶対パス>"` で依存を入れる (Node.js 24 以上)。実行に要るのは gunshi だけなので devDependencies は入れない。
+実行には Node.js 24 以上が要る。実行時の依存パッケージは無く、インストール手順は要らない。`npm ci` が要るのは開発 (lint・test) のときだけ。
 
 CLI は package.json の `bin` として公開しており `npx --no -- <name> <args>` で実行する (cwd が `scripts` ディレクトリの場合。別の cwd からは `npx --no --prefix "<scripts の絶対パス>" -- <name> <args>`)。別の cwd から `--prefix` で実行する場合、`--file` 等のパスは絶対パスで渡す (`--prefix` は bin の解決先を変えるだけで、相対パスは呼び出し元の cwd 基準で解決される)。`--` は必須。無いと npm 11 が `--config` 等のフラグを自分の設定として取り込む。
 
@@ -17,7 +17,7 @@ CLI は package.json の `bin` として公開しており `npx --no -- <name> <
 - 取得物が要求した山か検証する (`alt="登山指数"` の存在・`code=` の一致)。外れれば値を捏造せず exit 1 で停止する。
 - 時間帯別・週間の各テーブルを列位置で対応づけて抽出する。過去時間帯 (`t_no`)・予報範囲外は `null`。同一見出しの分割版・麓の天気テーブルは正本にしない。
 
-引数解析は [gunshi](https://gunshi.dev/) を使う。`--help` で使い方、各オプションに短縮形がある。
+引数解析は `node:util` の `parseArgs` を使う (共通処理は `lib/cli.ts`)。`--help` (`-h`) で使い方、各オプションに短縮形がある。
 
 ```sh
 npx --no -- fetch-index --code=<山のコード> [--type=15]   # -c / -t
@@ -106,7 +106,7 @@ npx --no -- find-area --update                          # -u。キャッシュ�
 - API の並列配列 (`hourly.time` と各変数の配列) を時刻 1 点 = 1 レコードに整形する。全変数の存在と時刻列との長さ一致を検証し、欠測 (`null`) はそのまま残す (補完しない)。
 - `weather_code` は WMO コードの数値のまま出力する (和名変換はしない。読み方は SKILL.md)。
 
-引数解析は fetch-index と同じく [gunshi](https://gunshi.dev/) を使う。`--help` で使い方、各オプションに短縮形がある。
+引数解析は fetch-index と同じく `node:util` の `parseArgs` を使う。`--help` (`-h`) で使い方、各オプションに短縮形がある。
 
 ```sh
 npx --no -- fetch-openmeteo --lat=<緯度> --lon=<経度> --elevation=<山頂標高 m> [--days=<1..7>]

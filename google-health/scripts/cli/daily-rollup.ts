@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { loadTokenConfig } from "../lib/config.ts";
 import { getValidToken } from "../lib/token-file.ts";
 import {
@@ -8,11 +8,14 @@ import {
 } from "../lib/civil.ts";
 import { API_BASE, postPaginated } from "../lib/api.ts";
 
-const command = define({
-  name: "daily-rollup",
+const USAGE = "daily-rollup <dataType> --from=<YYYY-MM-DD> --to=<YYYY-MM-DD>";
+
+await runCli({
   description:
     "Google Health API の dataPoints:dailyRollUp を取得し、全ページ結合した JSON を出力する (--to は inclusive)",
-  args: {
+  usage: USAGE,
+  allowPositionals: true,
+  options: {
     from: {
       type: "string",
       description: "取得範囲の開始 (YYYY-MM-DD)",
@@ -26,9 +29,7 @@ const command = define({
     const dataType = ctx.positionals[0];
     const { from, to } = ctx.values;
     if (dataType === undefined) {
-      console.error(
-        "usage: daily-rollup <dataType> --from=<YYYY-MM-DD> --to=<YYYY-MM-DD>",
-      );
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
     if (from === undefined || to === undefined) {
@@ -57,5 +58,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { readFile, writeFile } from "node:fs/promises";
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import {
   BA_LIST,
   type MountainEntry,
@@ -8,6 +8,8 @@ import {
   prefectureOf,
   searchMountains,
 } from "./kasel.ts";
+
+const USAGE = "find-mountain --name=<山名> [--update] | find-mountain --update";
 
 const BASE = "https://tenkura.n-kishou.co.jp/tk/kanko/kasel.html";
 const UA = "Mozilla/5.0";
@@ -64,11 +66,11 @@ async function readAsset(): Promise<Asset> {
   }
 }
 
-const command = define({
-  name: "find-mountain",
+await runCli({
   description:
     "てんくらの山リストのキャッシュから山名で code を検索する (--update でキャッシュを取り直す)",
-  args: {
+  usage: USAGE,
+  options: {
     name: {
       type: "string",
       short: "n",
@@ -85,9 +87,7 @@ const command = define({
     const { name, update } = ctx.values;
 
     if (name === undefined && !update) {
-      console.error(
-        "usage: find-mountain --name=<山名> [--update] | find-mountain --update",
-      );
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
 
@@ -134,5 +134,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

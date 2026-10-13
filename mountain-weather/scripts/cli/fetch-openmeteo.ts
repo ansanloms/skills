@@ -1,11 +1,14 @@
 #!/usr/bin/env node
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import {
   buildForecastUrl,
   type ForecastParams,
   type OpenMeteoResponse,
   toResult,
 } from "./openmeteo.ts";
+
+const USAGE =
+  "fetch-openmeteo --lat=<緯度> --lon=<経度> --elevation=<山頂標高 m> [--days=<1..7>]";
 
 /** 数値引数を検証付きでパースする。不正なら例外 (呼び出し側で exit 1)。 */
 function parseNumber(
@@ -53,11 +56,11 @@ async function fetchForecast(url: string): Promise<OpenMeteoResponse> {
   }
 }
 
-const command = define({
-  name: "fetch-openmeteo",
+await runCli({
   description:
     "Open-Meteo から山頂標高指定の数値予報 (1 時間ごと) を取得し JSON で出力する",
-  args: {
+  usage: USAGE,
+  options: {
     lat: {
       type: "string",
       short: "a",
@@ -77,16 +80,14 @@ const command = define({
       type: "string",
       short: "d",
       default: "3",
-      description: "予報日数 (既定 3、最大 7)",
+      description: "予報日数 (最大 7)",
     },
   },
   run: async (ctx) => {
     const { lat, lon, elevation, days } = ctx.values;
 
     if (lat === undefined || lon === undefined || elevation === undefined) {
-      console.error(
-        "usage: fetch-openmeteo --lat=<緯度> --lon=<経度> --elevation=<山頂標高 m> [--days=<1..7>]",
-      );
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
 
@@ -106,5 +107,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

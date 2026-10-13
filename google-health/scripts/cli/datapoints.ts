@@ -1,15 +1,20 @@
 #!/usr/bin/env node
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { loadTokenConfig } from "../lib/config.ts";
 import { getValidToken } from "../lib/token-file.ts";
 import { buildFilter, DATA_TYPE_FILTER_FIELDS } from "../lib/filter.ts";
 import { API_BASE, getPaginated } from "../lib/api.ts";
 
-const command = define({
-  name: "datapoints",
+const USAGE = `datapoints <${Object.keys(DATA_TYPE_FILTER_FIELDS).join(
+  "|",
+)}|...> (--from=<...> --to=<...> | --filter=<AIP-160>) [--reconcile]`;
+
+await runCli({
   description:
     "Google Health API の dataPoints (または --reconcile 指定時は dataPoints:reconcile) を取得し、全ページ結合した JSON を出力する",
-  args: {
+  usage: USAGE,
+  allowPositionals: true,
+  options: {
     from: {
       type: "string",
       description:
@@ -36,11 +41,7 @@ const command = define({
     const dataType = ctx.positionals[0];
     const { from, to, reconcile, filter: rawFilter } = ctx.values;
     if (dataType === undefined) {
-      console.error(
-        `usage: datapoints <${Object.keys(DATA_TYPE_FILTER_FIELDS).join(
-          "|",
-        )}|...> (--from=<...> --to=<...> | --filter=<AIP-160>) [--reconcile]`,
-      );
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
     const known = Object.hasOwn(DATA_TYPE_FILTER_FIELDS, dataType);
@@ -105,5 +106,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

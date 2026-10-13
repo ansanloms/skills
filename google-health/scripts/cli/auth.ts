@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { DEFAULT_PORT, loadTokenConfig } from "../lib/config.ts";
 import {
   buildAuthUrl,
@@ -14,16 +14,20 @@ import {
   writeTokenFile,
 } from "../lib/token-file.ts";
 
-const command = define({
-  name: "auth",
+const USAGE = "auth [--port=<port>] [--scope=<scope>...]";
+
+await runCli({
   description:
     "認可 URL を表示し、127.0.0.1:<port> でリダイレクトを待ち受けて認可コードを自動で受信・交換・保存する (ブラウザが実行環境の localhost に届く場合のみ使える。届かない場合は auth-url と token を使う)",
-  args: {
+  usage: USAGE,
+  options: {
     port: {
       type: "number",
       short: "p",
       default: DEFAULT_PORT,
-      description: `待ち受ける port (既定 ${DEFAULT_PORT})。変える場合は Cloud Console の Authorized redirect URIs も同じ値の http://localhost:<port> に変更しておく`,
+      min: 1,
+      max: 65535,
+      description: `待ち受ける port。変える場合は Cloud Console の Authorized redirect URIs も同じ値の http://localhost:<port> に変更しておく`,
     },
     scope: {
       type: "string",
@@ -78,5 +82,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

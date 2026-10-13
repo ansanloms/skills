@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 import { readFile, writeFile } from "node:fs/promises";
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { type AreaData, resolveMunicipality, stripAreaJson } from "./area.ts";
+
+const USAGE =
+  "find-area --municipality=<市町村・地区名> [--update] | find-area --update";
 
 const SOURCE = "https://www.jma.go.jp/bosai/common/const/area.json";
 
@@ -39,11 +42,11 @@ async function readAsset(): Promise<Asset> {
   }
 }
 
-const command = define({
-  name: "find-area",
+await runCli({
   description:
     "気象庁 area.json のキャッシュから、市町村・地区名で細分区 (class10) と気象台 (office) を検索する",
-  args: {
+  usage: USAGE,
+  options: {
     municipality: {
       type: "string",
       short: "m",
@@ -61,9 +64,7 @@ const command = define({
     const { municipality, update } = ctx.values;
 
     if (municipality === undefined && !update) {
-      console.error(
-        "usage: find-area --municipality=<市町村・地区名> [--update] | find-area --update",
-      );
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
 
@@ -107,5 +108,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

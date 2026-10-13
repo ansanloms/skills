@@ -31,7 +31,7 @@ done
 
 ## 前提と制約
 
-- Node.js 24.2 以上。`<scripts の絶対パス>/node_modules` が無いとき、または skill を更新 (`apm update` 等) した直後は、`npm ci --omit=dev --prefix "<scripts の絶対パス>"` で依存 (gunshi) を入れる。devDependencies は実行に不要なので入れない。 `--prefix` は bin の解決先を指定するだけで、CLI の cwd は呼び出し元のまま変わらない。本 skill の CLI にファイルパス引数は無い (`--body` は JSON 文字列か `-` で標準入力) が、`GOOGLE_HEALTH_TOKEN_PATH` は cwd に依存しないよう絶対パスで設定する。
+- Node.js 24.2 以上。実行時の依存パッケージは無く、`npm ci` などのインストール手順は要らない。`npm ci` が要るのは開発 (lint・test) のときだけ。コマンド例の `--prefix` は bin の解決先を指定するだけで、CLI の cwd は呼び出し元のまま変わらない。本 skill の CLI にファイルパス引数は無い (`--body` は JSON 文字列か `-` で標準入力) が、`GOOGLE_HEALTH_TOKEN_PATH` は cwd に依存しないよう絶対パスで設定する。
 - Google Fit REST API は廃止済み (新規登録は 2024-05-01 終了、サポートは 2026 年末まで、代替なし)。Health Connect は端末内 API でサーバから読めない。Google Health API がサーバから叩ける唯一の公式手段。出典: <https://developer.android.com/health-and-fitness/health-connect/migration/fit/faq>
 - データ源は Fitbit・Pixel Watch と、Health Connect 経由の一部データ型。公式ドキュメントでは Health Connect のデータ型は 2026 Q4 に追加予定で未提供とされていた。出典: <https://developers.google.com/health/about>。ただし 2026-09-27 時点の実測では、少なくとも体重 (`weight`) と体脂肪率 (`body-fat`) は取得できた。Health Planet アプリが Health Connect に書き込んだデータで、`dataSource.platform` が `HEALTH_CONNECT` として返る。
 - 全スコープが Restricted だが、OAuth 同意画面を Testing (External) のままにし自分をテストユーザに登録すれば審査なしで使える (100 ユーザ上限)。出典: <https://developers.google.com/health/setup>, <https://developers.google.com/health/app-verification>
@@ -151,11 +151,11 @@ GOOGLE_HEALTH_TOKEN_PATH=<トークンファイルの絶対パス> \
 
 `refresh_token_expired` が `true` のとき (残り日数が 0 以下) は、標準エラーに再認可が必要な旨を出して exit code 2 で終了する。このとき JSON は出力しない。exit code の全体は次のとおり。
 
-| exit code | 意味                                                                                                           |
-| --------- | -------------------------------------------------------------------------------------------------------------- |
-| 0         | 有効。標準出力に上の JSON を出す                                                                               |
-| 2         | リフレッシュトークンが失効している (再認可が必要)                                                              |
-| 1         | 判定できなかった。依存 (gunshi) 未インストール・環境変数の欠落・トークンファイルが読めない・フィールド欠落など |
+| exit code | 意味                                                                                                                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0         | 有効。標準出力に上の JSON を出す                                                                                                                                                |
+| 2         | リフレッシュトークンが失効している (再認可が必要)                                                                                                                               |
+| 1         | 判定できなかった。環境変数の欠落・トークンファイルが読めない・フィールド欠落・引数の誤り (未知のオプション・不要な位置引数) など。引数の誤りはエラーと usage を標準エラーに出す |
 
 ### skill の外から非対話で呼ぶ
 
@@ -166,10 +166,9 @@ npx --no --prefix "<scripts の絶対パス>" -- token-status
 ```
 
 - 標準出力の JSON の形は上の実測サンプルのとおり。
-- 呼び出し側は exit code 2 を「再認可が必要」と扱う。1 は「判定できなかった」であり、失効とは限らない。理由: 依存未インストールでも Node が exit code 1 で落ちるため、1 を失効とみなすと誤検知する。
+- 呼び出し側は exit code 2 を「再認可が必要」と扱う。1 は「判定できなかった」であり、失効とは限らない。理由: 想定外の例外でも Node が exit code 1 で落ちるため、1 を失効とみなすと誤検知する。
 - `token-status` はサーバへ問い合わせず、トークンファイルに記録されたリフレッシュトークンの取得時刻 (`refresh_token_obtained_at`、無ければ `obtained_at`) と `refresh_token_expires_in` から期限を計算する。公称の期限より前にサーバ側で失効したリフレッシュトークンは検出できず、exit code 0 になる。その場合は他のコマンドが refresh で exit code 1 になる。
-- exit code 1 を無視しない。セットアップや設定の不備で判定できなかった状態 (`apm update` 後の `npm ci` 忘れ・未認可でトークンファイルが無い・環境変数の欠落等) なので、exit code 2 とは別に通知する。原因は stderr で見分ける。
-- `apm update` で skill の実体が置き換わると `node_modules` も消える。更新のたびに `npm ci --omit=dev --prefix "<scripts の絶対パス>"` を再実行する。
+- exit code 1 を無視しない。セットアップや設定の不備、または引数の誤りで判定できなかった状態 (未認可でトークンファイルが無い・環境変数の欠落・未知のオプション等) なので、exit code 2 とは別に通知する。原因は stderr で見分ける。
 
 ## サブコマンド
 
@@ -1367,9 +1366,9 @@ invalid_grant (実測、2026-09-26 JST 取得): OAuth token endpoint (`https://o
 - `datapoints` ・ `daily-rollup` ・ `get` ・ `rollup` ・ `create` ・ `update` ・ `batch-delete` ・ `/token` のいずれも、非 2xx レスポンス (429 を含む) は HTTP ステータスと生のレスポンスボディを stderr に出力し、exit code 1 で終了する。リトライしない。値を捏造しない。
 - アクセストークンの更新 (refresh) に失敗した場合は、リフレッシュトークンが失効している可能性がある旨と `npx --no --prefix "<scripts の絶対パス>" -- auth` での再認可が必要な旨 (localhost に届かない端末では `auth-url` と `token <code>`) を stderr に出力し、exit code 1 で終了する。失効しているかどうかは区別せず、失効していても exit code 1 になる。再認可の要否は `token-status` の exit code 2 を基準に判断する。ただし `token-status` はサーバへ問い合わせず、トークンファイルに記録されたリフレッシュトークンの取得時刻 (`refresh_token_obtained_at`、無ければ `obtained_at`) と `refresh_token_expires_in` から期限を計算するだけである。公称の期限より前にサーバ側で失効したリフレッシュトークンは検出できず、`token-status` は exit code 0 を返す。その場合は他のコマンドが refresh で exit code 1 になる。
 - `token-status` はリフレッシュトークンが失効済み (残り日数 0 以下) なら再認可が必要な旨を stderr に出力し、exit code 2 で終了する。このとき JSON は出力しない。
-- `token-status` でトークンファイルが読めない・必要なフィールドが揃っていない・環境変数が欠落している・依存が未インストールの場合は、失効とは区別して exit code 1 で終了する。stderr に出るものは原因ごとに異なる。
+- `token-status` でトークンファイルが読めない・必要なフィールドが揃っていない・環境変数が欠落している・引数が誤っている場合は、失効とは区別して exit code 1 で終了する。stderr に出るものは原因ごとに異なる。
   - 環境変数の欠落・トークンファイルが読めない・フィールドの欠落: この skill が理由を日本語で出力する。
-  - 依存の未インストール: Node の `ERR_MODULE_NOT_FOUND` のスタックが出る。skill 側は理由を出力できない。
+  - 引数の誤り (未知のオプション・不要な位置引数): エラーと usage を標準エラーに出す。
 - 呼び出し側は exit code 2 を「再認可が必要」と扱う。サーバ側で先に失効した場合は exit code 0 のままなので、他のコマンドの refresh 失敗 (exit code 1) も再認可の要否の判断材料にする。
 
 ## 対象外

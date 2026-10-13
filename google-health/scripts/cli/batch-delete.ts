@@ -1,21 +1,24 @@
 #!/usr/bin/env node
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { loadTokenConfig } from "../lib/config.ts";
 import { getValidToken } from "../lib/token-file.ts";
 import { buildBatchDeleteBody } from "../lib/batch-delete.ts";
 import { checkOperationDone } from "../lib/body.ts";
 import { API_BASE, request } from "../lib/api.ts";
 
-const command = define({
-  name: "batch-delete",
+const USAGE = "batch-delete <dataType> <dataPoint name...>";
+
+await runCli({
   description:
     "Google Health API の dataPoints:batchDelete で複数件をまとめて削除する (応答は Operation。response.dataPoints に削除した DataPoint)",
-  args: {},
+  usage: USAGE,
+  allowPositionals: true,
+  options: {},
   run: async (ctx) => {
     const dataType = ctx.positionals[0];
     const names = ctx.positionals.slice(1);
     if (dataType === undefined || names.length === 0) {
-      console.error("usage: batch-delete <dataType> <dataPoint name...>");
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
 
@@ -41,5 +44,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

@@ -20,9 +20,6 @@
     "lint": "oxlint && oxfmt --check && tsc --noEmit",
     "fix": "oxlint --fix && oxfmt"
   },
-  "dependencies": {
-    "gunshi": "0.37.3"
-  },
   "devDependencies": {
     "@types/node": "26.6.4",
     "oxfmt": "0.72.0",

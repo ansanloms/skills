@@ -1,16 +1,20 @@
 #!/usr/bin/env node
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import { loadTokenConfig } from "../lib/config.ts";
 import { getValidToken } from "../lib/token-file.ts";
 import { normalizeWindowSize } from "../lib/duration.ts";
 import { validateRfc3339Range } from "../lib/filter.ts";
 import { API_BASE, postPaginated } from "../lib/api.ts";
 
-const command = define({
-  name: "rollup",
+const USAGE =
+  "rollup <dataType> --from=<RFC3339> --to=<RFC3339> --window=<30s|5m|1h>";
+
+await runCli({
   description:
     "Google Health API の dataPoints:rollUp を取得し、全ページ結合した JSON を出力する",
-  args: {
+  usage: USAGE,
+  allowPositionals: true,
+  options: {
     from: {
       type: "string",
       description: "取得範囲の開始 (RFC3339)",
@@ -29,9 +33,7 @@ const command = define({
     const dataType = ctx.positionals[0];
     const { from, to, window } = ctx.values;
     if (dataType === undefined) {
-      console.error(
-        "usage: rollup <dataType> --from=<RFC3339> --to=<RFC3339> --window=<30s|5m|1h>",
-      );
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
     if (from === undefined || to === undefined || window === undefined) {
@@ -59,5 +61,3 @@ const command = define({
     }
   },
 });
-
-await cli(process.argv.slice(2), command);

@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
-import { cli, define } from "gunshi";
+import { runCli } from "../lib/cli.ts";
 import {
   type DayTable,
   fingerprint,
   parseDayTables,
   scoreIndexes,
 } from "./parse.ts";
+
+const USAGE = "fetch-index --code=<山のコード> | --file=<UTF-8 HTML>";
 
 const BASE = "https://tenkura.n-kishou.co.jp/tk/kanko/kad.html";
 const UA = "Mozilla/5.0";
@@ -93,10 +95,10 @@ async function robustFetch(
   };
 }
 
-const command = define({
-  name: "fetch-index",
+await runCli({
   description: "てんくらの登山指数を取得し、時間帯別・週間を JSON で出力する",
-  args: {
+  usage: USAGE,
+  options: {
     code: {
       type: "string",
       short: "c",
@@ -106,7 +108,7 @@ const command = define({
       type: "string",
       short: "t",
       default: "15",
-      description: "カテゴリ (既定 15 = 登山)",
+      description: "カテゴリ (15 = 登山)",
     },
     file: {
       type: "string",
@@ -138,9 +140,7 @@ const command = define({
         process.exit(1);
       }
     } else {
-      console.error(
-        "usage: fetch-index --code=<山のコード> | --file=<UTF-8 HTML>",
-      );
+      console.error(`usage: ${USAGE}`);
       process.exit(1);
     }
 
@@ -162,5 +162,3 @@ const command = define({
     console.log(JSON.stringify(result, null, 2));
   },
 });
-
-await cli(process.argv.slice(2), command);
