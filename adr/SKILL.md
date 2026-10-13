@@ -94,7 +94,7 @@ ADR の配置先が無いリポジトリで ADR 運用を始めるときは、�
 
 ## 推敲
 
-- ja-tech-proofread skill が利用できる環境 (skill 一覧にあるか、`apm install` で導入済み) では、書き上げた ADR に ja-tech-proofread の fix を当ててから成果物とする。
+- ja-tech-proofread skill が利用できる環境 (skill 一覧にある) では、書き上げた ADR に ja-tech-proofread の fix を当ててから成果物とする。
 - 利用できない環境では推敲工程を省略し、省略した旨を報告に含める。推敲できないことを理由に ADR の作成自体を止めない。
 
 ## 検証
