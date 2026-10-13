@@ -12,14 +12,18 @@
 - `<name>/SKILL.md` を 1 skill = 1 ディレクトリで配置する。これがこのリポジトリの提供する skill。
 - frontmatter は `name` と `description` が必須。`description` が skill の発動トリガになる。「何をするか + いつ発動するか」を具体的に書く。理由: 曖昧だと発動しない。
 - `<name>/README.md` は各 skill の人間向け説明で、SKILL.md の frontmatter を情報源にする。SKILL.md とは別に用意し、新設・更新時に追随させる (後述のフロー参照)。
+- 実行時の npm 依存を足す skill は、利用側 apm.yml の lifecycle (README の「依存を持つ skill」) が `npm ci` する前提で、`scripts/package-lock.json` を必ずコミットする。
 - `apm.yml` の `devDependencies` は skill を磨く・使うための道具。empirical-prompt-tuning と yomiyasu は外部由来で配布対象ではない。ja-tech-proofread は自リポジトリの配布 skill を自分でも使うための自己参照で、複製は remote main のスナップショット。
 - コミットするのは `apm.yml`/`apm.lock.yaml`、各 skill の `SKILL.md`・`README.md`・`scripts/`・`references/`・`assets/`、`.github/`、`.gitignore`、`CLAUDE.md`。`apm_modules/`・`.claude/skills/` (依存 skill)・`coverage/` は gitignore 済みで、依存 skill は `apm install` で再生成する。
 
 ## クローン後のセットアップ
 
 ```sh
-apm install     # 依存 skill (ja-tech-proofread、yomiyasu、empirical-prompt-tuning) を .claude/skills/ に復元
+apm lifecycle trust   # apm.yml の lifecycle を信頼する (初回と、lifecycle ブロックを編集した後に必要)。install より先に実行する
+apm install     # 依存 skill (ja-tech-proofread、yomiyasu、empirical-prompt-tuning) を .claude/skills/ に復元し、lifecycle で実行時依存を入れる
 ```
+
+信頼後の `apm install`/`apm update` では、apm.yml の `lifecycle.post-install` が `.claude/skills/*/scripts` の実行時依存 (ja-tech-proofread の textlint・preset・oxfmt) を `npm ci` で入れる。lifecycle の失敗は無音なので、`ls -d .claude/skills/*/scripts/node_modules` で確認する。
 
 ## skill を追加・修正するフロー
 
@@ -61,7 +65,7 @@ skill の `scripts/` (TS・設定) を変更したら、そのディレクトリ
 
 `.claude/skills/` の実体は apm が remote の main から解決したスナップショットで、ローカルの編集は反映されない。skill への変更は main に入った後に `apm update` で複製へ反映される (`apm install` は lock の resolved_commit に固定されたままで、複製を更新しない)。skill として実行される定義も複製側のため、探索順を含む定義の変更は main 反映後に効く。開発中に変更を検証するときは、リポジトリ内の `ja-tech-proofread/SKILL.md` をパス指定で実行者に読ませる。
 
-機械層だけを直接使う場合は `npx --no --prefix <scripts の絶対パス> -- textlint --config <scripts の絶対パス>/.textlintrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--fix] <絶対パス...>` と `npx --no --prefix <scripts の絶対パス> -- oxfmt -c <scripts の絶対パス>/.oxfmtrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--check] <絶対パス...>` (`<scripts の絶対パス>` は `ja-tech-proofread/scripts` の絶対パス。初回は `npm ci --omit=dev --prefix <scripts の絶対パス>` で依存を入れる)。
+機械層だけを直接使う場合は `npx --no --prefix <scripts の絶対パス> -- textlint --config <scripts の絶対パス>/.textlintrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--fix] <絶対パス...>` と `npx --no --prefix <scripts の絶対パス> -- oxfmt -c <scripts の絶対パス>/.oxfmtrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--check] <絶対パス...>` (`<scripts の絶対パス>` は `ja-tech-proofread/scripts` の絶対パス。`.claude/skills` 配下は apm.yml の lifecycle が入れる。`node_modules` が無いときは `npm ci --omit=dev --prefix <scripts の絶対パス>` で依存を入れる)。
 
 rule の正本は preset リポジトリで、このリポジトリでは上書きしない。preset の新しいタグが出たら `ja-tech-proofread/scripts/package.json` の preset の ref (`#<タグ>`) を書き換え、`npm install` で `package-lock.json` を更新する。手順は `ja-tech-proofread/scripts/README.md` にある。機械層の正本はリポジトリ内の `ja-tech-proofread/scripts`。git 依存のため Dependabot は preset のタグ上げを追えない (textlint と oxfmt は追える)。タグ上げは手作業で行う。
 

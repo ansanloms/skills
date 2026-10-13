@@ -15,7 +15,7 @@ ja-tech-proofread skill の機械層を実行する Node の薄い層。表記�
 
 ## 起動方法
 
-依存は初回と更新後に `npm ci --omit=dev --prefix "<scripts の絶対パス>"` で入れる。以降は cwd を問わず、絶対パスで次のとおり呼ぶ。
+依存は通常、利用側 apm.yml の lifecycle が入れる (skills リポジトリの README を参照)。`node_modules` が無いときは `npm ci --omit=dev --prefix "<scripts の絶対パス>"` で入れる。以降は cwd を問わず、絶対パスで次のとおり呼ぶ。
 
 ```sh
 npx --no --prefix "<scripts の絶対パス>" -- textlint --config "<scripts の絶対パス>/.textlintrc.json" --ignore-path "<scripts の絶対パス>/.ignore-none" [--fix] <対象ファイルの絶対パス...>

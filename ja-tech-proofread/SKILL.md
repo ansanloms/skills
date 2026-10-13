@@ -52,7 +52,7 @@ done
 
 候補の順は、作業中のリポジトリ内 (`git rev-parse --show-toplevel` 基準、source of truth)、そのリポジトリへの vendoring 先 (`<toplevel>/.claude/skills/`。cwd がリポジトリルート以外でも当たる)、cwd 直下の配布先、ユーザ共通の 4 つ。最初に見つかった 1 件を使う。理由: 配布先の複製はインストール時点のスナップショットで、開発中のリポジトリでは古くなり得る。0 件なら推測せず、機械層を「実行不可 (scripts 未検出)」として手順 1 へ進む。内部動作は `scripts/README.md` を参照。
 
-実行環境: Node.js 24 以上が必要。`<scripts>/node_modules` が無いとき、または skill を更新 (`apm update` 等) した直後は `npm ci --omit=dev --prefix "<scripts>"` で依存 (textlint、preset、oxfmt) を入れる。`--prefix` は bin の解決先の指定で、cwd は呼び出し元のまま変わらない。対象ファイルは絶対パスで渡す。
+実行環境: Node.js 24 以上が必要。依存 (textlint、preset、oxfmt) は通常、利用側 apm.yml の lifecycle が入れる ([skills リポジトリの README (利用側 apm.yml の lifecycle)](https://github.com/ansanloms/skills#依存を持つ-skill))。`<scripts>/node_modules` が無いときは `npm ci --omit=dev --prefix "<scripts>"` で入れる。`--prefix` は bin の解決先の指定で、cwd は呼び出し元のまま変わらない。対象ファイルは絶対パスで渡す。
 
 ## 手順
 
