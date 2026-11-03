@@ -45,10 +45,18 @@ base="<呼び出し側から供給されたベースディレクトリの絶対�
      - 理由: どの cwd から実行しても所定のディレクトリへ確実に置くため (`<base>` は受け取り時に絶対パスへ解決しておく)。
      - ただし path が絶対でも、コマンド自体の対象リポジトリは cwd から解決される。cwd が対象リポジトリの外にありうる環境では `git -C <main> worktree add ...` の形で対象を固定する。
    - `<name>`/`<branch>` はタスク内容がわかる短い名前にする。両者は同名でよい (変換規則を設けない)。
-2. ローカル設定を持ち込む (任意)。`git-worktree-include` コマンドが利用できる環境なら、`git worktree add` で作った path を渡して実行し、`.worktreeinclude` に記載されたローカル未追跡ファイル (`.env` 等) をメインから複製する。コマンドが無い環境では何もしない。
-   - MUST: メイン worktree (`<main>`、clone 直下の絶対パス) の中をカレントディレクトリにして実行する。`git-worktree-include` はメイン worktree をカレントディレクトリから解決し (引数の path はコピー先にしか使わない)、cwd がメイン worktree の外だと別リポジトリを見て黙って no-op する。手順 1 の `git worktree add` は絶対 path で cwd 非依存だが、この手順は絶対 path を渡しても cwd 非依存にはならない。
-   - 例: `(cd <main> && command -v git-worktree-include >/dev/null && git-worktree-include <base>/<name>) || true`。コマンド不在時の非 0 終了は「何もしなかった」を意味し、失敗ではない (`set -e` 環境で偽の失敗にしないよう `|| true` で無害化する)。
-   - コマンドはあるが `.worktreeinclude` が無い場合、`git-worktree-include` 自体が何もせず正常終了する。そのため `command -v` のガードだけでよく、`.worktreeinclude` の有無を確認するガードを別途足す必要は無い。
+2. ローカル設定を持ち込む (任意)。メイン worktree (clone 直下) の直下に `.worktreeinclude` (gitignore 構文。一致した未追跡ファイルを持ち込む対象とする) があれば、記載のファイルをメインから複製する。無ければ何もしない。`<main>` はメイン worktree の絶対パスで、cwd には依存しない。
+
+   ```sh
+   main="<main>"; dst="$base/<name>"
+   if [ -f "$main/.worktreeinclude" ]; then
+     git -C "$main" ls-files -z -o -i -X .worktreeinclude | (cd "$main" && xargs -0 -r cp --parents -t "$dst")
+   fi
+   ```
+
+   - `git ls-files -o -i -X <file>` は `.gitignore` を参照せず、`<file>` のパターンに一致する未追跡ファイルだけを出す。そのため gitignore 済みの `.env` 等も複製される。`!` の否定行も効く。別 worktree の中には降りない。
+   - `cp --parents` は GNU coreutils のオプションで、`$dst` の下に元の相対パスのままディレクトリを作って複製する。
+
 3. その branch に description を設定する (下記「branch description」)。
 
 ## branch description
@@ -77,7 +85,7 @@ base="<呼び出し側から供給されたベースディレクトリの絶対�
 
   `git branch --edit-description` はプログラム的に実行する場合は使わない。理由: 対話エディタが開くため。
 
-- 設定・更新はどの worktree の cwd から実行してもよい。branch description はリポジトリ共有の設定に書かれ、worktree ごとに分かれない (cwd 制約があるのは「作成手順」の `git-worktree-include` のみ)。
+- 設定・更新はどの worktree の cwd から実行してもよい。branch description はリポジトリ共有の設定に書かれ、worktree ごとに分かれない。
 
 ### 更新
 
@@ -100,10 +108,16 @@ description は書いた時点の記録ではなく、worktree の現在地を�
 
 ## 片付け
 
-worktree のブランチがデフォルトブランチへマージされたら、worktree とローカルブランチを片付ける。発動条件は、PR やブランチのマージ報告を受けたとき、またはマージ済み worktree の残骸に気づいたとき。
+worktree のブランチがデフォルトブランチへマージされたら、worktree とローカルブランチを片付ける。発動条件は、呼び出し側から PR やブランチのマージ報告を受けたときのみ。マージ済み worktree の残骸に気づいただけでは削除せず、気づいた事実を報告するに留める。理由: 次の手順はマージ状態も working tree の状態も確認しないため、報告の無い削除は誤削除になりうる。
 
-- 呼び出し側の環境に片付け専用のツールや手順が供給されている場合は、そちらを優先して従う。その供給は base と同様に呼び出し側の責務であり、この skill は汎用手順のみを定める。
-- MUST: マージ済みであることを非対話コマンド (`git log --oneline <デフォルトブランチ>..<branch>` が空になる等) で確認できた worktree に限り、`git worktree remove <path>` と `git branch -d <branch>` で片付ける。確認できないもの・working tree が dirty なものは削除せず、状態を報告するに留める。
-  - MUST: マージ済みと外部情報 (forge の表示等) で分かっていても機械的な確認が取れない場合は、削除せず呼び出し側へ判断を仰ぐ。理由: squash merge されたブランチはローカルコミットが常に「未マージ」に見えるため、この確認では検出できない。
+- MUST: マージ報告を受けた worktree は、マージ状態や working tree の状態を確認せず、次の 2 コマンドで片付ける。
+
+  ```sh
+  git worktree remove --force <path>
+  git branch -D <branch>
+  ```
+
+  `--force` は未コミットの変更や未追跡ファイルがあっても削除する。`-D` はマージ済みかどうかを問わず削除する (squash merge されたブランチは git からは未マージに見えるため、`-d` では消せない)。
+
 - MUST: merge 操作のローカル後処理 (デフォルトブランチへの checkout・ローカルブランチ削除) を merge コマンドに任せない。理由: デフォルトブランチはメインの worktree にチェックアウト済みのため必ず失敗する (例: GitHub の `gh pr merge --delete-branch` は `fatal: 'main' is already used by worktree` になる)。マージだけ行い、ローカルの後片付けは本節の手順で別途行う。
 - リモートブランチの削除は本手順の対象外。自分が作ったマージ済みブランチに限り削除してよい (forge 側の自動削除が有効なら不要)。
