@@ -50,11 +50,11 @@ base="<呼び出し側から供給されたベースディレクトリの絶対�
    ```sh
    main="<main>"; dst="$base/<name>"
    if [ -f "$main/.worktreeinclude" ]; then
-     git -C "$main" ls-files -z -o -i -X .worktreeinclude | (cd "$main" && xargs -0 -r cp --parents -t "$dst")
+     git -C "$main" ls-files -z -o -i -X .worktreeinclude | grep -zv '/$' | (cd "$main" && xargs -0 -r cp --parents -t "$dst")
    fi
    ```
 
-   - `git ls-files -o -i -X <file>` は `.gitignore` を参照せず、`<file>` のパターンに一致する未追跡ファイルだけを出す。そのため gitignore 済みの `.env` 等も複製される。`!` の否定行も効く。別 worktree の中には降りない。
+   - `git ls-files -o -i -X <file>` は `.gitignore` を参照せず、`<file>` のパターンに一致する未追跡ファイルだけを出す。そのため gitignore 済みの `.env` 等も複製される。`!` の否定行も効く。別 worktree や入れ子のリポジトリの中には降りず、そのディレクトリ名が末尾 `/` 付きのエントリとして出るだけなので、`grep -zv '/$'` で除く (ディレクトリパターンを書いたときに `cp` がディレクトリで失敗するのを防ぐ)。
    - `cp --parents` は GNU coreutils のオプションで、`$dst` の下に元の相対パスのままディレクトリを作って複製する。
 
 3. その branch に description を設定する (下記「branch description」)。
