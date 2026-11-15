@@ -1,0 +1,41 @@
+name: lint
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+jobs:
+  lint:
+    name: lint (${{ matrix.dir }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # scripts/ に lint task を持つ skill を足したら、ここと
+        # .github/dependabot.yml の directories の両方に足す。
+        dir:
+          - google-health/scripts
+          - infra-architecture/scripts
+          - mountain-weather/scripts
+          - ja-tech-proofread/scripts
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ matrix.dir }}
+      - name: Lint
+        run: npm run lint
+        working-directory: ${{ matrix.dir }}
