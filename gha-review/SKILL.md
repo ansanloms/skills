@@ -23,6 +23,8 @@ GitHub Actions の定義ファイルを検査し、指摘を返す。検査は 2
 
 対象を絞られた場合も、リポジトリ全体で決まる規準 (F6・F7・U1・U2) は判定する。F6 の判定には対象外の workflow も読む。読むのは `gh actions-lock --verify` を実行する job があるかを見るためだけで、対象外のファイルにある他の問題は指摘しない。
 
+対象のファイルが 1 つも無いリポジトリでは、その事実を報告の先頭に書く。機械層は zizmor だけを実行し、関連して読むファイルのうち存在するものだけを規準に当てる。対象が無くて判定できなかった規準は、報告の「確認していない項目」に ID を並べる。
+
 ## 手順
 
 1. 対象ファイルと、リポジトリの最上位 (`git rev-parse --show-toplevel`) を確定する。以降のコマンドは最上位を cwd にして実行する。
@@ -69,6 +71,12 @@ exit code は次のとおり (0・1・2・3 とも実測)。
 
 書式は `<ファイル>:<行>:<列>: <メッセージ> [<種別>]` で、exit code はこのとき 1 だった。
 
+workflow が 1 つも無いリポジトリで引数なしの `actionlint -oneline` を実行すると、exit code は 3 になり、次の 1 行が出た。検査は行われていない。
+
+```text
+no project was found in any parent directories of "/home/ansanloms/dev/github.com/ansanloms/skills". check workflows directory is put correctly in your Git repository
+```
+
 読むときの注意が 3 つある。
 
 - actionlint は shellcheck が PATH に無いと、警告も出さずに `run:` の検査を飛ばす。`command -v shellcheck` で有無を確かめ、無ければ「shell の検査は未実行」と報告する。
@@ -81,7 +89,7 @@ exit code は次のとおり (0・1・2・3 とも実測)。
 zizmor --format=github <対象ファイルまたはディレクトリ...>
 ```
 
-zizmor は既定でオフラインで動く。`impostor-commit`・`known-vulnerable-actions`・`ref-confusion` の監査は GitHub API を使うので、token を渡したときだけ走る。`gh auth token` が成功する環境では `GH_TOKEN="$(gh auth token)"` を付けて実行し、付けなかった場合はこの 3 つが未実行であると報告する。
+zizmor は既定でオフラインで動く。`impostor-commit`・`known-vulnerable-actions`・`ref-confusion` の監査は GitHub API を使うので、token を渡したときだけ走る。`gh auth token` が成功する環境では `GH_TOKEN="$(gh auth token)"` を付けて実行し、付けなかった場合はこの 3 つが未実行であると報告する。この 3 つが走ったかどうかは出力からは分からないので、報告には token を付けたかどうかを書く。
 
 token を付けた実行は、参照先のリポジトリに届かないと監査の全体が止まる。exit code は 1 で、指摘は 1 件も出ない。このときは token を外して実行し直し、上の 3 つが未実行であると報告する。
 
@@ -109,15 +117,26 @@ Caused by:
 
 `title=` が監査の名前、`file=` と `line=` が場所である。exit code はこのとき 14 だった。監査の説明は `https://docs.zizmor.sh/audits/#<監査の名前>` にある。
 
-exit code のうち実測したのは次の 3 つである。
+ディレクトリを渡すと、zizmor は `.github/dependabot.yml` も監査する。
+
+取得したコマンド: `zizmor --format=github .github` (token なし。workflow が無く、`cooldown` を設定していない `dependabot.yml` だけがあるリポジトリで実行した。`INFO`・`WARN` で始まるログ行を省いた)
+
+```text
+::warning file=.github/dependabot.yml,line=3,title=dependabot-cooldown::dependabot.yml:3: insufficient cooldown in Dependabot updates: insufficient implicit default-days (less than 7)
+```
+
+exit code はこのとき 13 だった。
+
+exit code のうち実測したのは次の 4 つである。
 
 | exit code | 意味                                                                                  |
 | --------- | ------------------------------------------------------------------------------------- |
 | 0         | 指摘なし。`No findings to report. Good job!` と出る                                   |
 | 1         | 監査を実行できなかった。存在しないパスを渡すと `fatal: no audit was performed` と出る |
+| 13        | 指摘あり (最も重い指摘の severity が medium)                                          |
 | 14        | 指摘あり (最も重い指摘の severity が high)                                            |
 
-次は実測しておらず、[zizmor の docs](https://docs.zizmor.sh/usage/) からの引用である。2 は引数の解析の失敗、3 は入力が 1 つも集まらなかった場合、11・12・13 は指摘ありで、最も重い指摘の severity が順に informational・low・medium の場合を表す。
+次は実測しておらず、[zizmor の docs](https://docs.zizmor.sh/usage/) からの引用である。2 は引数の解析の失敗、3 は入力が 1 つも集まらなかった場合、11・12 は指摘ありで、最も重い指摘の severity が順に informational・low の場合を表す。
 
 lockfile の有無で `unpinned-uses` の出方が変わる。zizmor の lockfile 対応は v1.32.0 からで、docs は experimental と書いている。
 
@@ -136,7 +155,7 @@ gh actions-lock --verify-local
 gh actions-lock --verify
 ```
 
-`--verify-local` はネットワークを使わず、すべての `uses:` が lockfile に載っているかだけを見る。`--verify` はネットワークを使い、記録された commit の出所まで検査する。どちらもリポジトリの中のファイルを書き換えない (実行の記録は `~/.cache/gh-actions-lock/logs/` に書かれる)。exit code はすべて通れば 0、1 件でも落ちれば 1 だった。
+`--verify-local` はネットワークを使わず、すべての `uses:` が lockfile に載っているかだけを見る。`--verify` はネットワークを使い、記録された commit の出所まで検査する。どちらもリポジトリの中のファイルを書き換えない (実行の記録は `~/.cache/gh-actions-lock/logs/` に書かれる)。exit code はすべて通れば 0、1 件でも落ちれば 1 だった。workflow が 1 つも無いリポジトリでは、どちらも exit code が 2 になり、`no workflow files found in .github/workflows/` と出た。
 
 引数なしの `--verify` はリポジトリのすべての workflow を検査する。対象を絞られた場合も引数なしで実行し、全体を検査した事実を報告の実行状況に書く。指摘に使うのは、対象のファイルに関わる行だけである。
 
@@ -231,6 +250,8 @@ dependencies:
 
 各項目は「満たすべき状態」と理由を書く。1 つの項目が複数の条件を並べている場合は、どれか 1 つでも欠ければその項目に反する。出典の番号は「出典」節を指す。
 
+F6・F7・U1 は、workflow が 1 つ以上あるリポジトリで判定する。workflow が無ければ指摘にせず、報告の「確認していない項目」に書く。理由: 3 つとも workflow を守るための規準で、守る対象が無いリポジトリでは反していても害が出ない。
+
 ### 固定 (F)
 
 - F1: 対象の workflow がすべて lockfile に onboard されている。`gh actions-lock --verify` が通り、lockfile が git に追跡されている。
@@ -285,6 +306,7 @@ dependencies:
 - S3: reusable workflow の呼び出しで `secrets: inherit` を使わず、必要な secret を名前で渡している (zizmor の `secrets-inherit`)。
 - S4: secret は使う step の `env:` で渡している。workflow と job の `env:` に置いていない。
   - 理由: job の `env:` に置くと、その job が使うすべての action から読める。
+  - 対象は `secrets.*` で参照する値である。自動で発行される `github.token` は対象にせず、権限の広さを P1 で見る。
 - S5: デプロイと publish の job が `environment:` を指定している。
   - 理由: environment には承認者を設定でき、承認されるまで job は secret を読めない[4]。
 - S6: 公開リポジトリで self-hosted runner を使っていない[4]。
@@ -297,6 +319,7 @@ dependencies:
   - 固定したままだと、安全側の既定値も届かない。`actions/checkout` v7 の保護は完全タグや SHA で固定した workflow には更新するまで効かない[7]。
 - U2: Dependabot の cooldown を 0 にしていない。
   - 理由: 2026-07-14 から、version updates は公開の 3 日後まで PR を作らない。公開直後に見つかる侵害を避ける働きがある[13]。
+  - zizmor の `dependabot-cooldown` は、`default-days` が 7 未満の場合と未設定の場合を指摘する。U2 より厳しい基準なので U2 には当てず、機械層だけが拾った指摘として書く。
 
 ### ファイルから確認できない項目
 
@@ -337,6 +360,7 @@ dependencies:
 - ファイルが無いことの指摘 (`CODEOWNERS` が無い等) は、場所に「該当ファイルなし」と、あるべきパスを書く。
 - 規準に反するかどうかがファイルから決まらない箇所は、指摘にせず「確認していない項目」に書く。リポジトリが公開かどうかで決まる S6 がその例である。
 - 反する箇所が無かった規準は、指摘の末尾に ID だけを 1 行で並べる。
+- 出典の番号が付いていない規準に反する指摘は、理由だけを書く。
 
 ## 出典
 
