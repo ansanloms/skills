@@ -13,6 +13,7 @@
 - frontmatter は `name` と `description` が必須。`description` が skill の発動トリガになる。「何をするか + いつ発動するか」を具体的に書く。理由: 曖昧だと発動しない。
 - `<name>/README.md` は各 skill の人間向け説明で、SKILL.md の frontmatter を情報源にする。SKILL.md とは別に用意し、新設・更新時に追随させる (後述のフロー参照)。
 - 実行時の npm 依存を足す skill は、利用側 apm.yml の lifecycle (README の「依存を持つ skill」) が `npm ci` する前提で、`scripts/package-lock.json` を必ずコミットする。
+- `scripts/` に lint task を持つ skill を足したら、そのパスを `.github/workflows/lint.yml` の matrix と `.github/dependabot.yml` の `directories` の両方に足す。理由: どちらも対象を直書きしており、足し忘れた skill は lint の CI と依存の更新から外れる。
 - `apm.yml` の `devDependencies` は skill を磨く・使うための道具。empirical-prompt-tuning と yomiyasu は外部由来で配布対象ではない。ja-tech-proofread は自リポジトリの配布 skill を自分でも使うための自己参照で、複製は remote main のスナップショット。
 - コミットするのは `apm.yml`/`apm.lock.yaml`、各 skill の `SKILL.md`・`README.md`・`scripts/`・`references/`・`assets/`、`.github/`、`.gitignore`、`CLAUDE.md`。`apm_modules/`・`.claude/skills/` (依存 skill)・`coverage/` は gitignore 済みで、依存 skill は `apm install` で再生成する。
 
