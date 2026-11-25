@@ -1,6 +1,0 @@
-{
-  "name": "textlint-rule-jtf-style-heading-no-fix",
-  "private": true,
-  "type": "module",
-  "main": "./index.ts"
-}

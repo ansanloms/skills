@@ -14,5 +14,5 @@
     "types": ["node"],
     "erasableSyntaxOnly": true
   },
-  "include": ["*.ts", "rules/**/*.ts"]
+  "include": ["*.ts"]
 }

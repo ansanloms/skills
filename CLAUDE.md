@@ -68,7 +68,7 @@ skill の `scripts/` (TS・設定) を変更したら、そのディレクトリ
 
 機械層だけを直接使う場合は `npx --no --prefix <scripts の絶対パス> -- textlint --config <scripts の絶対パス>/.textlintrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--fix] <絶対パス...>` と `npx --no --prefix <scripts の絶対パス> -- oxfmt -c <scripts の絶対パス>/.oxfmtrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--check] <絶対パス...>` (`<scripts の絶対パス>` は `ja-tech-proofread/scripts` の絶対パス。`.claude/skills` 配下は apm.yml の lifecycle が入れる。`node_modules` が無いときは `npm ci --omit=dev --prefix <scripts の絶対パス>` で依存を入れる)。
 
-rule の有効・無効と options は `ja-tech-proofread/scripts/.textlintrc.json` が定め、各値の理由は `ja-tech-proofread/scripts/README.md` にある。機械層の正本はリポジトリ内の `ja-tech-proofread/scripts`。第三者の依存 (textlint、4 preset、proofdict、oxfmt 等) は npm registry から入り、Dependabot が追う。局所 rule `rules/jtf-style-heading-no-fix` は `file:` 依存で、jtf-style の `lib/1.1.2.js` を import する。jtf-style のバージョンを上げるときは `ja-tech-proofread/scripts` で `npm test` を通す。
+rule の有効・無効と options は `ja-tech-proofread/scripts/.textlintrc.json` が定め、各値の理由は `ja-tech-proofread/scripts/README.md` にある。機械層の正本はリポジトリ内の `ja-tech-proofread/scripts`。依存 (textlint、4 preset、proofdict、oxfmt 等) は npm registry から入り、Dependabot が追う。preset のバージョンを上げるときは、rule 名が変わっていないかを確かめるため `ja-tech-proofread/scripts` で `npm test` を通す。
 
 TS を含む skill の `scripts/` は各ディレクトリの設定で自己完結している。各ディレクトリで `npm run lint`/`npm run fix` を実行する (初回はそのディレクトリで `npm ci` を実行して devDependencies を入れる)。root に共通の設定・task は無い。
 

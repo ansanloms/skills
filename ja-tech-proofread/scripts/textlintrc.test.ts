@@ -54,12 +54,14 @@ test("package.json の依存が .textlintrc.json の参照先を含む", () => {
   const pkg = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
     dependencies: Record<string, string>;
   };
-  const expected = [
-    ...Object.values(presets),
-    "@proofdict/textlint-rule-proofdict",
-    "textlint-rule-jtf-style-heading-no-fix",
-  ];
+  const expected = [...Object.values(presets), "@proofdict/textlint-rule-proofdict"];
   for (const name of expected) {
     assert.equal(name in pkg.dependencies, true, `dependencies に ${name} が無い`);
   }
+});
+
+// 最上位に解決できない rule 名が 1 つでもあると、textlint は全 rule を無効にする (`No rules found`)。
+test(".textlintrc.json の rules の最上位キーが 4 preset と @proofdict/proofdict だけである", () => {
+  const expected = [...Object.keys(presets), "@proofdict/proofdict"].sort();
+  assert.deepEqual(Object.keys(config.rules).sort(), expected);
 });

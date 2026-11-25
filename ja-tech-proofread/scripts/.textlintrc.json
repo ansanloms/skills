@@ -35,7 +35,6 @@
     "@proofdict/proofdict": {
       "dictURL": "https://azu.github.io/proof-dictionary/",
       "autoUpdateInterval": 1000
-    },
-    "jtf-style-heading-no-fix": true
+    }
   }
 }
