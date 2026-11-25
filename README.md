@@ -12,7 +12,7 @@ skill の取り込みには [apm](https://github.com/microsoft/apm) CLI を使�
 
 ```sh
 cd <project>
-apm install ansanloms/skills/find-docs --target claude
+apm install ansanloms/skills/worktree --target claude
 # → <project>/.claude/skills/ にコピー + apm.yml / apm.lock.yaml に記録
 ```
 
