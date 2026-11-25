@@ -3,13 +3,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "oxfmt --check",
-    "fix": "oxfmt"
+    "test": "node --test",
+    "lint": "oxlint && oxfmt --check && tsc --noEmit",
+    "fix": "oxlint --fix && oxfmt"
   },
   "dependencies": {
-    "@ansanloms/textlint-rule-preset-ansanloms": "github:ansanloms/textlint-rule-preset-ansanloms#0.1.0",
+    "@proofdict/textlint-rule-proofdict": "3.1.2",
+    "@textlint-ja/textlint-rule-preset-ai-writing": "1.7.0",
     "oxfmt": "0.75.0",
-    "textlint": "15.8.0"
+    "textlint": "15.8.0",
+    "textlint-rule-preset-ja-spacing": "3.0.3",
+    "textlint-rule-preset-ja-technical-writing": "12.0.2",
+    "textlint-rule-preset-jtf-style": "3.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "oxlint": "1.90.0",
+    "typescript": "7.0.2"
   },
   "engines": {
     "node": ">=24"
