@@ -24,7 +24,7 @@ apm lifecycle trust   # apm.yml の lifecycle を信頼する (初回と、lifec
 apm install     # 依存 skill (ja-tech-proofread、yomiyasu、empirical-prompt-tuning) を .claude/skills/ に復元し、lifecycle で実行時依存を入れる
 ```
 
-信頼後の `apm install`/`apm update` では、apm.yml の `lifecycle.post-install` が `.claude/skills/*/scripts` の実行時依存 (ja-tech-proofread の textlint・preset・oxfmt) を `npm ci` で入れる。lifecycle の失敗は無音なので、`ls -d .claude/skills/*/scripts/node_modules` で確認する。
+信頼後の `apm install`/`apm update` では、apm.yml の `lifecycle.post-install` が `.claude/skills/*/scripts` の実行時依存 (ja-tech-proofread の textlint・rule・oxfmt) を `npm ci` で入れる。lifecycle の失敗は無音なので、`ls -d .claude/skills/*/scripts/node_modules` で確認する。
 
 ## skill を追加・修正するフロー
 
@@ -58,9 +58,9 @@ skill/プロンプトを新規作成・大幅改訂したら、empirical-prompt-
 
 ## 推敲と検査
 
-日本語の markdown は skill `yomiyasu` で推敲した後、skill `ja-tech-proofread` で推敲する。順序はこの通りに固定する。yomiyasu は文の構造と語の選び方を書き換え、ja-tech-proofread は preset の表記規則で最終形を揃える。逆順にすると、yomiyasu の書き換えが持ち込んだ preset 違反が残る。
+日本語の markdown は skill `yomiyasu` で推敲した後、skill `ja-tech-proofread` で推敲する。順序はこの通りに固定する。yomiyasu は文の構造と語の選び方を書き換え、ja-tech-proofread は textlint の表記規則で最終形を揃える。逆順にすると、yomiyasu の書き換えが持ち込んだ表記規則の違反が残る。
 
-yomiyasu の lint スクリプトは Python 製で、実行には `python3` が要る。ja-tech-proofread は機械層 (@ansanloms/textlint-rule-preset-ansanloms + oxfmt) を含む。既定の fix モードは修正を skill 内で完結させる (著者の判断が要る箇所はその場で確認される)。変更したファイルを列挙して渡す。一括で見たい場合も対象ファイルを列挙する (ディレクトリ走査はしない)。
+yomiyasu の lint スクリプトは Python 製で、実行には `python3` が要る。ja-tech-proofread は機械層 (textlint + oxfmt) を含む。既定の fix モードは修正を skill 内で完結させる (著者の判断が要る箇所はその場で確認される)。変更したファイルを列挙して渡す。一括で見たい場合も対象ファイルを列挙する (ディレクトリ走査はしない)。
 
 skill の `scripts/` (TS・設定) を変更したら、そのディレクトリの lint task を通す。lint task は `npm run lint` で実行する。
 
@@ -68,7 +68,7 @@ skill の `scripts/` (TS・設定) を変更したら、そのディレクトリ
 
 機械層だけを直接使う場合は `npx --no --prefix <scripts の絶対パス> -- textlint --config <scripts の絶対パス>/.textlintrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--fix] <絶対パス...>` と `npx --no --prefix <scripts の絶対パス> -- oxfmt -c <scripts の絶対パス>/.oxfmtrc.json --ignore-path <scripts の絶対パス>/.ignore-none [--check] <絶対パス...>` (`<scripts の絶対パス>` は `ja-tech-proofread/scripts` の絶対パス。`.claude/skills` 配下は apm.yml の lifecycle が入れる。`node_modules` が無いときは `npm ci --omit=dev --prefix <scripts の絶対パス>` で依存を入れる)。
 
-rule の正本は preset リポジトリで、このリポジトリでは上書きしない。preset の新しいタグが出たら `ja-tech-proofread/scripts/package.json` の preset の ref (`#<タグ>`) を書き換え、`npm install` で `package-lock.json` を更新する。手順は `ja-tech-proofread/scripts/README.md` にある。機械層の正本はリポジトリ内の `ja-tech-proofread/scripts`。git 依存のため Dependabot は preset のタグ上げを追えない (textlint と oxfmt は追える)。タグ上げは手作業で行う。
+rule の有効・無効と options は `ja-tech-proofread/scripts/.textlintrc.json` が定め、各値の理由は `ja-tech-proofread/scripts/README.md` にある。機械層の正本はリポジトリ内の `ja-tech-proofread/scripts`。第三者の依存 (textlint、4 preset、proofdict、oxfmt 等) は npm registry から入り、Dependabot が追う。局所 rule `rules/jtf-style-heading-no-fix` は `file:` 依存で、jtf-style の `lib/1.1.2.js` を import する。jtf-style のバージョンを上げるときは `ja-tech-proofread/scripts` で `npm test` を通す。
 
 TS を含む skill の `scripts/` は各ディレクトリの設定で自己完結している。各ディレクトリで `npm run lint`/`npm run fix` を実行する (初回はそのディレクトリで `npm ci` を実行して devDependencies を入れる)。root に共通の設定・task は無い。
 

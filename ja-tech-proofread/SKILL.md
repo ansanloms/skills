@@ -4,7 +4,7 @@ description: >-
   日本語で書かれた技術文書 (README・設計文書・ルール文書・skill 本文・PR 本文等の markdown) を、ファイルパスまたは貼り付け本文で受け取って推敲し、段落と論証の構成・箇条書き項目の書き方・行構造 (1 行 1 段落)・文の一義性・語彙・事実と意見の区別を点検する。
   既定 (fix モード) では修正を skill の中で完結させる。本文だけから決まる修正は構成の変更も含めて直接適用し、著者の判断が要る箇所はその場で選択肢を提示して確認してから適用する。args で lint モードを指定すると指摘のみを返す。
   「推敲して」「読みにくい箇所を指摘して」「文章をレビューして」と頼まれたとき、または文書を書き上げて確認する段階で使う。
-  表記・文法の機械判定と markdown の整形は skill 内のスクリプトが textlint (`@ansanloms/textlint-rule-preset-ansanloms`) と oxfmt で実行して機械層として取り込み、実行できない場合は実行不可として報告して意味層だけを行う。
+  表記・文法の機械判定と markdown の整形は skill 内のスクリプトが textlint (ja-technical-writing・ja-spacing・jtf-style・ai-writing の各 preset と proofdict) と oxfmt で実行して機械層として取り込み、実行できない場合は実行不可として報告して意味層だけを行う。
   表記・文法の判定と文体の指定、要約・翻訳・執筆の代行、コードやコメントのレビュー、英語文書には使わない。
 ---
 
@@ -14,12 +14,12 @@ description: >-
 
 ## 分担
 
-- 表記と文法の機械判定は textlint (`@ansanloms/textlint-rule-preset-ansanloms`) が担う。lint 設定は `scripts/.textlintrc.json` (preset をそのまま有効化) で、この skill が rule を上書きすることは無い。textlint が出した指摘は機械層として報告に転記し、この skill は再判定しない。
-- preset が無効化した rule のうち、この skill が意味の側から引き取るのは 2 つ。
+- 表記と文法の機械判定は textlint (ja-technical-writing・ja-spacing・jtf-style・ai-writing の各 preset と proofdict) が担う。lint 設定は `scripts/.textlintrc.json` で、この skill が rule を上書きすることは無い。textlint が出した指摘は機械層として報告に転記し、この skill は再判定しない。
+- `.textlintrc.json` が無効化した rule のうち、この skill が意味の側から引き取るのは 2 つ。
   - `ja-no-weak-phrase` は S2、`no-doubled-joshi` は S3 で扱う。
-  - 理由: この 2 つは機械判定では誤検出が出るため preset が無効化している。
+  - 理由: この 2 つは機械判定では誤検出が出るため `.textlintrc.json` が無効化している。
 - S 群の他の規範は、有効な rule と重ならない範囲を扱う。
-- それ以外に lint が拾わない表記・文法の現象 (括弧の幅、カタカナ長音、外来語の表記等) があっても、この skill は表記・文法を判定しない。rule の有効・無効の一覧は preset の README を正とする。
+- それ以外に lint が拾わない表記・文法の現象 (括弧の幅、カタカナ長音、外来語の表記等) があっても、この skill は表記・文法を判定しない。rule の有効・無効の一覧は `scripts/.textlintrc.json` と `scripts/README.md` を正とする。
 - 文体 (常体か敬体か) は扱わない。文体は lint 設定が決める。
 
 ## 受け取り
@@ -52,12 +52,12 @@ done
 
 候補の順は、作業中のリポジトリ内 (`git rev-parse --show-toplevel` 基準、source of truth)、そのリポジトリへの vendoring 先 (`<toplevel>/.claude/skills/`。cwd がリポジトリルート以外でも当たる)、cwd 直下の配布先、ユーザ共通の 4 つ。最初に見つかった 1 件を使う。理由: 配布先の複製はインストール時点のスナップショットで、開発中のリポジトリでは古くなり得る。0 件なら推測せず、機械層を「実行不可 (scripts 未検出)」として手順 1 へ進む。内部動作は `scripts/README.md` を参照。
 
-実行環境: Node.js 24 以上が必要。依存 (textlint、preset、oxfmt) は `<scripts>/node_modules` が無いときに `npm ci --omit=dev --prefix "<scripts>"` で入れる。`--prefix` は bin の解決先の指定で、cwd は呼び出し元のまま変わらない。対象ファイルは絶対パスで渡す。
+実行環境: Node.js 24 以上が必要。依存 (textlint、rule、oxfmt) は `<scripts>/node_modules` が無いときに `npm ci --omit=dev --prefix "<scripts>"` で入れる。`--prefix` は bin の解決先の指定で、cwd は呼び出し元のまま変わらない。対象ファイルは絶対パスで渡す。
 
 ## 手順
 
 0. 機械層。対象が複数なら path ごとに行う。
-   - 準備: `<scripts>/node_modules/@ansanloms/textlint-rule-preset-ansanloms/package.json` の `version` (実際に読み込まれる版) を控え、報告ヘッダに使う。読めなければ機械層は実行不可 (依存未導入)。
+   - 準備: `<scripts>/node_modules/textlint/package.json` の `version` (実際に読み込まれる版) を控え、報告ヘッダに使う。読めなければ機械層は実行不可 (依存未導入)。
    - 出力: 出力 O・O1・O2 はコマンドの標準出力と標準エラーを合わせたもの (`2>&1`) とする。実行環境の警告行 (Node の DeprecationWarning 等) も含めてそのまま扱う。色などの ANSI 制御コードは除く。
    - 取得形: 取得はパイプを使わず `<コマンド> > <一時ファイル> 2>&1; rc=$?` の形で行い、終了コードを先に確保してから一時ファイルの ANSI 制御コードを除く。理由: パイプに流すと終了コードを失う。
    - コマンドの記録: 実行したコマンドは実行順にすべて (`lint` は 2 本、`fix` は 3 本) 報告ヘッダに列挙する。
@@ -165,12 +165,12 @@ lint が意図的に開けた穴を意味の側から判定する群。lint の 
 
 ### H: 誠実さ (個別の例外は規範文に従う)
 
-| ID  | 規範                                                                                                                                                                                                                                                                                                               | 適用 | 根拠        |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- | ----------- |
-| H1  | 事実と意見を分ける。推量には推量の語を残し、断定には根拠を添える。確認の語 (「確認した」等) を伴わない断定の根拠不足はここで扱う                                                                                                                                                                                   | 全節 | 木下        |
-| H2  | 未確認のことを確認したように書かない。「動作を確認した」「実測した」等、確認を明言する語は実際に行った場合に限る。確認の有無が読めない場合は要判断にする                                                                                                                                                           | 全節 | gist        |
-| H3  | 根拠は一次資料に求め、出典を示す。二次情報は二次と書く                                                                                                                                                                                                                                                             | 全節 | gist        |
-| H4  | 演出 (溜め、決め台詞、本文中の太字の強調、命令調、劇的転回、ひねった比喩) は要所に限る。技術文書では原則使わない。見出し内の太字は lint の担当で対象外。箇条書き先頭の太字ラベル (`**ラベル**: 説明`) は preset が許容する書式で対象外。ラベルが情報プレフィックス語 (「重要」「注意」等) の場合は lint が検出する | 全節 | gist 演出節 |
+| ID  | 規範                                                                                                                                                                                                                                                                                                             | 適用 | 根拠        |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ----------- |
+| H1  | 事実と意見を分ける。推量には推量の語を残し、断定には根拠を添える。確認の語 (「確認した」等) を伴わない断定の根拠不足はここで扱う                                                                                                                                                                                 | 全節 | 木下        |
+| H2  | 未確認のことを確認したように書かない。「動作を確認した」「実測した」等、確認を明言する語は実際に行った場合に限る。確認の有無が読めない場合は要判断にする                                                                                                                                                         | 全節 | gist        |
+| H3  | 根拠は一次資料に求め、出典を示す。二次情報は二次と書く                                                                                                                                                                                                                                                           | 全節 | gist        |
+| H4  | 演出 (溜め、決め台詞、本文中の太字の強調、命令調、劇的転回、ひねった比喩) は要所に限る。技術文書では原則使わない。見出し内の太字は lint の担当で対象外。箇条書き先頭の太字ラベル (`**ラベル**: 説明`) は lint が許容する書式で対象外。ラベルが情報プレフィックス語 (「重要」「注意」等) の場合は lint が検出する | 全節 | gist 演出節 |
 
 ## 判断の指針
 
@@ -200,41 +200,40 @@ lint が意図的に開けた穴を意味の側から判定する群。lint の 
 会話への返答は次の 2 行の形にする。
 
 ```
-/home/user/.claude/jobs/xxxx/tmp/proofread-nvim-rule-20260831-235723.md
-集計: 機械層 (自動修正 2 件、整形なし、残り 1 件)、適用 10 件、要判断 1 件
+/home/user/.claude/jobs/xxxx/tmp/proofread-nvim-rule-20261125-153325.md
+集計: 機械層 (自動修正 2 件、整形なし、残り 2 件)、適用 2 件、要判断 1 件
 ```
 
 整形と提示手段 (エディタで開く等) は呼び出し側が決める。
 
 ### 例 (fix モード、ファイル対象)
 
-次は 2026-09-01 に `fix /home/ansanloms/.claude/jobs/b7dd5f76/tmp/ept/a/nvim-rule.md` を実行して得た報告の実物を、表の行数だけ削ったもの。書式はこの例を正とし、以降の規則と食い違えば例に従う。
+次は 2026-11-25 に `fix /home/ansanloms/.claude/jobs/ce913ece/tmp/example/nvim-rule.md` を実行して得た報告の実物。加工したのは機械層のコマンドの `<scripts>` のパスを `/home/user/dev/skills/ja-tech-proofread/scripts` に置き換えた点だけで、表の行も削っていない。書式はこの例を正とし、以降の規則と食い違えば例に従う。
 
 ````markdown
 # 推敲報告: nvim-rule.md
 
-- 対象: /home/ansanloms/.claude/jobs/b7dd5f76/tmp/ept/a/nvim-rule.md
+- 対象: /home/ansanloms/.claude/jobs/ce913ece/tmp/example/nvim-rule.md
 - モード: fix
-- 実行日時: 2026-09-01 01:25
+- 実行日時: 2026-11-25 15:33
 - 機械層 (実行順):
-  - `npx --no --prefix "/home/user/dev/skills/ja-tech-proofread/scripts" -- textlint --config "/home/user/dev/skills/ja-tech-proofread/scripts/.textlintrc.json" --ignore-path "/home/user/dev/skills/ja-tech-proofread/scripts/.ignore-none" --fix /home/ansanloms/.claude/jobs/b7dd5f76/tmp/ept/a/nvim-rule.md`
-  - `npx --no --prefix "/home/user/dev/skills/ja-tech-proofread/scripts" -- oxfmt -c "/home/user/dev/skills/ja-tech-proofread/scripts/.oxfmtrc.json" --ignore-path "/home/user/dev/skills/ja-tech-proofread/scripts/.ignore-none" /home/ansanloms/.claude/jobs/b7dd5f76/tmp/ept/a/nvim-rule.md`
-  - `npx --no --prefix "/home/user/dev/skills/ja-tech-proofread/scripts" -- textlint --config "/home/user/dev/skills/ja-tech-proofread/scripts/.textlintrc.json" --ignore-path "/home/user/dev/skills/ja-tech-proofread/scripts/.ignore-none" /home/ansanloms/.claude/jobs/b7dd5f76/tmp/ept/a/nvim-rule.md`
-- preset: @ansanloms/textlint-rule-preset-ansanloms@0.1.0
-- 集計: 機械層 (自動修正 2 件、整形なし、残り 1 件)、適用 19 件、要判断 1 件
+  - `npx --no --prefix "/home/user/dev/skills/ja-tech-proofread/scripts" -- textlint --config "/home/user/dev/skills/ja-tech-proofread/scripts/.textlintrc.json" --ignore-path "/home/user/dev/skills/ja-tech-proofread/scripts/.ignore-none" --fix /home/ansanloms/.claude/jobs/ce913ece/tmp/example/nvim-rule.md`
+  - `npx --no --prefix "/home/user/dev/skills/ja-tech-proofread/scripts" -- oxfmt -c "/home/user/dev/skills/ja-tech-proofread/scripts/.oxfmtrc.json" --ignore-path "/home/user/dev/skills/ja-tech-proofread/scripts/.ignore-none" /home/ansanloms/.claude/jobs/ce913ece/tmp/example/nvim-rule.md`
+  - `npx --no --prefix "/home/user/dev/skills/ja-tech-proofread/scripts" -- textlint --config "/home/user/dev/skills/ja-tech-proofread/scripts/.textlintrc.json" --ignore-path "/home/user/dev/skills/ja-tech-proofread/scripts/.ignore-none" /home/ansanloms/.claude/jobs/ce913ece/tmp/example/nvim-rule.md`
+- textlint: textlint@15.8.0
+- 集計: 機械層 (自動修正 2 件、整形なし、残り 2 件)、適用 2 件、要判断 1 件
 
 ## 機械層
 
 ### 1 回目 (--fix)
 
 ```
-(node:316941) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 
-/home/ansanloms/.claude/jobs/b7dd5f76/tmp/ept/a/nvim-rule.md
-  15:269  ✔   スラッシュの前後にスペースを入れません。                                ansanloms/ja-no-space-around-slash
-  30:12   ✔   以下の => 次の
+/home/ansanloms/.claude/jobs/ce913ece/tmp/example/nvim-rule.md
+  16:1   ✔   以下の => 次の
 書籍の場合は、以下ではなく次を利用します(常に下にあるとは限らないため)
-See https://azu.github.io/proof-dictionary/#01BQ92YWWJ53P93ZZ2YMXDKF1D  ansanloms/proofdict
+See https://azu.github.io/proof-dictionary/#01BQ92YWWJ53P93ZZ2YMXDKF1D  @proofdict/proofdict
+  14:91  ✔   スラッシュの前後にスペースを入れません。                                ja-spacing/ja-no-space-around-slash
 
 ✔ Fixed 2 problems
 ```
@@ -244,20 +243,25 @@ See https://azu.github.io/proof-dictionary/#01BQ92YWWJ53P93ZZ2YMXDKF1D  ansanlom
 ### 2 回目
 
 ```
-(node:317048) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 
-/home/ansanloms/.claude/jobs/b7dd5f76/tmp/ept/a/nvim-rule.md
-  26:101  error  一つの文で"、"を4つ以上使用しています  ansanloms/max-ten
+/home/ansanloms/.claude/jobs/ce913ece/tmp/example/nvim-rule.md
+  5:92   error  一つの文で"、"を4つ以上使用しています                                         ja-technical-writing/max-ten
+  5:126  error  本文: "である"調 でなければなりません
+=> "である"調 であるべき箇所に、次の "ですます"調 の箇所があります: "ます。"
+Total:
+である  : 0
+ですます: 1
+  ja-technical-writing/no-mix-dearu-desumasu
 
-✖ 1 problem (1 error, 0 warnings, 0 infos)
+✖ 2 problems (2 errors, 0 warnings, 0 infos)
 ```
 
-指摘 1 件
+指摘 2 件
 
 ### 整形
 
 ```
-Checked 1 file
+Finished in 1ms on 1 files using 8 threads.
 ```
 
 整形なし
@@ -266,32 +270,27 @@ Checked 1 file
 
 1 か所の書き換えが複数の規範に当たる場合は規範 ID ごとに行を立て、変更前 / 変更後にはその規範が担う部分だけを書く。
 
-| 箇所                                                                 | ID | 変更前                                                                                                                                                                                | 変更後                                                                                                                                                                   |
-| -------------------------------------------------------------------- | -- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 節順序 (L13「socket の解決手順」と L28「いつ nvim で開くか」) (構成) | D5 | 前提条件 → socket の解決手順 → いつ nvim で開くか                                                                                                                                     | 前提条件 → nvim で開く場面 → socket の解決手順                                                                                                                           |
-| L15「候補は必ず…」(構成)                                             | P1 | live 判定の条件・stale を弾く理由・`timeout 5` とリトライ禁止・失敗時の扱いが 1 段落                                                                                                  | 「live 判定の条件」と「判定コマンド呼び出しの扱い」の 2 段落に分割                                                                                                       |
-| L24「1. attach 判定:…」(構成)                                        | L6 | 1 項目 5 文。判定手順・除外条件・失敗時の扱い・分岐後の遷移が 1 項目に畳まれている                                                                                                    | 判定手順を親項目に残し、除外条件と失敗時の扱いを 1 つ目、分岐後の遷移を 2 つ目の下位箇条書きへ下ろす                                                                     |
-| L15「失敗の扱いは…」                                                 | L3 | 括弧が 3 つ入る 1 文「失敗の扱いはコマンド系統で逆になる: `nvim --server` 呼び出し (生存確認・cwd 取得) の失敗は…、`zellij action` (attach 判定) の失敗は判定不能として候補に残す。」 | 「失敗の扱いはコマンド系統で逆になる。生存確認・cwd 取得に使う `nvim --server` 呼び出しの失敗は…。attach 判定に使う `zellij action` の失敗は判定不能として候補に残す。」 |
-| L15「失敗の扱いは…」                                                 | L4 | 「その候補を落とし (応答しない nvim は送信先に使えない)、」                                                                                                                           | 「その候補を落とす。理由: 応答しない nvim は送信先に使えない。」                                                                                                         |
-| L15「解決手順中の…」                                                 | L5 | 「`nvim --server`/`zellij action` 呼び出しには」                                                                                                                                      | 「`nvim --server`・`zellij action` 呼び出しには」                                                                                                                        |
-| L9「MUST: 生きている nvim socket が…」                               | H4 | 「**生きている nvim socket が 1 つ以上見つかる** 場合に」                                                                                                                             | 「生きている nvim socket が 1 つ以上見つかる場合に」                                                                                                                     |
+| 箇所                                         | ID | 変更前                                                                                                                       | 変更後                                    |
+| -------------------------------------------- | -- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| L5「本ルールは nvim で開く場面の…」          | P8 | 「ここでは、nvim の socket を探す手順と、…ユーザに確認する場面を、順に説明していきます。」(以下の節の内容を予告する 1 文)      | 削除                                      |
+| L10「MUST: バックグラウンドジョブでは…」     | L4 | 「信用しない。env のセッション名が現在ユーザの見ているセッションを指す保証が無い。」(理由の文に「理由:」が無い)               | 「信用しない。理由: env のセッション名が現在ユーザの見ているセッションを指す保証が無い。」 |
 
-L24・L25・L26 の下位箇条書きへの分解は、項目番号 (L26 が参照する「手順 4-1」) を保つため、小見出しへの昇格ではなく同じ番号付き項目の下へ下ろす形で行った。
+L5 の削除した 1 文は、2 回目の textlint が出した 2 件 (`max-ten`、`no-mix-dearu-desumasu`) の箇所そのものを含む。適用は 2 回目の出力の後に行ったため、機械層の「残り 2 件」は集計のまま残る。
 
 ## ユーザ判断
 
-| 箇所                                     | 節種別 | ID | 問題                                                                                                                                                   | 選択肢と回答                                                                                                                                                        |
-| ---------------------------------------- | ------ | -- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| L11「MUST: バックグラウンドジョブでは…」 | 項目   | H1 | 「env は daemon が起動した時点のセッション名で固定される」は根拠も確認の語も伴わない断定で、実測した挙動なのか仕様からの推定なのかが本文から決まらない | (1) 実測に基づくなら確認方法か観測時点を 1 文添える / (2) 未確認なら「固定されるとみなす」等の推量の語に直す。回答: ユーザ判断待ち (会話にユーザがいないため未適用) |
+| 箇所                                     | 節種別 | ID | 問題                                                                                                                                     | 選択肢と回答                                                                                                                                                       |
+| ---------------------------------------- | ------ | -- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| L10「MUST: バックグラウンドジョブでは…」 | 項目   | H2 | 「daemon の起動時に固定されることが確認されている」は、誰がいつ確認したかが読めない。受動形のため確認の主体も隠れている (S5 は H2 の回答に従属) | (1) 確認した方法か観測時点を 1 文添える / (2) 未確認なら「固定されるとみなす」等の推量の語に直す。回答: ユーザ判断待ち (会話にユーザがいないため未適用) |
 
 ## 層別の件数
 
-- D (文書): 適用 3 件、指摘 0 件
+- D (文書): 適用 0 件、指摘 0 件
 - P (段落): 適用 1 件、指摘 0 件
-- L (項目): 適用 12 件、指摘 0 件
-- R (行): 適用 0 件、指摘 0 件。200 文字超の行 5 件 (L3、L15、L24、L25、L26) は注記のみ
-- S (文): 適用 1 件、指摘 0 件
-- H (誠実さ): 適用 2 件、指摘 1 件
+- L (項目): 適用 1 件、指摘 0 件
+- R (行): 適用 0 件、指摘 0 件。200 文字超の行なし
+- S (文): 適用 0 件、指摘 0 件
+- H (誠実さ): 適用 0 件、指摘 1 件
 ````
 
 ### lint モードとの差分
